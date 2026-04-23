@@ -1,17 +1,31 @@
-# Quartz v4
+# Benvenuto!
 
-> “[One] who works with the door open gets all kinds of interruptions, but [they] also occasionally gets clues as to what the world is and what might be important.” — Richard Hamming
+Benvenuto nel mio quaderno pubblico di appunti tecnici.
 
-Quartz is a set of tools that helps you publish your [digital garden](https://jzhao.xyz/posts/networked-thought) and notes as a website for free.
+Qui raccolgo note, procedure e ragionamenti che uso (o ho usato) nel mio lavoro di **System Administrator / SRE / Cloud Engineer**. Tratto temi di infrastruttura cloud, orchestrazione, storage distribuito, networking e tutto ciò che ruota attorno a sistemi Linux di produzione.
 
-🔗 Read the documentation and get started: https://quartz.jzhao.xyz/
+Le note sono interconnesse: ogni appunto è un nodo in un grafo di conoscenza, e puoi navigare i collegamenti o usare la ricerca in alto a sinistra.
 
-[Join the Discord Community](https://discord.gg/cRFFHYye7t)
+---
 
-## Sponsors
+## 🧭 Aree tematiche
 
-<p align="center">
-  <a href="https://github.com/sponsors/jackyzha0">
-    <img src="https://cdn.jsdelivr.net/gh/jackyzha0/jackyzha0/sponsorkit/sponsors.svg" />
-  </a>
-</p>
+- ☸️ **Kubernetes** — Procedure operative su cluster K8s, da Kubespray a gestione quotidiana  
+- 🌩️ **OpenStack** — Deployment, troubleshooting e operatività di piattaforme OpenStack  
+- 🗄️ **Ceph** — Storage distribuito: progettazione, tuning e gestione  
+- 🐧 **Linux & Sistemistica** — Fondamentali e tricks dall’esperienza operativa  
+
+---
+
+## 🔎 Come navigare
+
+- Usa la barra di ricerca in alto a sinistra per trovare un argomento  
+- Espandi l’indice *Esplora* a sinistra per sfogliare per cartella  
+- La vista grafo in alto a destra mostra le connessioni tra le note  
+
+---
+
+## 📫 Contatti
+
+- GitHub: https://github.com/Artolink  
+- LinkedIn: https://www.linkedin.com/in/andreafarneti/  
