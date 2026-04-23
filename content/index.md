@@ -1,5 +1,5 @@
 ---
-title: "Andrea Farneti · Appunti"
+title: Benvenuto!
 ---
 
 Benvenuto nel mio quaderno pubblico di appunti tecnici.
