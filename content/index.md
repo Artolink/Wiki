@@ -1,5 +1,5 @@
 ---
-title: Benvenuto!
+title: 🏠 Home
 ---
 
 Benvenuto nel mio quaderno pubblico di appunti tecnici.

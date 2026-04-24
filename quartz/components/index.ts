@@ -7,6 +7,10 @@ import Darkmode from "./Darkmode"
 import ReaderMode from "./ReaderMode"
 import Head from "./Head"
 import PageTitle from "./PageTitle"
+import SiteBrand from "./SiteBrand"
+import SocialLinks from "./SocialLinks"
+import HomeLink from "./HomeLink"
+import GitHubEdit from "./GitHubEdit"
 import ContentMeta from "./ContentMeta"
 import Spacer from "./Spacer"
 import TableOfContents from "./TableOfContents"
@@ -35,6 +39,10 @@ export {
   ReaderMode,
   Head,
   PageTitle,
+  SiteBrand,
+  SocialLinks,
+  HomeLink,
+  GitHubEdit,
   ContentMeta,
   Spacer,
   TableOfContents,

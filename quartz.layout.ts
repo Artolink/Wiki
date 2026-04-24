@@ -17,12 +17,21 @@ const explorerSortFn = (a: FileTrieNode, b: FileTrieNode): number => {
 
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
-  // Navbar full-width: visibile su desktop via position:fixed
+  // Top navbar: full-width fixed, organizzata in tre colonne (brand / search / links)
   header: [
-    Component.PageTitle(),
+    Component.SiteBrand(),
     Component.Search(),
     Component.Flex({
       components: [
+        {
+          Component: Component.SocialLinks({
+            links: [
+              { label: "Sito", href: "https://farnetiandrea.it", icon: "home" },
+              { label: "GitHub", href: "https://github.com/Artolink", icon: "github" },
+              { label: "LinkedIn", href: "https://www.linkedin.com/in/andreafarneti/", icon: "linkedin" },
+            ],
+          }),
+        },
         { Component: Component.Darkmode() },
         { Component: Component.FocusMode() },
       ],
@@ -32,13 +41,24 @@ export const sharedPageComponents: SharedLayout = {
   footer: Component.Footer({ links: {}, hidden: true }),
 }
 
+const gitHubEdit = Component.GitHubEdit({
+  repoUrl: "https://github.com/Artolink/blog",
+  branch: "main",
+  contentDir: "content",
+})
+
 export const defaultContentPageLayout: PageLayout = {
   beforeBody: [
     Component.ConditionalRender({
       component: Component.Breadcrumbs(),
       condition: (page) => page.fileData.slug !== "index",
     }),
-    Component.ArticleTitle(),
+    Component.Flex({
+      components: [
+        { Component: Component.ArticleTitle(), grow: true },
+        { Component: gitHubEdit },
+      ],
+    }),
     Component.ContentMeta(),
     Component.TagList(),
   ],
@@ -53,6 +73,7 @@ export const defaultContentPageLayout: PageLayout = {
         { Component: Component.FocusMode() },
       ],
     }),
+    Component.HomeLink(),
     Component.Explorer({ sortFn: explorerSortFn }),
   ],
   right: [
@@ -63,7 +84,16 @@ export const defaultContentPageLayout: PageLayout = {
 }
 
 export const defaultListPageLayout: PageLayout = {
-  beforeBody: [Component.Breadcrumbs(), Component.ArticleTitle(), Component.ContentMeta()],
+  beforeBody: [
+    Component.Breadcrumbs(),
+    Component.Flex({
+      components: [
+        { Component: Component.ArticleTitle(), grow: true },
+        { Component: gitHubEdit },
+      ],
+    }),
+    Component.ContentMeta(),
+  ],
   left: [
     Component.PageTitle(),
     Component.MobileOnly(Component.Spacer()),
@@ -73,6 +103,7 @@ export const defaultListPageLayout: PageLayout = {
         { Component: Component.Darkmode() },
       ],
     }),
+    Component.HomeLink(),
     Component.Explorer({ sortFn: explorerSortFn }),
   ],
   right: [],
