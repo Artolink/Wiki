@@ -17,7 +17,17 @@ const explorerSortFn = (a: FileTrieNode, b: FileTrieNode): number => {
 
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
-  header: [],
+  // Navbar full-width: visibile su desktop via position:fixed
+  header: [
+    Component.PageTitle(),
+    Component.Search(),
+    Component.Flex({
+      components: [
+        { Component: Component.Darkmode() },
+        { Component: Component.FocusMode() },
+      ],
+    }),
+  ],
   afterBody: [],
   footer: Component.Footer({ links: {}, hidden: true }),
 }
@@ -33,6 +43,7 @@ export const defaultContentPageLayout: PageLayout = {
     Component.TagList(),
   ],
   left: [
+    // Mantenuti nella sidebar per stabilità del grid (nascosti su desktop via CSS)
     Component.PageTitle(),
     Component.MobileOnly(Component.Spacer()),
     Component.Flex({

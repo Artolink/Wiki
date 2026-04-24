@@ -1,3 +1,3 @@
 ---
-title: OpenStack
+title: 🌩️ OpenStack
 ---

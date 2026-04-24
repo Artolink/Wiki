@@ -1,46 +1,109 @@
 @use "./base.scss";
 
-// put your custom CSS here!
+// ── LAYOUT BASE ───────────────────────────────────────────────────────────────
 
-// Pagina full-width
 .page {
   max-width: 100%;
-  padding: 0 2rem;
+  padding: 0;
   box-sizing: border-box;
 }
 
-// Contenuto centrale centrato
+// ── NAVBAR FIXED (desktop) ────────────────────────────────────────────────────
+// Usa position:fixed invece di cambiare il grid → il layout non si rompe
+
+.page > #quartz-body > .page-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  z-index: 200;
+  margin: 0 !important;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0 1.5rem;
+  border-bottom: 1px solid var(--lightgray);
+  background: var(--light);
+
+  & .page-title {
+    font-size: 1.15rem;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  & .search > .search-button {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    display: flex;
+    border: 1px solid var(--lightgray);
+    border-radius: 8px;
+    padding: 0.35rem 0.8rem;
+    background: var(--light);
+    & > p { flex: 1; }
+  }
+
+  & .flex-component {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+  }
+}
+
+// ── SIDEBAR SINISTRA — card arrotondata ───────────────────────────────────────
+
+.page > #quartz-body > .sidebar.left {
+  // Nasconde i duplicati (visibili nella navbar)
+  & > .page-title,
+  & > .flex-component {
+    display: none !important;
+  }
+
+  // Card con bordo arrotondato e sfondo caldo
+  background: #f7f3ef;
+  border: 1px solid #e8e0d8 !important;
+  border-radius: 14px;
+  margin: calc(56px + 0.75rem) 0 0.75rem 0.75rem !important;
+  padding: 1.25rem !important;
+  height: calc(100vh - 56px - 1.5rem) !important;
+  top: calc(56px + 0.75rem) !important;
+}
+
+html[saved-theme="dark"] .page > #quartz-body > .sidebar.left {
+  background: #181c28;
+  border-color: #2a3050 !important;
+}
+
+// ── SIDEBAR DESTRA — card arrotondata ────────────────────────────────────────
+
+.page > #quartz-body > .sidebar.right {
+  background: #f7f3ef;
+  border: 1px solid #e8e0d8 !important;
+  border-radius: 14px;
+  margin: calc(56px + 0.75rem) 0.75rem 0.75rem 0 !important;
+  padding: 1.25rem !important;
+  height: calc(100vh - 56px - 1.5rem) !important;
+  top: calc(56px + 0.75rem) !important;
+}
+
+html[saved-theme="dark"] .page > #quartz-body > .sidebar.right {
+  background: #181c28;
+  border-color: #2a3050 !important;
+}
+
+// ── CONTENUTO CENTRALE ────────────────────────────────────────────────────────
+
 .page > #quartz-body > .center {
   max-width: 860px;
   margin-left: auto;
   margin-right: auto;
+  padding: calc(56px + 1.5rem) 2rem 2rem;
 }
 
-// Sidebar sinistra con bordo destro
-.page > #quartz-body > .sidebar.left {
-  border-right: 1px solid var(--lightgray);
-}
+// ── FOCUS MODE ────────────────────────────────────────────────────────────────
 
-// Dark mode: codice inline più visibile
-html[saved-theme="dark"] code {
-  background: #323a58;
-}
-
-html[saved-theme="dark"] pre {
-  border-color: #3d4663;
-  background: #1a1f30;
-}
-
-// TOC: font più piccolo
-ul.toc-content a {
-  font-size: 0.78rem;
-}
-
-button.toc-header h3 {
-  font-size: 0.88rem;
-}
-
-// Focus mode
 html[focus-mode="on"] {
   .page > #quartz-body {
     grid-template-columns: 1fr !important;
@@ -60,4 +123,25 @@ html[focus-mode="on"] {
     margin-left: auto !important;
     margin-right: auto !important;
   }
+}
+
+// ── DARK MODE ─────────────────────────────────────────────────────────────────
+
+html[saved-theme="dark"] code {
+  background: #323a58;
+}
+
+html[saved-theme="dark"] pre {
+  border-color: #3d4663;
+  background: #1a1f30;
+}
+
+// ── TOC ───────────────────────────────────────────────────────────────────────
+
+ul.toc-content a {
+  font-size: 0.78rem;
+}
+
+button.toc-header h3 {
+  font-size: 0.88rem;
 }

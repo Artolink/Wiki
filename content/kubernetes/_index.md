@@ -1,3 +1,3 @@
 ---
-title: Kubernetes
+title: ☸️ Kubernetes
 ---
