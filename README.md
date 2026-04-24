@@ -8,8 +8,8 @@ Le note sono interconnesse: ogni appunto è un nodo in un grafo di conoscenza, e
 
 ## 🧭 Aree tematiche
 
-- ☸️ **Kubernetes** — Procedure operative su cluster K8s e gestione quotidiana
 - 🌩️ **OpenStack** — Juju e Kolla: Deployment, troubleshooting e operatività
+- ☸️ **Kubernetes** — Procedure operative su cluster K8s e gestione quotidiana
 - 🗄️ **Ceph** — Storage distribuito: progettazione, tuning e gestione
 - 🐧 **Linux & Sistemistica** — Fondamentali e tricks dall'esperienza operativa
 
