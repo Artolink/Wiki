@@ -440,14 +440,152 @@ html[focus-mode="on"] {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
+// CODE BLOCKS — stile syselement/GitBook (rounded, soft border, padding)
+// ──────────────────────────────────────────────────────────────────────────────
+
+// Contenitore (block code): sfondo chiaro, bordo soft, angoli arrotondati
+figure[data-rehype-pretty-code-figure] {
+  margin: 1.25rem 0;
+
+  & > [data-rehype-pretty-code-title] {
+    border: 1px solid var(--lightgray);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    padding: 0.4rem 0.9rem;
+    margin-bottom: 0;
+    background: #f3f3f3;
+    width: fit-content;
+    font-size: 0.8rem;
+    color: var(--darkgray);
+
+    // Quando c'è un titolo, il pre sotto perde il border-radius top-left
+    & + pre {
+      border-top-left-radius: 0;
+    }
+  }
+}
+
+// Pre: il "riquadro" del blocco di codice
+pre {
+  padding: 0 !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--lightgray) !important;
+  background: #fafafa !important;
+  overflow-x: auto;
+  position: relative;
+  margin: 1rem 0;
+
+  & > code {
+    font-size: 0.82rem;
+    line-height: 1.55;
+    padding: 1rem 1.2rem !important;
+    background: transparent !important;
+  }
+
+  // Scrollbar discreta
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--lightgray);
+    border-radius: 3px;
+  }
+}
+
+// Inline code: pill sottile con monospace
+code {
+  background: #f1f1f1 !important;
+  color: var(--dark);
+  padding: 0.15rem 0.4rem !important;
+  border-radius: 5px !important;
+  font-size: 0.88em;
+  font-family: var(--codeFont);
+}
+
+// Inline code dentro pre: resetta lo stile pill (altrimenti si sovrappone)
+pre > code {
+  background: transparent !important;
+  padding: 1rem 1.2rem !important;
+  border-radius: 0 !important;
+  font-size: 0.82rem;
+}
+
+// ── Pulsante Copy in alto a destra, stile syselement ──────────────────────────
+
+pre > .clipboard-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  margin: 0;
+  padding: 0.3rem 0.7rem;
+  background: #ffffff !important;
+  border: 1px solid var(--lightgray) !important;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-family: var(--bodyFont);
+  color: var(--darkgray);
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    background: var(--light) !important;
+    border-color: var(--gray) !important;
+    color: var(--dark);
+    cursor: pointer;
+  }
+
+  & > svg {
+    fill: var(--darkgray);
+    filter: none;
+  }
+
+  // Label "Copy" a fianco dell'icona (se presente). Altrimenti mostra solo l'icona.
+  &::after {
+    content: "Copy";
+    margin-left: 0.3rem;
+    font-weight: 500;
+  }
+}
+
+pre:hover > .clipboard-button {
+  opacity: 1;
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
 // DARK MODE
 // ──────────────────────────────────────────────────────────────────────────────
 
 html[saved-theme="dark"] code {
-  background: #323a58;
+  background: #2a2f3e !important;
 }
 
 html[saved-theme="dark"] pre {
-  border-color: #3d4663;
-  background: #1a1f30;
+  border-color: #2f3547 !important;
+  background: #1a1f2e !important;
+}
+
+html[saved-theme="dark"] pre > code {
+  background: transparent !important;
+}
+
+html[saved-theme="dark"] figure[data-rehype-pretty-code-figure] > [data-rehype-pretty-code-title] {
+  background: #242a3a;
+  border-color: #2f3547;
+  color: var(--darkgray);
+}
+
+html[saved-theme="dark"] pre > .clipboard-button {
+  background: #242a3a !important;
+  border-color: #2f3547 !important;
+  color: var(--gray);
+
+  &:hover {
+    background: #2a3045 !important;
+    border-color: var(--gray) !important;
+    color: var(--dark);
+  }
+
+  & > svg {
+    fill: var(--gray);
+  }
 }
