@@ -8,7 +8,7 @@ import * as Plugin from "./quartz/plugins"
  */
 const config: QuartzConfig = {
   configuration: {
-    pageTitle: "Andrea Farneti · Appunti",
+    pageTitle: "Dispense",
     pageTitleSuffix: "",
     enableSPA: true,
     enablePopovers: true,
@@ -39,15 +39,15 @@ const config: QuartzConfig = {
           textHighlight: "#fff23688",
         },
         darkMode: {
-          light: "#0b0d12",
-          lightgray: "#1c202c",
+          light: "#13151f",
+          lightgray: "#1e2230",
           gray: "#5a6378",
-          darkgray: "#c0c7d4",
-          dark: "#e8ecf1",
-          secondary: "#7aa2f7",
-          tertiary: "#bb9af7",
-          highlight: "rgba(122, 162, 247, 0.12)",
-          textHighlight: "#7aa2f744",
+          darkgray: "#c8cfe0",
+          dark: "#e4eaf5",
+          secondary: "#e0b84a",
+          tertiary: "#f0a050",
+          highlight: "rgba(224, 184, 74, 0.13)",
+          textHighlight: "#e0b84a33",
         },
       },
     },

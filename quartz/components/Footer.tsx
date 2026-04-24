@@ -5,10 +5,12 @@ import { i18n } from "../i18n"
 
 interface Options {
   links: Record<string, string>
+  hidden?: boolean
 }
 
 export default ((opts?: Options) => {
   const Footer: QuartzComponent = ({ displayClass, cfg }: QuartzComponentProps) => {
+    if (opts?.hidden) return null
     const year = new Date().getFullYear()
     const links = opts?.links ?? []
     return (

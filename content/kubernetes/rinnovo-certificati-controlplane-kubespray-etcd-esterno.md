@@ -1,3 +1,6 @@
+---
+title: "Rinnovo certificati ControlPlane (cluster KubeSpray, ETCD esterno)"
+---
 Procedura operativa per rinnovare i certificati scaduti dei nodi control-plane di
 un cluster Kubernetes installato con kubespray, con etcd esterno gestito
 separatamente.

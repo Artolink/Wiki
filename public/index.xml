@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+    <channel>
+      <title>Dispense</title>
+      <link>https://blog.farnetiandrea.it</link>
+      <description>Ultime 10 note on Dispense</description>
+      <generator>Quartz -- quartz.jzhao.xyz</generator>
+      <item>
+    <title>Ceph</title>
+    <link>https://blog.farnetiandrea.it/ceph/</link>
+    <guid>https://blog.farnetiandrea.it/ceph/</guid>
+    <description><![CDATA[  ]]></description>
+    <pubDate>Fri, 24 Apr 2026 12:45:11 GMT</pubDate>
+  </item><item>
+    <title>OpenStack</title>
+    <link>https://blog.farnetiandrea.it/openstack/</link>
+    <guid>https://blog.farnetiandrea.it/openstack/</guid>
+    <description><![CDATA[  ]]></description>
+    <pubDate>Fri, 24 Apr 2026 12:45:10 GMT</pubDate>
+  </item><item>
+    <title>GENERALI</title>
+    <link>https://blog.farnetiandrea.it/linux/generali/</link>
+    <guid>https://blog.farnetiandrea.it/linux/generali/</guid>
+    <description><![CDATA[  ]]></description>
+    <pubDate>Fri, 24 Apr 2026 12:45:10 GMT</pubDate>
+  </item><item>
+    <title>Linux</title>
+    <link>https://blog.farnetiandrea.it/linux/</link>
+    <guid>https://blog.farnetiandrea.it/linux/</guid>
+    <description><![CDATA[  ]]></description>
+    <pubDate>Fri, 24 Apr 2026 12:45:09 GMT</pubDate>
+  </item><item>
+    <title>Kubernetes</title>
+    <link>https://blog.farnetiandrea.it/kubernetes/</link>
+    <guid>https://blog.farnetiandrea.it/kubernetes/</guid>
+    <description><![CDATA[  ]]></description>
+    <pubDate>Fri, 24 Apr 2026 09:43:17 GMT</pubDate>
+  </item><item>
+    <title>Benvenuto!</title>
+    <link>https://blog.farnetiandrea.it/</link>
+    <guid>https://blog.farnetiandrea.it/</guid>
+    <description><![CDATA[ Benvenuto nel mio quaderno pubblico di appunti tecnici. ]]></description>
+    <pubDate>Thu, 23 Apr 2026 15:10:44 GMT</pubDate>
+  </item><item>
+    <title>Rinnovo certificati ControlPlane (cluster KubeSpray, ETCD esterno)</title>
+    <link>https://blog.farnetiandrea.it/kubernetes/rinnovo-certificati-controlplane-kubespray-etcd-esterno</link>
+    <guid>https://blog.farnetiandrea.it/kubernetes/rinnovo-certificati-controlplane-kubespray-etcd-esterno</guid>
+    <description><![CDATA[ Procedura operativa per rinnovare i certificati scaduti dei nodi control-plane di un cluster Kubernetes installato con kubespray, con etcd esterno gestito separatamente. ]]></description>
+    <pubDate>Thu, 23 Apr 2026 14:31:24 GMT</pubDate>
+  </item>
+    </channel>
+  </rss>

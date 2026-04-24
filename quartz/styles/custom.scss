@@ -1,3 +1,63 @@
 @use "./base.scss";
 
 // put your custom CSS here!
+
+// Pagina full-width
+.page {
+  max-width: 100%;
+  padding: 0 2rem;
+  box-sizing: border-box;
+}
+
+// Contenuto centrale centrato
+.page > #quartz-body > .center {
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+// Sidebar sinistra con bordo destro
+.page > #quartz-body > .sidebar.left {
+  border-right: 1px solid var(--lightgray);
+}
+
+// Dark mode: codice inline più visibile
+html[saved-theme="dark"] code {
+  background: #323a58;
+}
+
+html[saved-theme="dark"] pre {
+  border-color: #3d4663;
+  background: #1a1f30;
+}
+
+// TOC: font più piccolo
+ul.toc-content a {
+  font-size: 0.78rem;
+}
+
+button.toc-header h3 {
+  font-size: 0.88rem;
+}
+
+// Focus mode
+html[focus-mode="on"] {
+  .page > #quartz-body {
+    grid-template-columns: 1fr !important;
+    grid-template-areas:
+      "grid-header"
+      "grid-center"
+      "grid-footer" !important;
+  }
+
+  .page > #quartz-body > .sidebar {
+    display: none !important;
+  }
+
+  .page > #quartz-body > .center {
+    min-width: unset !important;
+    max-width: 860px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
