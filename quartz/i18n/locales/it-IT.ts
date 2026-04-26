@@ -58,7 +58,8 @@ export default {
       title: "Indice",
     },
     contentMeta: {
-      readingTime: ({ minutes }) => (minutes === 1 ? "1 minuto" : `${minutes} minuti`),
+      readingTime: ({ minutes }) =>
+        minutes === 1 ? "1 minuto di lettura" : `${minutes} minuti di lettura`,
     },
   },
   pages: {

@@ -480,6 +480,16 @@ html, body {
   }
 }
 
+// ── Content meta (data + tempo di lettura) ───────────────────────────────────
+// Più piccolo, muted e con spazio extra sotto per staccare dal contenuto.
+
+.popover-hint > .content-meta {
+  font-size: 0.82rem;
+  color: var(--gray);
+  margin-top: 0.4rem;
+  margin-bottom: 2.5rem;     // spazio extra che separa la testata dal corpo
+}
+
 @media all and (max-width: 600px) {
   .github-edit-label {
     display: none;
