@@ -487,7 +487,23 @@ html, body {
   font-size: 0.82rem;
   color: var(--gray);
   margin-top: 0.4rem;
-  margin-bottom: 2.5rem;     // spazio extra che separa la testata dal corpo
+  margin-bottom: 3.5rem;     // spazio extra che separa la testata dal corpo
+}
+
+// ── Home page (slug=index): nascondi titolo "index" e content-meta ───────────
+// L'utente vuole che la home mostri direttamente il contenuto del file md
+// senza titolo/data/tempo di lettura ridondante.
+
+body[data-slug="index"] {
+  .popover-hint > .flex-component:has(.article-title) {
+    justify-content: flex-end !important;  // Edit button da solo a destra
+    margin-top: 0 !important;
+  }
+
+  .popover-hint .article-title,
+  .popover-hint > .content-meta {
+    display: none !important;
+  }
 }
 
 @media all and (max-width: 600px) {
