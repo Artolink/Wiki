@@ -14,9 +14,11 @@ Ciò che distingue quindi queste note dal chiedere consigli all'AI di turno, è 
 - contenuti **mirati** ma dettagliati, riportati in maniera concentrata e strettamente coerenti l'uno con l'altro
 - integrazioni utili: collegamenti alla teoria, consigli e software per facilitare il lavoro e migliorarne la qualità
  
-Le note sono **veramente** interconnesse: ogni appunto è un nodo in un grafo, per cui ognuna di esse contiene solo lo stretto necessario in maniera approfondita.
-Puoi quindi vedere fisicamente tutti i collegamenti che un'argomento richiede a livello di conoscenze e navigare fra di essi senza trovare mai ripetizioni.
+Le note sono **veramente** interconnesse: ogni appunto è un nodo in un grafo, per cui ognuna di esse contiene solo lo stretto necessario.<br>
+Puoi quindi vedere fisicamente tutti i collegamenti che un argomento richiede a livello di conoscenze e navigare fra di essi senza trovare mai ripetizioni.
 L'insieme di tutti i collegamenti di un determinato argomento, ti fornisce una visione reale della sua profondità e di ciò che ti serve per comprenderlo a fondo.
+
+Inizia subito!
 
 ---
 
