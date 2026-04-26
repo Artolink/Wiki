@@ -11,13 +11,13 @@ Benvenuto nella mia Wiki! Qui trovi [chi sono io](https://www.linkedin.com/in/an
 In questa Wiki raccolgo tutto ciò che è fondamentale sapere per operare nei lavori che ti ho menzionato, in maniera **professionale** e **metodica**. 
 
 Ciò che distingue quindi queste note dal chiedere consigli all'AI di turno, è che qui trovi:
-- l'esperienza **vera** di una persona che ha lavorato in realtà **grandi** ed **internazionali**, su sistemi di **produzione** con turni di **reperibilità**
-- contenuti **mirati** ma dettagliati, riportati in maniera concentrata e strettamente coerenti l'uno con l'altro
-- integrazioni utili: collegamenti alla teoria, consigli e software per facilitare il lavoro e migliorarne la qualità
+- l'esperienza **vera** di una persona che ha lavorato in realtà **grandi** ed **internazionali**, su sistemi di **produzione** con turni di **reperibilità**.
+- contenuti **mirati** ma dettagliati, riportati in maniera concentrata e strettamente coerenti l'uno con l'altro.
+- integrazioni utili: collegamenti alla teoria, consigli e software per facilitare il lavoro e migliorarne la qualità.
  
 Le note sono **veramente** interconnesse: ogni appunto è un nodo in un grafo, per cui ognuna di esse contiene solo lo stretto necessario.<br>
-Puoi quindi vedere fisicamente tutti i collegamenti che un argomento richiede a livello di conoscenze e navigare fra di essi senza trovare mai ripetizioni.
-L'insieme di tutti i collegamenti di un determinato argomento, ti fornisce una visione reale della sua profondità e di ciò che ti serve per comprenderlo a fondo.
+In questo modo puoi vedere **fisicamente** tutti i collegamenti che un argomento richiede a livello di conoscenze e navigare fra di essi senza trovare mai ripetizioni.
+L'insieme di tutti i collegamenti di un determinato argomento, ti fornisce una visione **concreta** della sua profondità e di ciò che ti serve per comprenderlo a fondo.
 
 Inizia subito!
 
