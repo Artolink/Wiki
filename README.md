@@ -4,11 +4,11 @@ Benvenuto nella mia Wiki! Qui trovi [chi sono io](https://www.linkedin.com/in/an
 
 **TL;DR** Il mio percorso lavorativo è stato il seguente:
 - Riparazione/installazione HW: prendevo il furgoncino e andavo a fare [queste cose](https://github.com/user-attachments/assets/0be38a78-6e00-4ac0-b0da-e6ef47d060eb) (installare/configurare PC, Switch, Router, Firewall...)
-- IT Technical Specialist (NOC): supporto a 100+ clienti diversi con infrastrutture diverse (SO Windows) e attività On-Site in solitaria
+- IT Technical Specialist (NOC): supporto a 100+ clienti diversi con infrastrutture diverse (SO Windows) e attività On-Site in solitaria.
 - System Administrator (SOC): Malware e Mail Threat Analysis, gestione sicura del dominio aziendale, hardening del networking e di ogni endpoint.
 - Cloud Engineer (Open-Source): Linux, Git, Ansible, AWX, Terraform/OpenTofu, MAAS, BareOS, KVM, QEMU, LXD/LXC, Docker, Kubernetes, Ceph, Openstack, Kafka, Observability (ELK Stack, Prometheus, Telegraf, Victoria Metrics, Grafana...), scripting (Bash, Python, Powershell), networking (e BGP), eccetera...
 
-Qui raccolgo lo stretto necessario che è fondamentale sapere per operare in ognuno dei lavori che ho menzionato, con l'aggiunta di teoria, consigli e SoftWare per facilitarne e migliorarne la qualità. 
+Qui raccolgo lo stretto necessario che è fondamentale sapere per operare in ognuno dei lavori che ho menzionato, con l'aggiunta di teoria, consigli e software per facilitarne e migliorarne la qualità. 
 Lo standard qualitativo che troverete è quello per il lavoro in sistemi di produzione con turni di reperibilità, come ho sempre fatto.
 
 Le note sono interconnesse: ogni appunto è un nodo in un grafo di conoscenza, e puoi navigare i collegamenti o usare la ricerca in alto a sinistra.
