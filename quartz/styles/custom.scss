@@ -18,23 +18,27 @@ $navH: 60px;
 // ──────────────────────────────────────────────────────────────────────────────
 
 :root {
-  --code-bg:          #fafafa;
-  --code-border:      #e5e5e5;
-  --code-header-bg:   #f3f3f3;
-  --code-inline-bg:   #f1f1f1;
+  // Light mode — palette syselement (bianco puro, grigi neutri)
+  --code-bg:          #f9fafb;
+  --code-border:      #e5e7eb;
+  --code-header-bg:   #f3f4f6;
+  --code-inline-bg:   #f3f4f6;
   --copy-btn-bg:      #ffffff;
-  --copy-btn-border:  #e5e5e5;
-  --sidebar-hover:    rgba(0, 0, 0, 0.04);
+  --copy-btn-border:  #e5e7eb;
+  --sidebar-hover:    rgba(17, 24, 39, 0.05);
+  --soft-border:      #e5e7eb;
 }
 
 html[saved-theme="dark"] {
-  --code-bg:          #181c28;   // impercettibilmente sopra --light (#13151f)
-  --code-border:      #262b3d;
-  --code-header-bg:   #1c2030;
-  --code-inline-bg:   #242a3a;
-  --copy-btn-bg:      #1c2030;
-  --copy-btn-border:  #2a3045;
+  // Dark mode — palette syselement (slate-900 base, accent giallo-ocra)
+  --code-bg:          #111827;     // slate-900, appena sopra il body --light (#0f172a)
+  --code-border:      #1f2937;     // slate-800
+  --code-header-bg:   #131c2e;
+  --code-inline-bg:   #1f2937;
+  --copy-btn-bg:      #131c2e;
+  --copy-btn-border:  #1f2937;
   --sidebar-hover:    rgba(255, 255, 255, 0.05);
+  --soft-border:      #1f2937;
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -269,31 +273,26 @@ html[saved-theme="dark"] {
   border-radius: 3px;
 }
 
-// Dark mode: bordi leggermente rinforzati perché --lightgray è quasi invisibile
+// Dark mode: bordi un filo più rinforzati (--lightgray slate-800 sarebbe quasi invisibile)
 html[saved-theme="dark"] .page > #quartz-body > .sidebar.left {
-  border-right-color: #262b3d;
-}
-
-html[saved-theme="dark"] .page > #quartz-body > .sidebar.right {
-  // nessun bordo a destra; separatori interni via border-top tra sezioni
+  border-right-color: var(--soft-border);
 }
 
 html[saved-theme="dark"] .sidebar.right .toc,
 html[saved-theme="dark"] .sidebar.right .backlinks {
-  border-top-color: #262b3d;
+  border-top-color: var(--soft-border);
 }
 
 html[saved-theme="dark"] .sidebar.right .graph .graph-outer {
-  border-color: #262b3d;
+  border-color: var(--soft-border);
 }
 
-// Dark: navbar con bordo inferiore più scuro
 html[saved-theme="dark"] .page .page-header > header {
-  border-bottom-color: #262b3d;
+  border-bottom-color: var(--soft-border);
 }
 
 html[saved-theme="dark"] .page .page-header > header .search > .search-button {
-  border-color: #262b3d;
+  border-color: var(--soft-border);
   background: var(--light);
 }
 
