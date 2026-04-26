@@ -30,15 +30,16 @@ $navH: 60px;
 }
 
 html[saved-theme="dark"] {
-  // Dark mode — palette syselement (slate-900 base, accent giallo-ocra)
-  --code-bg:          #111827;     // slate-900, appena sopra il body --light (#0f172a)
-  --code-border:      #1f2937;     // slate-800
-  --code-header-bg:   #131c2e;
-  --code-inline-bg:   #1f2937;
-  --copy-btn-bg:      #131c2e;
-  --copy-btn-border:  #1f2937;
-  --sidebar-hover:    rgba(255, 255, 255, 0.05);
-  --soft-border:      #1f2937;
+  // Dark mode — palette syselement (GitHub dark): code blocks chiaramente
+  // distinguibili dal body grazie a +1 step di luminosità.
+  --code-bg:          #161b22;     // 1 step sopra il body (#0d1117)
+  --code-border:      #30363d;     // bordo ben visibile
+  --code-header-bg:   #1c2128;
+  --code-inline-bg:   #262c36;     // chiaramente più chiaro del body
+  --copy-btn-bg:      #21262d;
+  --copy-btn-border:  #30363d;
+  --sidebar-hover:    rgba(177, 186, 196, 0.08);
+  --soft-border:      #30363d;
 }
 
 // ──────────────────────────────────────────────────────────────────────────────

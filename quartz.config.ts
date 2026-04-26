@@ -40,17 +40,17 @@ const config: QuartzConfig = {
           highlight: "rgba(249, 115, 22, 0.12)",
           textHighlight: "#fde04788",
         },
-        // Dark mode — stile syselement: nero-slate neutro, testo chiaro,
-        // accent giallo-ocra (come il suo "Android Rooting Guide" attivo).
+        // Dark mode — palette syselement (GitHub dark inspired): contrasti netti,
+        // bordi visibili, testo chiaro, code blocks ben distinti dal body.
         darkMode: {
-          light: "#0f172a",
-          lightgray: "#1f2937",
-          gray: "#6b7280",
-          darkgray: "#d1d5db",
-          dark: "#f1f5f9",
-          secondary: "#fbbf24",
-          tertiary: "#f59e0b",
-          highlight: "rgba(251, 191, 36, 0.14)",
+          light: "#0d1117",      // body bg (GitHub dark)
+          lightgray: "#30363d",  // bordi visibili (era #1f2937, troppo invisibile)
+          gray: "#8b949e",       // testo muted/uppercase headers (era #6b7280)
+          darkgray: "#c9d1d9",   // testo body (era #d1d5db, ora più readable)
+          dark: "#f0f6fc",       // headings ben luminosi
+          secondary: "#fbbf24",  // accent giallo
+          tertiary: "#fcd34d",
+          highlight: "rgba(251, 191, 36, 0.18)",
           textHighlight: "#fbbf2433",
         },
       },
