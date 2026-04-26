@@ -49,10 +49,6 @@ const gitHubEdit = Component.GitHubEdit({
 
 export const defaultContentPageLayout: PageLayout = {
   beforeBody: [
-    Component.ConditionalRender({
-      component: Component.Breadcrumbs(),
-      condition: (page) => page.fileData.slug !== "index",
-    }),
     Component.Flex({
       components: [
         { Component: Component.ArticleTitle(), grow: true },
@@ -85,7 +81,6 @@ export const defaultContentPageLayout: PageLayout = {
 
 export const defaultListPageLayout: PageLayout = {
   beforeBody: [
-    Component.Breadcrumbs(),
     Component.Flex({
       components: [
         { Component: Component.ArticleTitle(), grow: true },
