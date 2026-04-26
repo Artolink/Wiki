@@ -65,9 +65,7 @@ const config: QuartzConfig = {
       Plugin.SyntaxHighlighting({
         theme: {
           light: "one-light",
-          // vesper: tema warm minimal stile syselement con palette
-          // yellow/green/red su sfondo marroncino caldo.
-          dark: "vesper",
+          dark: "one-dark-pro",
         },
         keepBackground: false,
       }),
