@@ -43,7 +43,7 @@ export const sharedPageComponents: SharedLayout = {
   // Top navbar: full-width fixed, organizzata in tre colonne (brand / search / links)
   header: [
     Component.SiteBrand(),
-    Component.Search(),
+    Component.Search({ enablePreview: false }),
     Component.Flex({
       components: [
         {
