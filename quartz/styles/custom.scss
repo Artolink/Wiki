@@ -30,16 +30,16 @@ $navH: 60px;
 }
 
 html[saved-theme="dark"] {
-  // Dark mode — palette syselement (GitHub dark): code blocks chiaramente
-  // distinguibili dal body grazie a +1 step di luminosità.
-  --code-bg:          #161b22;     // 1 step sopra il body (#0d1117)
-  --code-border:      #30363d;     // bordo ben visibile
-  --code-header-bg:   #1c2128;
-  --code-inline-bg:   #262c36;     // chiaramente più chiaro del body
-  --copy-btn-bg:      #21262d;
-  --copy-btn-border:  #30363d;
-  --sidebar-hover:    rgba(177, 186, 196, 0.08);
-  --soft-border:      #30363d;
+  // Dark mode — palette warm stone, complementare al tema syntax gruvbox-dark-hard.
+  // Toni marroncini caldi invece del blu-slate freddo.
+  --code-bg:          #292524;     // stone-800 (caldo, 1 step sopra body #1c1917)
+  --code-border:      #44403c;     // stone-700 (bordo visibile)
+  --code-header-bg:   #292524;
+  --code-inline-bg:   #292524;     // inline code stesso bg dei block
+  --copy-btn-bg:      #292524;
+  --copy-btn-border:  #44403c;
+  --sidebar-hover:    rgba(231, 229, 228, 0.06);
+  --soft-border:      #44403c;
 }
 
 // ──────────────────────────────────────────────────────────────────────────────

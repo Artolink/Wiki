@@ -40,15 +40,15 @@ const config: QuartzConfig = {
           highlight: "rgba(249, 115, 22, 0.12)",
           textHighlight: "#fde04788",
         },
-        // Dark mode — palette syselement (GitHub dark inspired): contrasti netti,
-        // bordi visibili, testo chiaro, code blocks ben distinti dal body.
+        // Dark mode — palette syselement: warm stone (toni marroncini),
+        // ispirata a gruvbox/syselement. Sfumatura calda invece del blue-slate.
         darkMode: {
-          light: "#0d1117",      // body bg (GitHub dark)
-          lightgray: "#30363d",  // bordi visibili (era #1f2937, troppo invisibile)
-          gray: "#8b949e",       // testo muted/uppercase headers (era #6b7280)
-          darkgray: "#c9d1d9",   // testo body (era #d1d5db, ora più readable)
-          dark: "#f0f6fc",       // headings ben luminosi
-          secondary: "#fbbf24",  // accent giallo
+          light: "#1c1917",      // stone-900 (warm dark, marroncino)
+          lightgray: "#44403c",  // stone-700 (bordi visibili e caldi)
+          gray: "#a8a29e",       // stone-400 (muted/uppercase headers)
+          darkgray: "#e7e5e4",   // stone-200 (testo body, ottimo contrasto)
+          dark: "#fafaf9",       // stone-50 (headings molto luminosi)
+          secondary: "#fbbf24",  // accent giallo (amber)
           tertiary: "#fcd34d",
           highlight: "rgba(251, 191, 36, 0.18)",
           textHighlight: "#fbbf2433",
@@ -65,7 +65,9 @@ const config: QuartzConfig = {
       Plugin.SyntaxHighlighting({
         theme: {
           light: "one-light",
-          dark: "one-dark-pro",
+          // vesper: tema warm minimal stile syselement con palette
+          // yellow/green/red su sfondo marroncino caldo.
+          dark: "vesper",
         },
         keepBackground: false,
       }),
