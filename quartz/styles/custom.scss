@@ -572,6 +572,17 @@ html[focus-mode="on"] {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
+// SYNTAX TOKEN OVERRIDE (solo dark mode)
+// ──────────────────────────────────────────────────────────────────────────────
+// One-dark-pro usa #61AFEF (blu) per i nomi di funzioni / comandi bash
+// (sudo, grep, sleep, mv, cp...). Lo portiamo a un giallo warm in stile
+// syselement per integrarsi con la palette stone del body.
+
+html[saved-theme="dark"] code[data-theme*=" "] span[style*="#61AFEF" i] {
+  color: #e6c074 !important;
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
 // CODE BLOCKS — stile syselement/GitBook (rounded, soft border, padding)
 // Funziona sia light che dark tramite le CSS variables definite in cima.
 // ──────────────────────────────────────────────────────────────────────────────
