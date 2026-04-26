@@ -160,7 +160,7 @@ html[saved-theme="dark"] {
   border-radius: 10px;
   font-size: 1rem;
   font-weight: 600;
-  margin: 0 0 1.2rem 0;
+  margin: 0;
   color: var(--dark);
   background: transparent;
 }
@@ -188,7 +188,8 @@ html[saved-theme="dark"] {
   border-radius: 10px;
   font-size: 1rem;
   font-weight: 600;
-  margin: 0 0 1.2rem 0;
+  // Compensa il gap: 1.2rem del flex per avvicinare visivamente Home e Vista grafo
+  margin: -0.8rem 0 0 0;
   color: var(--dark);
   background: transparent;
   text-decoration: none;

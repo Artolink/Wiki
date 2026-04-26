@@ -15,6 +15,11 @@ const explorerSortFn = (a: FileTrieNode, b: FileTrieNode): number => {
   return a.isFolder ? -1 : 1
 }
 
+// Esclude "tags" (default Quartz) e "grafico" (la nostra pagina dedicata al grafo)
+// dall'explorer — sono già accessibili via i pulsanti dedicati nella sidebar.
+const explorerFilterFn = (node: FileTrieNode): boolean =>
+  node.slugSegment !== "tags" && node.slugSegment !== "grafico"
+
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
   // Top navbar: full-width fixed, organizzata in tre colonne (brand / search / links)
@@ -95,7 +100,7 @@ export const defaultContentPageLayout: PageLayout = {
     }),
     Component.HomeLink(),
     Component.GraphLink(),
-    Component.Explorer({ sortFn: explorerSortFn }),
+    Component.Explorer({ sortFn: explorerSortFn, filterFn: explorerFilterFn }),
   ],
   right: [
     Component.Graph(),
@@ -125,7 +130,7 @@ export const defaultListPageLayout: PageLayout = {
     }),
     Component.HomeLink(),
     Component.GraphLink(),
-    Component.Explorer({ sortFn: explorerSortFn }),
+    Component.Explorer({ sortFn: explorerSortFn, filterFn: explorerFilterFn }),
   ],
   right: [],
 }
