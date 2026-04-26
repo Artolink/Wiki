@@ -15,7 +15,7 @@ const explorerSortFn = (a: FileTrieNode, b: FileTrieNode): number => {
     "observability",
     "networking",
     "hardware",
-    "virtualizzazione",
+    "virtualization",
     // Sotto-cartelle (ordinamento applicato anche dentro a folder che contengono questi slug)
     "message-brokers",
     "ceph",
@@ -34,7 +34,7 @@ const explorerSortFn = (a: FileTrieNode, b: FileTrieNode): number => {
 // Esclude "tags" (default Quartz) e "grafico" (la nostra pagina dedicata al grafo)
 // dall'explorer — sono già accessibili via i pulsanti dedicati nella sidebar.
 const explorerFilterFn = (node: FileTrieNode): boolean =>
-  node.slugSegment !== "tags" && node.slugSegment !== "grafico"
+  node.slugSegment !== "tags" && node.slugSegment !== "graph"
 
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
@@ -47,7 +47,7 @@ export const sharedPageComponents: SharedLayout = {
         {
           Component: Component.SocialLinks({
             links: [
-              { label: "Sito", href: "https://farnetiandrea.it", icon: "home" },
+              { label: "Site", href: "https://farnetiandrea.it", icon: "home" },
               { label: "GitHub", href: "https://github.com/Artolink", icon: "github" },
               { label: "LinkedIn", href: "https://www.linkedin.com/in/andreafarneti/", icon: "linkedin" },
             ],
@@ -100,7 +100,7 @@ export const defaultContentPageLayout: PageLayout = {
   afterBody: [
     Component.ConditionalRender({
       component: fullPageGraph,
-      condition: (page) => page.fileData.slug === "grafico",
+      condition: (page) => page.fileData.slug === "graph",
     }),
   ],
   left: [

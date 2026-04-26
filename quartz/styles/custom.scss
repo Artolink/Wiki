@@ -542,7 +542,7 @@ body[data-slug="index"] {
 // (definito in quartz.layout.ts con depth: -1) viene ingrandito a tutto
 // schermo per dare la "vista grande" del grafo.
 
-body[data-slug="grafico"] {
+body[data-slug="graph"] {
   // Nascondi header pagina, content-meta, taglist, e l'article (vuoto)
   .popover-hint > .flex-component:has(.article-title),
   .popover-hint > .content-meta,

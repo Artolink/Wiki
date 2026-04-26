@@ -13,7 +13,7 @@ const config: QuartzConfig = {
     enableSPA: true,
     enablePopovers: true,
     analytics: null,
-    locale: "it-IT",
+    locale: "en-US",
     baseUrl: "blog.farnetiandrea.it",
     ignorePatterns: ["private", "templates", ".obsidian"],
     defaultDateType: "modified",

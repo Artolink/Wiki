@@ -5,14 +5,14 @@ import { classNames } from "../util/lang"
 type GraphLinkOpts = {
   label?: string
   icon?: string
-  /** Slug della pagina dedicata al grafo (default: "grafico") */
+  /** Slug della pagina dedicata al grafo (default: "graph") */
   slug?: string
 }
 
 export default ((opts?: GraphLinkOpts) => {
-  const label = opts?.label ?? "Vista grafo"
+  const label = opts?.label ?? "Graph view"
   const icon = opts?.icon ?? "🕸️"
-  const targetSlug = opts?.slug ?? "grafico"
+  const targetSlug = opts?.slug ?? "graph"
 
   const GraphLink: QuartzComponent = ({ fileData, displayClass }: QuartzComponentProps) => {
     const baseDir = pathToRoot(fileData.slug!)
