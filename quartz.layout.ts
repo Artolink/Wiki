@@ -3,7 +3,21 @@ import * as Component from "./quartz/components"
 import { FileTrieNode } from "./quartz/util/fileTrie"
 
 const explorerSortFn = (a: FileTrieNode, b: FileTrieNode): number => {
-  const order = ["linux", "kubernetes", "ceph", "openstack"]
+  // Ordine dei parent folder a livello root (e in generale di qualsiasi folder
+  // che contenga questi slug come figli). Tutto ciò che non è in elenco viene
+  // ordinato alfabeticamente dopo.
+  const order = [
+    "operating-systems",
+    "automation",
+    "cloud",
+    "backup-reliability",
+    "observability",
+    "networking",
+    "hardware",
+    "virtualizzazione",
+    "message-brokers",
+    "ceph",
+  ]
   const ai = order.indexOf(a.slugSegment.toLowerCase())
   const bi = order.indexOf(b.slugSegment.toLowerCase())
   if (ai !== -1 && bi !== -1) return ai - bi

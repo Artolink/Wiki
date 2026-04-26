@@ -656,7 +656,8 @@ body[data-slug="grafico"] {
 // ──────────────────────────────────────────────────────────────────────────────
 // FOCUS MODE (toggle manuale dalla navbar)
 // ──────────────────────────────────────────────────────────────────────────────
-// Usa lo stesso comportamento dell'auto focus-mode così il layout è consistente
+// Usa lo stesso comportamento dell'auto focus-mode, ma con il contenuto
+// centrato e larghezza ridotta per una lettura comoda (in stile syselement).
 
 html[focus-mode="on"] {
   .page > #quartz-body {
@@ -671,11 +672,16 @@ html[focus-mode="on"] {
     display: none !important;
   }
 
-  .page > #quartz-body > .center {
+  // Centriamo il contenuto in focus mode: max-width ragionevole + margin auto
+  // così il titolo e il body restano allineati al centro del viewport invece
+  // di partire dal bordo sinistro.
+  .page > #quartz-body > .center,
+  .page > #quartz-body > footer {
     min-width: 0 !important;
-    max-width: 100% !important;
+    max-width: 850px !important;
     margin-left: auto !important;
     margin-right: auto !important;
+    width: 100% !important;
   }
 }
 
