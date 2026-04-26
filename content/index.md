@@ -18,9 +18,9 @@ Puoi quindi vedere fisicamente tutti i collegamenti che un'argomento richiede a 
 
 ## 🔎 Come navigare
 
-- Usa la barra di ricerca in alto a sinistra per trovare un argomento
+- Usa la barra di ricerca in alto per trovare velocemente un macro-argomento
 - Espandi l'indice **Esplora** a sinistra per sfogliare per cartella
-- La **vista grafo** in alto a destra mostra le connessioni tra le note
+- La **vista grafo** mostra le connessioni tra le note
 
 ## 📫 Contatti
 
