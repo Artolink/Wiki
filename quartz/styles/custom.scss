@@ -423,12 +423,37 @@ html[saved-theme="dark"] .page .page-header > header .search > .search-button {
 // ──────────────────────────────────────────────────────────────────────────────
 // CONTENUTO CENTRALE
 // ──────────────────────────────────────────────────────────────────────────────
+// Il .center occupa il 100% della sua colonna grid (con `min-width: 0` per evitare
+// che il contenuto largo — code blocks, immagini — faccia overflow nella sidebar).
+// L'articolo *interno* è cappato a 860px per la leggibilità, e centrato.
 
 .page > #quartz-body > .center {
-  max-width: 860px;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  width: 100%;
   margin-left: auto;
   margin-right: auto;
   padding: calc(#{$navH} + 1.5rem) 2rem 2rem;
+  box-sizing: border-box;
+}
+
+.page > #quartz-body > .center > article,
+.page > #quartz-body > .center > .popover-hint {
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+// Code blocks / immagini / tabelle non devono mai sfondare la colonna
+.page > #quartz-body > .center pre,
+.page > #quartz-body > .center img,
+.page > #quartz-body > .center .table-container {
+  max-width: 100%;
+}
+
+// Evita overflow orizzontale globale
+html, body {
+  overflow-x: hidden;
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -461,12 +486,46 @@ html[saved-theme="dark"] .page .page-header > header .search > .search-button {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// FOCUS MODE
+// LAYOUT RESPONSIVE — griglia proporzionale + auto focus-mode
 // ──────────────────────────────────────────────────────────────────────────────
+// Strategia per soglia viewport:
+//   ≥ 1500px → 3-col layout completo (left + center + right)
+//   1200-1500px → nascondi sidebar destra, espandi center (hai ancora il TOC nel
+//                  toggle navbar e l'explorer a sinistra)
+//   ≤ 1100px → auto focus-mode: nascondi entrambe le sidebar, contenuto centrato
+//
+// L'uso di `minmax(0, 1fr)` sulla colonna centrale impedisce al contenuto largo
+// (code blocks, immagini) di forzare la colonna oltre la sua larghezza, che è
+// quello che causava l'overlap con la barra destra.
 
-html[focus-mode="on"] {
+// Layout 3-col (desktop largo)
+@media (min-width: 1500px) {
   .page > #quartz-body {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(260px, 340px) minmax(0, 1fr) minmax(260px, 340px) !important;
+    column-gap: 1.5rem !important;
+  }
+}
+
+// Layout 2-col (desktop stretto): nascondi sidebar destra
+@media (min-width: 1101px) and (max-width: 1499.98px) {
+  .page > #quartz-body {
+    grid-template-columns: minmax(240px, 320px) minmax(0, 1fr) !important;
+    grid-template-areas:
+      "grid-sidebar-left grid-header"
+      "grid-sidebar-left grid-center"
+      "grid-sidebar-left grid-footer" !important;
+    column-gap: 1.5rem !important;
+  }
+
+  .page > #quartz-body > .sidebar.right {
+    display: none !important;
+  }
+}
+
+// Auto focus-mode (sotto i 1100px): nascondi tutto, center pieno
+@media (max-width: 1100px) {
+  .page > #quartz-body {
+    grid-template-columns: minmax(0, 1fr) !important;
     grid-template-areas:
       "grid-header"
       "grid-center"
@@ -478,8 +537,34 @@ html[focus-mode="on"] {
   }
 
   .page > #quartz-body > .center {
-    min-width: unset !important;
-    max-width: 860px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// FOCUS MODE (toggle manuale dalla navbar)
+// ──────────────────────────────────────────────────────────────────────────────
+// Usa lo stesso comportamento dell'auto focus-mode così il layout è consistente
+
+html[focus-mode="on"] {
+  .page > #quartz-body {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas:
+      "grid-header"
+      "grid-center"
+      "grid-footer" !important;
+  }
+
+  .page > #quartz-body > .sidebar {
+    display: none !important;
+  }
+
+  .page > #quartz-body > .center {
+    min-width: 0 !important;
+    max-width: 100% !important;
     margin-left: auto !important;
     margin-right: auto !important;
   }
