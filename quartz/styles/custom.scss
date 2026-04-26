@@ -543,11 +543,11 @@ body[data-slug="index"] {
 // schermo per dare la "vista grande" del grafo.
 
 body[data-slug="graph"] {
-  // Nascondi header pagina, content-meta, taglist, e l'article (vuoto)
+  // Nascondi article-title (la pagina ha già il testo descrittivo nel body),
+  // content-meta (data/reading time non rilevante per questa pagina) e taglist.
   .popover-hint > .flex-component:has(.article-title),
   .popover-hint > .content-meta,
-  .popover-hint > .tag-list,
-  .popover-hint > article {
+  .popover-hint > .tag-list {
     display: none !important;
   }
 
@@ -568,15 +568,41 @@ body[data-slug="graph"] {
     }
   }
 
-  // Il graph component in afterBody: titolo nascosto, container full-page
-  .popover-hint > .graph {
+  // L'article body è esso stesso .popover-hint (vedi Content.tsx) —
+  // contiene il testo descrittivo introduttivo. Stile leggero e leggibile.
+  article.popover-hint {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    max-width: 900px;
+    margin: 0 auto 1.5rem auto;
+
+    p {
+      margin: 0.6rem 0;
+      color: var(--gray);
+    }
+
+    p:last-of-type {
+      color: var(--dark);
+      margin-top: 1rem;
+    }
+  }
+
+  // Nascondi <hr> che separa article da page-footer
+  .page > #quartz-body > .center > hr {
+    display: none !important;
+  }
+
+  // Il graph component vive in .page-footer (afterBody), non in .popover-hint.
+  // Nascondi h3 (titolo "Graph View" ridondante) e ingrandisci graph-outer.
+  .page-footer > .graph {
     & > h3 {
       display: none;
     }
 
     & > .graph-outer {
-      height: calc(100vh - #{$navH} - 4rem);
-      max-height: 80vh;
+      height: calc(100vh - #{$navH} - 16rem);
+      max-height: 70vh;
+      min-height: 400px;
       border-radius: 12px;
       margin: 0;
     }
