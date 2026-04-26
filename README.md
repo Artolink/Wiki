@@ -11,13 +11,14 @@ Benvenuto nella mia Wiki! Qui trovi [chi sono io](https://www.linkedin.com/in/an
 Qui raccolgo lo stretto necessario che è fondamentale sapere per operare in ognuno dei lavori che ho menzionato, con l'aggiunta di teoria, consigli e software per facilitarne e migliorarne la qualità. 
 Lo standard qualitativo che troverete è quello per il lavoro in sistemi di produzione con turni di reperibilità, come ho sempre fatto.
 
-Le note sono interconnesse: ogni appunto è un nodo in un grafo di conoscenza, e puoi navigare i collegamenti o usare la ricerca in alto a sinistra.
+Le note sono interconnesse: ogni appunto è un nodo in un grafo di conoscenza per cui contiene solo lo stretto necessario, puoi navigare i collegamenti senza trovare ripetizioni.
 
 ---
 
 ## 🛠️ Stack della Wiki
 
-Il sito è generato con [Quartz 4](https://quartz.jzhao.xyz/), un generatore di siti statici basato su file Markdown pensato per pubblicare vault [Obsidian](https://obsidian.md/). Il deploy avviene su VPS Ubuntu con Nginx come web server.
+Il sito è generato con [Quartz 4](https://quartz.jzhao.xyz/), un generatore di siti statici basato su file Markdown pensato per pubblicare vault [Obsidian](https://obsidian.md/). 
+Il deploy avviene su VPS Ubuntu con Nginx come web server.
 
 ---
 
