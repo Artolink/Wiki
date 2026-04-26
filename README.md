@@ -9,7 +9,7 @@ Benvenuto nella mia Wiki! Qui trovi [chi sono io](https://www.linkedin.com/in/an
 - Cloud Engineer (Open-Source): Linux, Git, Ansible, AWX, Terraform/OpenTofu, MAAS, BareOS, KVM, QEMU, LXD/LXC, Docker, Kubernetes, Ceph, Openstack, Kafka, Observability (ELK Stack, Prometheus, Telegraf, Victoria Metrics, Grafana...), scripting (Bash, Python, Powershell), networking (e BGP), eccetera...
 
 Qui raccolgo lo stretto necessario che è fondamentale sapere per operare in ognuno dei lavori che ho menzionato, con l'aggiunta di teoria, consigli e software per facilitarne e migliorarne la qualità. 
-Lo standard qualitativo che troverete è quello per il lavoro in sistemi di produzione con turni di reperibilità, come ho sempre fatto.
+Lo standard qualitativo che troverete è basato sul lavoro su sistemi di produzione con turni di reperibilità, come ho sempre fatto.
 
 Le note sono interconnesse: ogni appunto è un nodo in un grafo di conoscenza per cui contiene solo lo stretto necessario, puoi navigare i collegamenti senza trovare ripetizioni.
 
