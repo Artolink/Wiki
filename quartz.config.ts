@@ -8,7 +8,7 @@ import * as Plugin from "./quartz/plugins"
  */
 const config: QuartzConfig = {
   configuration: {
-    pageTitle: "Artolink's Wiki",
+    pageTitle: "Andrea Farneti's Wiki",
     pageTitleSuffix: "",
     enableSPA: true,
     enablePopovers: true,

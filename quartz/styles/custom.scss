@@ -27,6 +27,9 @@ $navH: 60px;
   --copy-btn-border:  #e5e7eb;
   --sidebar-hover:    rgba(17, 24, 39, 0.05);
   --soft-border:      #e5e7eb;
+  // Sidebar beige (light): tono caldo cremoso, in stile syselement
+  --sidebar-bg:       #f7f2e8;
+  --sidebar-border:   #ebe3d2;
 }
 
 html[saved-theme="dark"] {
@@ -40,6 +43,9 @@ html[saved-theme="dark"] {
   --copy-btn-border:  #44403c;
   --sidebar-hover:    rgba(231, 229, 228, 0.06);
   --soft-border:      #44403c;
+  // Sidebar (dark): tono stone leggermente più chiaro del body per stacco morbido
+  --sidebar-bg:       #232020;
+  --sidebar-border:   #3a3633;
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -99,9 +105,10 @@ html[saved-theme="dark"] {
     width: 100%;
     height: 2.25rem;
     display: flex;
+    align-items: center;
     border: 1px solid var(--lightgray);
     border-radius: 8px;
-    padding: 0 0.8rem;
+    padding: 0 0.5rem 0 0.8rem;
     background: var(--light);
     & > p { flex: 1; }
   }
@@ -128,7 +135,7 @@ html[saved-theme="dark"] {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// SIDEBAR SINISTRA — stile syselement (piatta, no card beige)
+// SIDEBAR SINISTRA — card beige in stile syselement
 // ──────────────────────────────────────────────────────────────────────────────
 
 .page > #quartz-body > .sidebar.left {
@@ -138,9 +145,9 @@ html[saved-theme="dark"] {
     display: none !important;
   }
 
-  background: transparent;
+  background: var(--sidebar-bg);
   border: none !important;
-  border-right: 1px solid var(--lightgray);
+  border-right: 1px solid var(--sidebar-border);
   border-radius: 0;
   margin: 0 !important;
   padding: calc(#{$navH} + 1rem) 1rem 1rem 1rem !important;
@@ -869,10 +876,41 @@ pre:hover > .clipboard-button {
   position: relative;
 }
 
+// ── Hint "Ctrl K" dentro al pulsante di ricerca ──────────────────────────────
+.search > .search-button {
+  & > .search-shortcut {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    margin-left: 0.5rem;
+    font-family: var(--bodyFont);
+    font-size: 0.7rem;
+    color: var(--gray);
+    pointer-events: none;
+    flex-shrink: 0;
+
+    & > span {
+      display: inline-block;
+      padding: 0.12rem 0.42rem;
+      border: 1px solid var(--lightgray);
+      border-radius: 5px;
+      background: var(--light);
+      line-height: 1;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+  }
+
+  // Mobile: nascondi l'hint per non stringere il placeholder
+  @media all and (max-width: 800px) {
+    & > .search-shortcut { display: none; }
+  }
+}
+
 .search > .search-container {
   // Override: niente più overlay fullscreen
   position: absolute !important;
-  top: calc(100% + 0.5rem) !important;
+  top: calc(100% + 1rem) !important;
   left: 50% !important;
   transform: translateX(-50%);
   width: min(38rem, 92vw);
