@@ -47,6 +47,24 @@ const gitHubEdit = Component.GitHubEdit({
   contentDir: "content",
 })
 
+// Graph "fullscreen" usato sulla pagina /grafico — depth: -1 mostra TUTTI i nodi
+// (vs il graph nella sidebar destra che mostra solo i vicini con depth: 1)
+const fullPageGraph = Component.Graph({
+  localGraph: {
+    depth: -1,
+    scale: 1.0,
+    repelForce: 0.5,
+    centerForce: 0.3,
+    linkDistance: 35,
+    fontSize: 0.65,
+    opacityScale: 1,
+    showTags: true,
+    removeTags: [],
+    focusOnHover: true,
+    enableRadial: true,
+  },
+})
+
 export const defaultContentPageLayout: PageLayout = {
   beforeBody: [
     Component.Flex({
@@ -57,6 +75,12 @@ export const defaultContentPageLayout: PageLayout = {
     }),
     Component.ContentMeta(),
     Component.TagList(),
+  ],
+  afterBody: [
+    Component.ConditionalRender({
+      component: fullPageGraph,
+      condition: (page) => page.fileData.slug === "grafico",
+    }),
   ],
   left: [
     // Mantenuti nella sidebar per stabilità del grid (nascosti su desktop via CSS)
@@ -70,6 +94,7 @@ export const defaultContentPageLayout: PageLayout = {
       ],
     }),
     Component.HomeLink(),
+    Component.GraphLink(),
     Component.Explorer({ sortFn: explorerSortFn }),
   ],
   right: [
@@ -99,6 +124,7 @@ export const defaultListPageLayout: PageLayout = {
       ],
     }),
     Component.HomeLink(),
+    Component.GraphLink(),
     Component.Explorer({ sortFn: explorerSortFn }),
   ],
   right: [],
