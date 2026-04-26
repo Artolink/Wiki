@@ -146,15 +146,28 @@ html[saved-theme="dark"] {
   }
 
   background: var(--sidebar-bg);
-  border: none !important;
-  border-right: 1px solid var(--sidebar-border);
-  border-radius: 0;
-  margin: 0 !important;
-  padding: calc(#{$navH} + 1rem) 1rem 1rem 1rem !important;
-  height: 100vh !important;
-  top: 0 !important;
+  border: 1px solid var(--sidebar-border) !important;
+  border-radius: 14px;
+  // Margine attorno → la sidebar diventa una "bolla" che galleggia, lasciando
+  // bianco/dark la pagina ai suoi lati. Top compensa la navbar fissa.
+  margin: calc(#{$navH} + 0.75rem) 0.75rem 0.75rem 0.75rem !important;
+  padding: 1rem !important;
+  // Altezza ridotta per non toccare i bordi del viewport
+  height: calc(100vh - #{$navH} - 1.5rem) !important;
+  top: calc(#{$navH} + 0.75rem) !important;
   box-sizing: border-box;
   overflow-y: auto;
+  // Soft shadow per un look "card"
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+
+  // Mobile: niente bolla galleggiante (la sidebar diventa orizzontale)
+  @media all and (max-width: 800px) {
+    margin: 0 !important;
+    border-radius: 0;
+    border: none !important;
+    height: auto !important;
+    box-shadow: none;
+  }
 }
 
 // ── HomeLink: stile "pillola" come syselement (pulsante big in alto) ──────────
@@ -479,7 +492,11 @@ html[saved-theme="dark"] .page .page-header > header .search > .search-button {
 }
 
 .page > #quartz-body > .center > article,
-.page > #quartz-body > .center > .popover-hint {
+.page > #quartz-body > .center > .popover-hint,
+// Il blocco con article-title + content-meta + tag-list è in
+// .center > .page-header > .popover-hint (NON direct child di .center).
+// Senza questa regola il titolo risulta allineato a sinistra su schermi grandi.
+.page > #quartz-body > .center > .page-header > .popover-hint {
   max-width: 860px;
   margin-left: auto;
   margin-right: auto;
@@ -910,7 +927,7 @@ pre:hover > .clipboard-button {
 .search > .search-container {
   // Override: niente più overlay fullscreen
   position: absolute !important;
-  top: calc(100% + 1rem) !important;
+  top: calc(100% + 1.5rem) !important;
   left: 50% !important;
   transform: translateX(-50%);
   width: min(38rem, 92vw);
