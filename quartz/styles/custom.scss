@@ -178,9 +178,11 @@ html[saved-theme="dark"] {
   font-size: 1.2rem;
 }
 
-// ── GraphLink: stesso stile di HomeLink, link a /grafico ──────────────────────
+// ── SidebarLink: pulsante generico (Graph view, Starting Tools, ...) ─────────
+// Stesso stile di HomeLink. Tutti i .sidebar-link nel sidebar.left vengono
+// avvicinati tra loro per formare un blocco coerente con HomeLink in cima.
 
-.sidebar.left > .graph-link {
+.sidebar.left > .sidebar-link {
   display: flex;
   align-items: center;
   gap: 0.7rem;
@@ -188,24 +190,24 @@ html[saved-theme="dark"] {
   border-radius: 10px;
   font-size: 1rem;
   font-weight: 600;
-  // Compensa il gap: 1.2rem del flex per avvicinare visivamente Home e Vista grafo
+  // Compensa il gap: 1.2rem del flex per avvicinare visivamente i bottoni
   margin: -0.8rem 0 0 0;
   color: var(--dark);
   background: transparent;
   text-decoration: none;
 }
 
-.sidebar.left > .graph-link:hover {
+.sidebar.left > .sidebar-link:hover {
   background: var(--sidebar-hover);
   text-decoration: none;
 }
 
-.sidebar.left > .graph-link.active {
+.sidebar.left > .sidebar-link.active {
   background: var(--highlight);
   color: var(--secondary);
 }
 
-.sidebar.left > .graph-link .graph-link-icon {
+.sidebar.left > .sidebar-link .sidebar-link-icon {
   font-size: 1.2rem;
 }
 
@@ -551,6 +553,18 @@ body[data-slug="graph"] {
     display: none !important;
   }
 
+  // Inverti l'ordine: grafo PRIMA, testo descrittivo DOPO.
+  // .center è normalmente block flow; lo trasformiamo in flex-column
+  // così possiamo riordinare i figli con `order`.
+  .page > #quartz-body > .center {
+    display: flex;
+    flex-direction: column;
+  }
+  .page > #quartz-body > .center > .page-header { order: 1; }
+  .page > #quartz-body > .center > .page-footer { order: 2; } // .graph (afterBody)
+  .page > #quartz-body > .center > article       { order: 3; } // testo descrittivo
+  .page > #quartz-body > .center > footer        { order: 4; }
+
   // Nascondi la sidebar destra (Graph piccolo + TOC + Backlinks) per dare
   // tutto lo spazio al grafo grande in centro.
   .page > #quartz-body > .sidebar.right {
@@ -569,12 +583,13 @@ body[data-slug="graph"] {
   }
 
   // L'article body è esso stesso .popover-hint (vedi Content.tsx) —
-  // contiene il testo descrittivo introduttivo. Stile leggero e leggibile.
+  // contiene il testo descrittivo che ora appare SOTTO il grafo.
   article.popover-hint {
     font-size: 0.95rem;
     line-height: 1.6;
     max-width: 900px;
-    margin: 0 auto 1.5rem auto;
+    margin: 1.8rem auto 0 auto;
+    text-align: center;
 
     p {
       margin: 0.6rem 0;

@@ -10,7 +10,7 @@ import PageTitle from "./PageTitle"
 import SiteBrand from "./SiteBrand"
 import SocialLinks from "./SocialLinks"
 import HomeLink from "./HomeLink"
-import GraphLink from "./GraphLink"
+import SidebarLink from "./SidebarLink"
 import GitHubEdit from "./GitHubEdit"
 import ContentMeta from "./ContentMeta"
 import Spacer from "./Spacer"
@@ -43,7 +43,7 @@ export {
   SiteBrand,
   SocialLinks,
   HomeLink,
-  GraphLink,
+  SidebarLink,
   GitHubEdit,
   ContentMeta,
   Spacer,
