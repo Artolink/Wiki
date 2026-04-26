@@ -1,32 +1,21 @@
 # Benvenuto!
 
-Benvenuto nel mio quaderno pubblico di appunti tecnici.
+Benvenuto nella mia Wiki! Qui trovi [chi sono io](https://www.linkedin.com/in/andreafarneti/).
 
-Qui raccolgo note, procedure e ragionamenti che uso (o ho usato) nel mio lavoro di **System Administrator / SRE / Cloud Engineer**. Tratto temi di infrastruttura cloud, orchestrazione, storage distribuito, networking e tutto ciò che ruota attorno a sistemi Linux di produzione.
+**TL;DR** Il mio percorso lavorativo è stato il seguente:
+- Riparazione/installazione HW: prendevo il furgoncino e andavo a fare [queste cose](https://github.com/user-attachments/assets/0be38a78-6e00-4ac0-b0da-e6ef47d060eb) (installare/configurare PC, Switch, Router, Firewall...)
+- IT Technical Specialist (NOC): supporto a 100+ clienti diversi con infrastrutture diverse (SO Windows) e attività On-Site in solitaria
+- System Administrator (SOC): Malware e Mail Threat Analysis, gestione sicura del dominio aziendale, hardening del networking e di ogni endpoint.
+- Cloud Engineer (Open-Source): Linux, Git, Ansible, AWX, Terraform/OpenTofu, MAAS, Docker, Kubernetes, Ceph, Openstack...
+
+Qui raccolgo lo stretto necessario che è fondamentale sapere per operare in ognuno dei lavori che ho menzionato, con l'aggiunta di teoria, consigli e SoftWare per facilitarne e migliorarne la qualità. 
+Lo standard qualitativo che troverete è quello per il lavoro in sistemi di produzione con turni di reperibilità, come ho sempre fatto.
 
 Le note sono interconnesse: ogni appunto è un nodo in un grafo di conoscenza, e puoi navigare i collegamenti o usare la ricerca in alto a sinistra.
 
-## 🧭 Aree tematiche
-
-- 🌩️ **OpenStack** — Juju e Kolla: Deployment, troubleshooting e operatività
-- ☸️ **Kubernetes** — Procedure operative su cluster K8s e gestione quotidiana
-- 🗄️ **Ceph** — Storage distribuito: progettazione, tuning e gestione
-- 🐧 **Linux & Sistemistica** — Fondamentali e tricks dall'esperienza operativa
-
-## 🔎 Come navigare
-
-- Usa la barra di ricerca in alto a sinistra per trovare un argomento
-- Espandi l'indice **Esplora** a sinistra per sfogliare per cartella
-- La **vista grafo** in alto a destra mostra le connessioni tra le note
-
-## 📫 Contatti
-
-- GitHub: <https://github.com/Artolink>
-- LinkedIn: <https://www.linkedin.com/in/andreafarneti/>
-
 ---
 
-## 🛠️ Stack tecnico
+## 🛠️ Stack della Wiki
 
 Il sito è generato con [Quartz 4](https://quartz.jzhao.xyz/), un generatore di siti statici basato su file Markdown pensato per pubblicare vault [Obsidian](https://obsidian.md/). Il deploy avviene su VPS Ubuntu con Nginx come web server.
 
@@ -60,7 +49,8 @@ npm install
 npx quartz build
 ```
 
-L'output finisce in `public/`. Punta il `root` di Nginx a `~/blog/public/` e ricarica.
+L'output finisce in `public/`. 
+Punta quindi il `root` di Nginx a `~/blog/public/` e ricarica.
 
 ---
 
