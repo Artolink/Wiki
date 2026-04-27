@@ -597,7 +597,7 @@ html, body {
 .page > #quartz-body > .center > .page-header > .popover-hint {
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--lightgray);
-  margin-bottom: 1.8rem;
+  margin-bottom: 3rem;
 }
 
 // Pagine speciali in cui il page-header è vuoto/nascosto: niente riga ghost.
@@ -613,9 +613,9 @@ body[data-slug="graph"] {
 // Home: il titolo visibile è il primo h1 del body markdown ("# Benvenuto!").
 // Riga sotto a quello per rispecchiare il layout di syselement.
 body[data-slug="index"] article.popover-hint > h1:first-child {
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.7rem;
   border-bottom: 1px solid var(--lightgray);
-  margin-bottom: 1.5rem;
+  margin-bottom: 3rem;
 }
 
 // ── Home page (slug=index): nascondi tutta la testata "vuota" ────────────────
