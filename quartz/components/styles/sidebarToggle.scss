@@ -1,0 +1,69 @@
+@use "../../styles/variables.scss" as *;
+
+// Bottone "tab" verticale: galleggia sul bordo destro della sidebar.left,
+// metà dentro e metà fuori. A click toglie/rimette la sidebar.
+.sidebar-toggle {
+  position: fixed;
+  // 380px = $sidePanelWidth; -12px = mezza larghezza del bottone
+  left: calc(#{$sidePanelWidth} - 12px);
+  top: 50vh;
+  transform: translateY(-50%);
+  z-index: 60;
+
+  width: 24px;
+  height: 56px;
+  padding: 0;
+  background: var(--light);
+  border: 1px solid var(--lightgray);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--darkgray);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition:
+    left 0.25s ease,
+    color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    color: var(--secondary);
+    background: var(--sidebar-hover, rgba(0, 0, 0, 0.04));
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  }
+
+  & > svg {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.25s ease;
+  }
+
+  // Mobile: nascondi (la sidebar diventa orizzontale, non c'è da collassare)
+  @media all and ($mobile) {
+    display: none;
+  }
+}
+
+// Stato "collassato": sidebar nascosta, bottone all'estrema sinistra
+// dello schermo, icona ruotata di 180° per indicare "espandi".
+html[data-sidebar-collapsed="true"] {
+  .sidebar-toggle {
+    left: 0.4rem;
+
+    & > svg {
+      transform: rotate(180deg);
+    }
+  }
+
+  // Nascondi la sidebar e collassa la sua colonna nel grid così il
+  // contenuto centrale si espande nello spazio liberato.
+  .page > #quartz-body > .sidebar.left {
+    display: none !important;
+  }
+
+  .page > #quartz-body {
+    grid-template-columns: 0 minmax(0, 1fr) #{$sidePanelWidth} !important;
+  }
+}

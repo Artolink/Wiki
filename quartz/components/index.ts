@@ -32,6 +32,7 @@ import ConditionalRender from "./ConditionalRender"
 import FocusMode from "./FocusMode"
 import GraphToggle from "./GraphToggle"
 import FontResizer from "./FontResizer"
+import SidebarToggle from "./SidebarToggle"
 
 export {
   ArticleTitle,
@@ -68,4 +69,5 @@ export {
   FocusMode,
   GraphToggle,
   FontResizer,
+  SidebarToggle,
 }

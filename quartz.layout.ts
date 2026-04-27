@@ -53,10 +53,10 @@ export const sharedPageComponents: SharedLayout = {
       ],
     }),
   ],
-  // FontResizer floating su list pages (folder/tag). Per le content pages la
-  // versione è in defaultContentPageLayout.afterBody (perché lo spread di
-  // defaultContentPageLayout sovrascrive interamente l'afterBody condiviso).
-  afterBody: [Component.FontResizer()],
+  // FontResizer floating + SidebarToggle su list pages (folder/tag). Per le
+  // content pages le versioni sono in defaultContentPageLayout.afterBody
+  // (lo spread sovrascrive interamente l'afterBody condiviso).
+  afterBody: [Component.FontResizer(), Component.SidebarToggle()],
   footer: Component.Footer({ links: {}, hidden: true }),
 }
 
@@ -103,6 +103,8 @@ export const defaultContentPageLayout: PageLayout = {
     // FontResizer floating: posizionato con position: fixed, appare in basso al
     // centro quando il mouse si avvicina al fondo dello schermo.
     Component.FontResizer(),
+    // Pulsante per nascondere/mostrare il menu di sinistra
+    Component.SidebarToggle(),
   ],
   left: [
     // Mantenuti nella sidebar per stabilità del grid (nascosti su desktop via CSS)
