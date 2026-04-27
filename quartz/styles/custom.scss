@@ -160,17 +160,18 @@ html[saved-theme="dark"] {
   // bianco/dark la pagina ai suoi lati. Top compensa la navbar fissa.
   margin: calc(#{$navH} + 0.75rem) 0.75rem 0.75rem 0.75rem !important;
   padding: 1rem !important;
-  // Altezza ridotta per non toccare i bordi del viewport
-  height: calc(100vh - #{$navH} - 1.5rem) !important;
+  // Altezza naturale: la sidebar si estende quanto serve per il suo contenuto.
+  // Niente scrollbar interna — se il contenuto è più alto del viewport, basta
+  // scrollare la pagina per vederne il resto.
+  height: auto !important;
   top: calc(#{$navH} + 0.75rem) !important;
   box-sizing: border-box;
-  overflow-y: auto;
+  overflow: visible !important;
 
   // Mobile: niente bolla galleggiante (la sidebar diventa orizzontale)
   @media all and (max-width: 800px) {
     margin: 0 !important;
     border-radius: 0;
-    height: auto !important;
   }
 }
 
@@ -263,6 +264,9 @@ html[saved-theme="dark"] {
 // Folder top-level (Linux, Kubernetes, …) come riga con icona a sinistra
 .sidebar.left .explorer-content {
   margin-top: 0.25rem;
+  // Override del default explorer.scss che imposta overflow-y: auto
+  // (creerebbe una scrollbar interna anche con sidebar a height: auto)
+  overflow: visible !important;
 
   & > ul > li {
     margin: 0.05rem 0;
@@ -370,10 +374,11 @@ html[saved-theme="dark"] .page .page-header > header .search > .search-button {
   border-radius: 0;
   margin: 0 !important;
   padding: calc(#{$navH} + 1rem) 1rem 1rem 1rem !important;
-  height: 100vh !important;
+  // Altezza naturale + niente scrollbar (vedi sidebar.left)
+  height: auto !important;
   top: 0 !important;
   box-sizing: border-box;
-  overflow-y: auto;
+  overflow: visible !important;
 }
 
 // ── Grafo: più piccolo e discreto, senza sfondo card ──────────────────────────
