@@ -3,48 +3,58 @@
 // Altezza della navbar fissa (deve coincidere con $navH in custom.scss)
 $navH: 60px;
 
-// Bottone piccolo posizionato all'interno della sidebar.left, top-right.
+// ── Riga "header" della sidebar: spazio dedicato in alto al toggle ───────────
+// Aumenta il padding-top della sidebar per ricavare una piccola "barra" in
+// cima dove il toggle vive comodamente, senza sovrapporsi a HomeLink.
+html:not([data-sidebar-collapsed="true"]) .page > #quartz-body > .sidebar.left {
+  padding-top: calc(#{$navH} + 2.6rem) !important;
+}
+
+// ── Toggle: stile discreto, top-right INSIDE della sidebar ───────────────────
 // Renderizzato fuori dalla sidebar (afterBody) e ancorato visualmente con
 // position:fixed così sopravvive a `display: none` della sidebar quando
 // l'utente la collassa.
 .sidebar-toggle {
   position: fixed;
-  top: calc(#{$navH} + 1.4rem);
-  // Posizione INSIDE top-right della sidebar:
-  //   sidebar grid column = $sidePanelWidth (380px)
-  //   sidebar margin-right = 0.75rem
-  //   sidebar padding-right = 1rem
-  //   button width = 24px
-  // → left = 380 - 0.75rem - 1rem - 24 = ~328px (ben dentro al rettangolo)
-  left: calc(#{$sidePanelWidth} - 1.75rem - 24px);
+  // Posizionato dentro la "barra header" della sidebar
+  // (top sidebar = $navH + 0.75rem margin; +0.6rem di spazio dall'angolo)
+  top: calc(#{$navH} + 1.35rem);
+  // Right-side inside: $sidePanelWidth (380px) - margin-right (0.75rem)
+  //                    - padding-right (1rem) - button width (22px)
+  // → ~328px dal bordo sinistro: angolo destro inside
+  left: calc(#{$sidePanelWidth} - 1.75rem - 22px);
   z-index: 60;
 
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   padding: 0;
+  // Niente bordo / sfondo: si fonde col beige della sidebar
   background: transparent;
-  border: 1px solid var(--lightgray);
-  border-radius: 6px;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--gray);
+  // Discreto a riposo, pieno all'hover
+  opacity: 0.6;
   transition:
     left 0.25s ease,
+    top 0.25s ease,
     color 0.15s ease,
     background 0.15s ease,
-    border-color 0.15s ease;
+    opacity 0.15s ease;
 
   &:hover {
     color: var(--secondary);
-    background: var(--sidebar-hover, rgba(0, 0, 0, 0.04));
-    border-color: var(--gray);
+    background: var(--sidebar-hover, rgba(0, 0, 0, 0.05));
+    opacity: 1;
   }
 
   & > svg {
-    width: 12px;
-    height: 12px;
+    width: 13px;
+    height: 13px;
     transition: transform 0.25s ease;
   }
 
@@ -54,14 +64,24 @@ $navH: 60px;
   }
 }
 
-// Stato "collassato": sidebar nascosta, bottone all'estrema sinistra
-// con icona ruotata di 180° (chevron > = "espandi").
+// ── Stato "collassato" ───────────────────────────────────────────────────────
+// Sidebar nascosta, bottone galleggiante a sinistra, icona ruotata 180°.
+// Bordino visibile per dare al bottone forma autonoma quando non c'è la
+// sidebar a fargli da contesto.
 html[data-sidebar-collapsed="true"] {
   .sidebar-toggle {
     left: 0.5rem;
+    top: calc(#{$navH} + 1.25rem);
+    border: 1px solid var(--lightgray);
+    background: var(--light);
+    opacity: 1;
 
     & > svg {
       transform: rotate(180deg);
+    }
+
+    &:hover {
+      border-color: var(--gray);
     }
   }
 
