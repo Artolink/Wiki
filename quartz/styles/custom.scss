@@ -31,6 +31,8 @@ $navH: 60px;
   // in stile syselement — un soffio di crema sopra al bianco.
   --sidebar-bg:       #faf8f3;
   --sidebar-border:   #f1ede4;
+  // Barra di ricerca: bordo più marcato della lightgray standard
+  --search-border:    #d1d5db;     // zinc-300, intermedio tra lightgray e gray
 }
 
 html[saved-theme="dark"] {
@@ -47,6 +49,8 @@ html[saved-theme="dark"] {
   // Sidebar (dark): tono stone appena più chiaro del body, stacco molto soft
   --sidebar-bg:       #221f1e;
   --sidebar-border:   #2e2a28;
+  // Barra di ricerca dark: bordo più marcato della lightgray standard
+  --search-border:    #57534e;     // stone-600, intermedio tra lightgray e gray
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -107,7 +111,9 @@ html[saved-theme="dark"] {
     height: 2.25rem;
     display: flex;
     align-items: center;
-    border: 1px solid var(--lightgray);
+    // Bordo più marcato della normale lightgray per dare presenza alla barra
+    // (in stile syselement). Vedi --search-border: zinc-300 light / stone-600 dark.
+    border: 1px solid var(--search-border);
     border-radius: 8px;
     padding: 0 0.5rem 0 0.8rem;
     background: var(--light);
