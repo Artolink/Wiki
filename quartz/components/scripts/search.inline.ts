@@ -244,7 +244,10 @@ async function setupSearch(searchElement: Element, currentSlug: FullSlug, data: 
   async function shortcutHandler(e: HTMLElementEventMap["keydown"]) {
     // "/" apre la barra di ricerca, ma SOLO se l'utente non sta già scrivendo
     // in un campo input/textarea/contenteditable (così il tasto resta usabile).
-    if (e.key === "/" && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+    // NON controlliamo !e.shiftKey: su tastiere italiane "/" si produce con
+    // Shift+7, quindi shiftKey è true. Ciò che conta è il carattere risultante
+    // (e.key === "/"), non i modificatori usati per produrlo.
+    if (e.key === "/" && !e.ctrlKey && !e.metaKey && !e.altKey) {
       const target = e.target as HTMLElement | null
       const isTyping =
         target instanceof HTMLInputElement ||
