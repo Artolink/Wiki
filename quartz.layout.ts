@@ -47,20 +47,16 @@ export const sharedPageComponents: SharedLayout = {
     Component.Search({ enablePreview: false }),
     Component.Flex({
       components: [
-        {
-          Component: Component.SocialLinks({
-            links: [
-              { label: "Site", href: "https://farnetiandrea.it", icon: "home" },
-            ],
-          }),
-        },
         { Component: Component.GraphToggle() },
         { Component: Component.Darkmode() },
         { Component: Component.FocusMode() },
       ],
     }),
   ],
-  afterBody: [],
+  // FontResizer floating su list pages (folder/tag). Per le content pages la
+  // versione è in defaultContentPageLayout.afterBody (perché lo spread di
+  // defaultContentPageLayout sovrascrive interamente l'afterBody condiviso).
+  afterBody: [Component.FontResizer()],
   footer: Component.Footer({ links: {}, hidden: true }),
 }
 
@@ -93,7 +89,6 @@ export const defaultContentPageLayout: PageLayout = {
     Component.Flex({
       components: [
         { Component: Component.ArticleTitle(), grow: true },
-        { Component: Component.FontResizer() },
         { Component: gitHubEdit },
       ],
     }),
@@ -105,6 +100,9 @@ export const defaultContentPageLayout: PageLayout = {
       component: fullPageGraph,
       condition: (page) => page.fileData.slug === "graph",
     }),
+    // FontResizer floating: posizionato con position: fixed, appare in basso al
+    // centro quando il mouse si avvicina al fondo dello schermo.
+    Component.FontResizer(),
   ],
   left: [
     // Mantenuti nella sidebar per stabilità del grid (nascosti su desktop via CSS)

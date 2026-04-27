@@ -38,10 +38,36 @@ function setScale(v: number) {
 // ma il componente usa afterDOMLoaded — leggera latenza accettabile).
 applyScale(readScale())
 
+// Soglia (px dal fondo del viewport) entro cui la barra diventa visibile
+const VISIBLE_THRESHOLD_PX = 110
+
 document.addEventListener("nav", () => {
   const initial = readScale()
   applyScale(initial)
   syncSliders(initial)
+
+  // ── Visibilità floating: appare quando il mouse è vicino al bordo basso ──
+  // La barra è position:fixed in basso al centro, opacity:0 di default.
+  // Aggiungiamo `.visible` quando il puntatore entra negli ultimi N pixel del
+  // viewport, e la rimuoviamo altrimenti. Throttle via requestAnimationFrame.
+  let mouseTracking = false
+  function updateVisibility(mouseY: number) {
+    const distFromBottom = window.innerHeight - mouseY
+    const shouldBeVisible = distFromBottom < VISIBLE_THRESHOLD_PX
+    for (const el of document.getElementsByClassName("font-resizer-floating")) {
+      el.classList.toggle("visible", shouldBeVisible)
+    }
+  }
+  function onMouseMove(e: MouseEvent) {
+    if (mouseTracking) return
+    mouseTracking = true
+    requestAnimationFrame(() => {
+      updateVisibility(e.clientY)
+      mouseTracking = false
+    })
+  }
+  document.addEventListener("mousemove", onMouseMove, { passive: true })
+  window.addCleanup(() => document.removeEventListener("mousemove", onMouseMove))
 
   // Slider: input event = update in tempo reale mentre l'utente trascina
   for (const slider of document.querySelectorAll<HTMLInputElement>(".font-resizer .font-slider")) {

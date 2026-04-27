@@ -536,8 +536,7 @@ html, body {
     min-width: 0;
   }
 
-  & > div:has(.github-edit),
-  & > div:has(.font-resizer) {
+  & > div:has(.github-edit) {
     flex: 0 0 auto !important;
   }
 
