@@ -164,6 +164,10 @@ html[saved-theme="dark"] {
   // Niente scrollbar interna — se il contenuto è più alto del viewport, basta
   // scrollare la pagina per vederne il resto.
   height: auto !important;
+  // align-self: start impedisce alla sidebar di "stirarsi" verticalmente per
+  // riempire la cella del grid (default = stretch). Senza questa, il background
+  // beige continuerebbe fino in fondo alla pagina.
+  align-self: start;
   top: calc(#{$navH} + 0.75rem) !important;
   box-sizing: border-box;
   overflow: visible !important;
