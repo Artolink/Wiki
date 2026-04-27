@@ -27,9 +27,10 @@ $navH: 60px;
   --copy-btn-border:  #e5e7eb;
   --sidebar-hover:    rgba(17, 24, 39, 0.05);
   --soft-border:      #e5e7eb;
-  // Sidebar beige (light): tono caldo cremoso, in stile syselement
-  --sidebar-bg:       #f7f2e8;
-  --sidebar-border:   #ebe3d2;
+  // Sidebar beige (light): tono caldo MOLTO leggero, quasi impercettibile,
+  // in stile syselement — un soffio di crema sopra al bianco.
+  --sidebar-bg:       #faf8f3;
+  --sidebar-border:   #f1ede4;
 }
 
 html[saved-theme="dark"] {
@@ -43,9 +44,9 @@ html[saved-theme="dark"] {
   --copy-btn-border:  #44403c;
   --sidebar-hover:    rgba(231, 229, 228, 0.06);
   --soft-border:      #44403c;
-  // Sidebar (dark): tono stone leggermente più chiaro del body per stacco morbido
-  --sidebar-bg:       #232020;
-  --sidebar-border:   #3a3633;
+  // Sidebar (dark): tono stone appena più chiaro del body, stacco molto soft
+  --sidebar-bg:       #221f1e;
+  --sidebar-border:   #2e2a28;
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
