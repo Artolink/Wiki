@@ -618,19 +618,21 @@ body[data-slug="index"] article.popover-hint > h1:first-child {
   margin-bottom: 1.5rem;
 }
 
-// ── Home page (slug=index): nascondi titolo "index" e content-meta ───────────
-// L'utente vuole che la home mostri direttamente il contenuto del file md
-// senza titolo/data/tempo di lettura ridondante.
-
+// ── Home page (slug=index): nascondi tutta la testata "vuota" ────────────────
+// Sulla home il titolo viene dall'h1 del body markdown ("# Benvenuto!"), non
+// dall'article-title del frontmatter. Nascondiamo l'INTERA .popover-hint del
+// page-header (che conteneva: flex con title+Edit, content-meta, tag-list)
+// così non resta uno spazio invisibile prima del titolo del body.
 body[data-slug="index"] {
-  .popover-hint > .flex-component:has(.article-title) {
-    justify-content: flex-end !important;  // Edit button da solo a destra
-    margin-top: 0 !important;
+  .page > #quartz-body > .center > .page-header > .popover-hint {
+    display: none !important;
   }
 
-  .popover-hint .article-title,
-  .popover-hint > .content-meta {
-    display: none !important;
+  // Riduci il margine top dell'h1 del body — senza testata, il titolo
+  // partirebbe troppo in alto col margin: 2.25rem di base.scss; lo lasciamo
+  // un po' di respiro dalla navbar.
+  article.popover-hint > h1:first-child {
+    margin-top: 0.5rem;
   }
 }
 
