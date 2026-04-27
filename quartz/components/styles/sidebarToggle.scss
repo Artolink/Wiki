@@ -1,69 +1,82 @@
 @use "../../styles/variables.scss" as *;
 
-// Bottone "tab" verticale: galleggia sul bordo destro della sidebar.left,
-// metà dentro e metà fuori. A click toglie/rimette la sidebar.
+// Altezza della navbar fissa (deve coincidere con $navH in custom.scss)
+$navH: 60px;
+
+// Bottone piccolo posizionato all'interno della sidebar.left, top-right.
+// Renderizzato fuori dalla sidebar (afterBody) e ancorato visualmente con
+// position:fixed così sopravvive a `display: none` della sidebar quando
+// l'utente la collassa.
 .sidebar-toggle {
   position: fixed;
-  // 380px = $sidePanelWidth; -12px = mezza larghezza del bottone
-  left: calc(#{$sidePanelWidth} - 12px);
-  top: 50vh;
-  transform: translateY(-50%);
+  top: calc(#{$navH} + 1.4rem);
+  // Posizione INSIDE top-right della sidebar:
+  //   sidebar grid column = $sidePanelWidth (380px)
+  //   sidebar margin-right = 0.75rem
+  //   sidebar padding-right = 1rem
+  //   button width = 24px
+  // → left = 380 - 0.75rem - 1rem - 24 = ~328px (ben dentro al rettangolo)
+  left: calc(#{$sidePanelWidth} - 1.75rem - 24px);
   z-index: 60;
 
   width: 24px;
-  height: 56px;
+  height: 24px;
   padding: 0;
-  background: var(--light);
+  background: transparent;
   border: 1px solid var(--lightgray);
   border-radius: 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--darkgray);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  color: var(--gray);
   transition:
     left 0.25s ease,
     color 0.15s ease,
     background 0.15s ease,
-    box-shadow 0.15s ease;
+    border-color 0.15s ease;
 
   &:hover {
     color: var(--secondary);
     background: var(--sidebar-hover, rgba(0, 0, 0, 0.04));
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    border-color: var(--gray);
   }
 
   & > svg {
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     transition: transform 0.25s ease;
   }
 
-  // Mobile: nascondi (la sidebar diventa orizzontale, non c'è da collassare)
+  // Mobile: niente toggle (la sidebar è orizzontale, non ha senso collassarla)
   @media all and ($mobile) {
     display: none;
   }
 }
 
 // Stato "collassato": sidebar nascosta, bottone all'estrema sinistra
-// dello schermo, icona ruotata di 180° per indicare "espandi".
+// con icona ruotata di 180° (chevron > = "espandi").
 html[data-sidebar-collapsed="true"] {
   .sidebar-toggle {
-    left: 0.4rem;
+    left: 0.5rem;
 
     & > svg {
       transform: rotate(180deg);
     }
   }
 
-  // Nascondi la sidebar e collassa la sua colonna nel grid così il
-  // contenuto centrale si espande nello spazio liberato.
+  // Nascondi la sidebar e ricomponi il grid (template-columns + areas)
+  // come fa focus-mode, così il contenuto centrale si espande pulitamente
+  // senza che restino "fantasmi" della prima colonna.
   .page > #quartz-body > .sidebar.left {
     display: none !important;
   }
 
   .page > #quartz-body {
-    grid-template-columns: 0 minmax(0, 1fr) #{$sidePanelWidth} !important;
+    grid-template-columns: minmax(0, 1fr) #{$sidePanelWidth} !important;
+    grid-template-areas:
+      "grid-header grid-sidebar-right"
+      "grid-center grid-sidebar-right"
+      "grid-footer grid-sidebar-right" !important;
   }
 }
