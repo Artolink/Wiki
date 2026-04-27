@@ -527,6 +527,20 @@ html[saved-theme="dark"] .page .page-header > header .search > .search-button {
   font-size: calc(1em * var(--font-scale, 1));
 }
 
+// ── Testo giustificato — solo su pagine selezionate ──────────────────────────
+// Test su 2 markdown: home (index) + guida K8s. Per estendere ad altri,
+// aggiungere il loro slug all'elenco. `hyphens: auto` evita gli spazi
+// vuoti enormi tra le parole tipici della giustificazione "raw".
+body[data-slug="index"],
+body[data-slug="virtualization/kubernetes/rinnovo-certificati-controlplane-kubespray-etcd-esterno"] {
+  & article.popover-hint p,
+  & article.popover-hint li {
+    text-align: justify;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+}
+
 // Code blocks / immagini / tabelle non devono mai sfondare la colonna
 .page > #quartz-body > .center pre,
 .page > #quartz-body > .center img,
