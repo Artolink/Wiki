@@ -953,6 +953,7 @@ pre:hover > .clipboard-button {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+  position: relative; // anchor per l'hint ESC
 
   & > * {
     width: 100%;
@@ -966,7 +967,8 @@ pre:hover > .clipboard-button {
 
   & > input {
     box-sizing: border-box;
-    padding: 0.55em 0.9em;
+    // padding-right extra per non sovrapporre il testo all'hint ESC
+    padding: 0.55em 3rem 0.55em 0.9em;
     font-family: var(--bodyFont);
     color: var(--dark);
     font-size: 0.95rem;
@@ -976,6 +978,26 @@ pre:hover > .clipboard-button {
       outline: none;
       border-color: var(--secondary);
     }
+  }
+
+  // Hint ESC dentro al campo di ricerca (in stile syselement)
+  &::after {
+    content: "ESC";
+    position: absolute;
+    right: 0.6rem;
+    top: 0.5rem;
+    z-index: 1;
+    padding: 0.18rem 0.48rem;
+    border: 1px solid var(--lightgray);
+    border-radius: 5px;
+    background: var(--light);
+    font-family: var(--bodyFont);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--gray);
+    line-height: 1;
+    pointer-events: none;
+    letter-spacing: 0.02em;
   }
 
   & > .search-layout {

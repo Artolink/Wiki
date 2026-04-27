@@ -16,6 +16,7 @@ const explorerSortFn = (a: FileTrieNode, b: FileTrieNode): number => {
     "networking",
     "hardware",
     "virtualization",
+    "security-hardening",
     // Sotto-cartelle (ordinamento applicato anche dentro a folder che contengono questi slug)
     "message-brokers",
     "ceph",

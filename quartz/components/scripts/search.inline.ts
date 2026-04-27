@@ -500,6 +500,19 @@ async function setupSearch(searchElement: Element, currentSlug: FullSlug, data: 
   searchBar.addEventListener("input", onType)
   window.addCleanup(() => searchBar.removeEventListener("input", onType))
 
+  // Click-outside-to-close: in modalità dropdown compatta il container non
+  // copre più tutto lo schermo, quindi un click "fuori" non lo intercetta.
+  // Aggiungiamo un listener globale che chiude se il click è fuori da .search.
+  function handleOutsideClick(e: MouseEvent) {
+    if (!container.classList.contains("active")) return
+    const target = e.target as Node
+    if (!searchElement.contains(target)) {
+      hideSearch()
+    }
+  }
+  document.addEventListener("click", handleOutsideClick)
+  window.addCleanup(() => document.removeEventListener("click", handleOutsideClick))
+
   registerEscapeHandler(container, hideSearch)
   await fillDocument(data)
 }
