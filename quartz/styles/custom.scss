@@ -503,11 +503,27 @@ html[saved-theme="dark"] .page .page-header > header .search > .search-button {
 }
 
 // ── Font scaling dinamico (FontResizer) ─────────────────────────────────────
-// Lo slider in .popover-hint applica una CSS variable --font-scale su <html>.
-// Il calc() qui sotto la usa per ridimensionare il body dell'articolo in
-// tempo reale, mantenendo invece costante il titolo / meta / tag-list.
+// Lo slider applica una CSS variable --font-scale su <html>. I calc() qui
+// sotto la usano per ridimensionare in tempo reale tutto il blocco di testo
+// del markdown: titolo (h1), meta (data/reading time), tag-list e body.
 .page > #quartz-body > .center > article {
   font-size: calc(1rem * var(--font-scale, 1));
+}
+
+// Titolo articolo (.article-title è un <h1>, base 1.75rem da base.scss)
+.page > #quartz-body > .center > .page-header .article-title {
+  font-size: calc(1.75rem * var(--font-scale, 1));
+}
+
+// Content-meta: data + reading time (base 0.82rem da custom.scss più sotto)
+.page > #quartz-body > .center > .page-header .content-meta {
+  font-size: calc(0.82rem * var(--font-scale, 1));
+}
+
+// Tag-list (i singoli tag pill scalano insieme)
+.page > #quartz-body > .center > .page-header .tag-list,
+.page > #quartz-body > .center > .page-header .tag-list * {
+  font-size: calc(1em * var(--font-scale, 1));
 }
 
 // Code blocks / immagini / tabelle non devono mai sfondare la colonna
