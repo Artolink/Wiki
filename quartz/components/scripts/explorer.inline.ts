@@ -87,6 +87,8 @@ function createFileNode(currentSlug: FullSlug, node: FileTrieNode): HTMLLIElemen
   a.href = resolveRelative(currentSlug, node.slug)
   a.dataset.for = node.slug
   a.textContent = node.displayName
+  // Tooltip nativo del browser quando il testo viene troncato con ellipsis
+  a.title = node.displayName
 
   if (currentSlug === node.slug) {
     a.classList.add("active")
@@ -123,10 +125,12 @@ function createFolderNode(
     a.dataset.for = folderPath
     a.className = "folder-title"
     a.textContent = node.displayName
+    a.title = node.displayName
     button.replaceWith(a)
   } else {
     const span = titleContainer.querySelector(".folder-title") as HTMLElement
     span.textContent = node.displayName
+    span.title = node.displayName
   }
 
   // if the saved state is collapsed or the default state is collapsed

@@ -298,16 +298,22 @@ html[saved-theme="dark"] {
     border-left: 1px solid var(--lightgray);
   }
 
-  // Leaf item (file dentro una cartella)
+  // Leaf item (file dentro una cartella) — testo troncato su singola riga.
+  // Il tooltip nativo (impostato via attributo `title` in explorer.inline.ts)
+  // mostra il nome completo al passaggio del mouse.
   & ul li > a {
     display: block;
     padding: 0.35rem 0.5rem;
     border-radius: 6px;
-    font-size: 0.9rem;
+    font-size: 0.82rem;
     line-height: 1.35;
     opacity: 1;
     color: var(--darkgray);
     transition: background 0.12s ease, color 0.12s ease;
+    // Tronca su singola riga con ellipsis
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 
     &:hover {
       background: var(--sidebar-hover);
