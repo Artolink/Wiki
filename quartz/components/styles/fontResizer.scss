@@ -1,0 +1,90 @@
+@use "../../styles/variables.scss" as *;
+
+.font-resizer {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.45rem;
+  border: 1px solid var(--lightgray);
+  border-radius: 8px;
+  background: var(--light);
+  width: fit-content;
+  font-size: 0.85rem;
+  user-select: none;
+
+  & button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--darkgray);
+    padding: 0.25rem 0.4rem;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: color 0.15s ease, background 0.15s ease;
+
+    &:hover {
+      color: var(--secondary);
+      background: var(--sidebar-hover, rgba(0, 0, 0, 0.05));
+    }
+
+    & > svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  // Le due "A" hanno la stessa lettera ma in due dimensioni diverse:
+  // visivamente comunica "diminuisci/aumenta".
+  & .font-icon {
+    font-family: var(--bodyFont);
+    font-weight: 700;
+    color: inherit;
+  }
+  & .font-icon-small { font-size: 0.78rem; }
+  & .font-icon-large { font-size: 1.1rem; }
+
+  & .font-slider {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 90px;
+    height: 4px;
+    background: var(--lightgray);
+    border-radius: 2px;
+    cursor: pointer;
+    outline: none;
+    margin: 0;
+
+    &::-webkit-slider-thumb {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--secondary);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    &::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--secondary);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    &:hover {
+      background: color-mix(in srgb, var(--lightgray) 70%, var(--secondary) 30%);
+    }
+  }
+
+  // Su mobile compatta lo slider
+  @media all and ($mobile) {
+    & .font-slider { width: 60px; }
+  }
+}

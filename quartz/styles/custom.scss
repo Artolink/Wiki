@@ -502,6 +502,14 @@ html[saved-theme="dark"] .page .page-header > header .search > .search-button {
   margin-right: auto;
 }
 
+// ── Font scaling dinamico (FontResizer) ─────────────────────────────────────
+// Lo slider in .popover-hint applica una CSS variable --font-scale su <html>.
+// Il calc() qui sotto la usa per ridimensionare il body dell'articolo in
+// tempo reale, mantenendo invece costante il titolo / meta / tag-list.
+.page > #quartz-body > .center > article {
+  font-size: calc(1rem * var(--font-scale, 1));
+}
+
 // Code blocks / immagini / tabelle non devono mai sfondare la colonna
 .page > #quartz-body > .center pre,
 .page > #quartz-body > .center img,
@@ -528,7 +536,8 @@ html, body {
     min-width: 0;
   }
 
-  & > div:has(.github-edit) {
+  & > div:has(.github-edit),
+  & > div:has(.font-resizer) {
     flex: 0 0 auto !important;
   }
 
@@ -536,6 +545,7 @@ html, body {
     margin: 0 !important;
   }
 }
+
 
 // ── Content meta (data + tempo di lettura) ───────────────────────────────────
 // Più piccolo, muted e con spazio extra sotto per staccare dal contenuto.

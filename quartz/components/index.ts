@@ -30,6 +30,8 @@ import Comments from "./Comments"
 import Flex from "./Flex"
 import ConditionalRender from "./ConditionalRender"
 import FocusMode from "./FocusMode"
+import GraphToggle from "./GraphToggle"
+import FontResizer from "./FontResizer"
 
 export {
   ArticleTitle,
@@ -64,4 +66,6 @@ export {
   Flex,
   ConditionalRender,
   FocusMode,
+  GraphToggle,
+  FontResizer,
 }

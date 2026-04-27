@@ -51,11 +51,10 @@ export const sharedPageComponents: SharedLayout = {
           Component: Component.SocialLinks({
             links: [
               { label: "Site", href: "https://farnetiandrea.it", icon: "home" },
-              { label: "GitHub", href: "https://github.com/Artolink", icon: "github" },
-              { label: "LinkedIn", href: "https://www.linkedin.com/in/andreafarneti/", icon: "linkedin" },
             ],
           }),
         },
+        { Component: Component.GraphToggle() },
         { Component: Component.Darkmode() },
         { Component: Component.FocusMode() },
       ],
@@ -94,6 +93,7 @@ export const defaultContentPageLayout: PageLayout = {
     Component.Flex({
       components: [
         { Component: Component.ArticleTitle(), grow: true },
+        { Component: Component.FontResizer() },
         { Component: gitHubEdit },
       ],
     }),
@@ -120,7 +120,7 @@ export const defaultContentPageLayout: PageLayout = {
     Component.HomeLink(),
     Component.SidebarLink({ label: "Graph view", icon: "🕸️", slug: "graph" }),
     Component.SidebarLink({ label: "Starting Tools", icon: "🛠️", slug: "starting-tools" }),
-    Component.Explorer({ sortFn: explorerSortFn, filterFn: explorerFilterFn }),
+    Component.Explorer({ title: "Notes", sortFn: explorerSortFn, filterFn: explorerFilterFn }),
   ],
   right: [
     Component.Graph(),
@@ -151,7 +151,7 @@ export const defaultListPageLayout: PageLayout = {
     Component.HomeLink(),
     Component.SidebarLink({ label: "Graph view", icon: "🕸️", slug: "graph" }),
     Component.SidebarLink({ label: "Starting Tools", icon: "🛠️", slug: "starting-tools" }),
-    Component.Explorer({ sortFn: explorerSortFn, filterFn: explorerFilterFn }),
+    Component.Explorer({ title: "Notes", sortFn: explorerSortFn, filterFn: explorerFilterFn }),
   ],
   right: [],
 }
