@@ -575,13 +575,41 @@ html, body {
 
 
 // ── Content meta (data + tempo di lettura) ───────────────────────────────────
-// Più piccolo, muted e con spazio extra sotto per staccare dal contenuto.
+// Più piccolo, muted. Lo spazio sotto è ora gestito dalla riga separatrice
+// del .page-header (vedi sotto).
 
 .popover-hint > .content-meta {
   font-size: 0.82rem;
   color: var(--gray);
   margin-top: 0.4rem;
-  margin-bottom: 3.5rem;     // spazio extra che separa la testata dal corpo
+  margin-bottom: 0.6rem;
+}
+
+// ── Riga separatrice sotto al titolo della pagina (stile syselement) ────────
+// Spanna sotto al blocco titolo + meta + tag-list, fungendo da divisore
+// visivo prima del corpo dell'articolo.
+.page > #quartz-body > .center > .page-header > .popover-hint {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--lightgray);
+  margin-bottom: 1.8rem;
+}
+
+// Pagine speciali in cui il page-header è vuoto/nascosto: niente riga ghost.
+body[data-slug="index"],
+body[data-slug="graph"] {
+  .page > #quartz-body > .center > .page-header > .popover-hint {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+}
+
+// Home: il titolo visibile è il primo h1 del body markdown ("# Benvenuto!").
+// Riga sotto a quello per rispecchiare il layout di syselement.
+body[data-slug="index"] article.popover-hint > h1:first-child {
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--lightgray);
+  margin-bottom: 1.5rem;
 }
 
 // ── Home page (slug=index): nascondi titolo "index" e content-meta ───────────
