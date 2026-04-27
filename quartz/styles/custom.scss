@@ -147,7 +147,8 @@ html[saved-theme="dark"] {
   }
 
   background: var(--sidebar-bg);
-  border: 1px solid var(--sidebar-border) !important;
+  // Niente bordo: solo il riempimento beige sfumato sul bianco della pagina.
+  border: none !important;
   border-radius: 14px;
   // Margine attorno → la sidebar diventa una "bolla" che galleggia, lasciando
   // bianco/dark la pagina ai suoi lati. Top compensa la navbar fissa.
@@ -158,16 +159,12 @@ html[saved-theme="dark"] {
   top: calc(#{$navH} + 0.75rem) !important;
   box-sizing: border-box;
   overflow-y: auto;
-  // Soft shadow per un look "card"
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 
   // Mobile: niente bolla galleggiante (la sidebar diventa orizzontale)
   @media all and (max-width: 800px) {
     margin: 0 !important;
     border-radius: 0;
-    border: none !important;
     height: auto !important;
-    box-shadow: none;
   }
 }
 
