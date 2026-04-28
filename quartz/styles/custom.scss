@@ -750,6 +750,19 @@ body[data-slug="graph"] {
   }
 }
 
+// Quando la sidebar sinistra è collassata su /graph: niente colonne vuote ai
+// lati, il grafo prende tutta la larghezza. Selettore più specifico (html[...]
+// + body[...]) per battere sia body[data-slug=graph] (definita sopra) sia
+// html[data-sidebar-collapsed=true] in sidebarToggle.scss — entrambe avrebbero
+// specificità (1,2,1), qui ne abbiamo (1,3,2), vince.
+html[data-sidebar-collapsed="true"] body[data-slug="graph"] .page > #quartz-body {
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-areas:
+    "grid-header"
+    "grid-center"
+    "grid-footer" !important;
+}
+
 @media all and (max-width: 600px) {
   .github-edit-label {
     display: none;
