@@ -534,11 +534,23 @@ async function setupSearch(searchElement: Element, currentSlug: FullSlug, data: 
  * @param data data to fill index with
  */
 let indexPopulated = false
+
+// Slug delle pagine di sola navigazione: non sono "note vere" e non devono
+// comparire nei risultati di ricerca.
+//   - "index" → home page
+//   - "graph", "starting-tools" → pagine speciali nel menu
+// Tutti gli slug che terminano con "/index" sono _index.md di cartella
+// (landing della folder, anche queste solo navigazione).
+const SEARCH_EXCLUDED_SLUGS = new Set(["index", "graph", "starting-tools"])
+const isSearchable = (slug: string): boolean =>
+  !SEARCH_EXCLUDED_SLUGS.has(slug) && !slug.endsWith("/index")
+
 async function fillDocument(data: ContentIndex) {
   if (indexPopulated) return
   let id = 0
   const promises: Array<Promise<unknown>> = []
   for (const [slug, fileData] of Object.entries<ContentDetails>(data)) {
+    if (!isSearchable(slug)) continue
     promises.push(
       index.addAsync(id++, {
         id,
