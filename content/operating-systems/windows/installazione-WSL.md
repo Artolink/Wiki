@@ -1,4 +1,6 @@
-# Installazione di WSL (Windows Subsystem for Linux)
+---
+title: Installazione di WSL (Windows Subsystem for Linux)
+---
 
 ## 🔎 Overview
 
