@@ -25,6 +25,11 @@ document.addEventListener("nav", () => {
     const next = !readState()
     localStorage.setItem(STORAGE_KEY, String(next))
     applyState(next)
+    // Notifica i componenti che misurano la propria larghezza al render
+    // (es. graph.inline.ts su Pixi) che il layout grid è cambiato e devono
+    // rifare i conti — altrimenti il canvas resta dimensionato sul vecchio
+    // grid e finisce troncato/vuoto.
+    window.dispatchEvent(new CustomEvent("sidebartoggled"))
   }
 
   for (const btn of document.getElementsByClassName("sidebar-toggle")) {

@@ -595,6 +595,20 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
     document.removeEventListener("themechange", handleThemeChange)
   })
 
+  // Re-render dei grafi quando la sidebar sinistra viene mostrata/nascosta:
+  // la grid si ricomponee i container cambiano larghezza, ma il canvas Pixi
+  // resta dimensionato sul vecchio layout. requestAnimationFrame attende che
+  // il browser abbia applicato il nuovo grid prima di rimisurare offsetWidth.
+  const handleSidebarToggle = () => {
+    requestAnimationFrame(() => {
+      void renderLocalGraph()
+    })
+  }
+  window.addEventListener("sidebartoggled", handleSidebarToggle)
+  window.addCleanup(() => {
+    window.removeEventListener("sidebartoggled", handleSidebarToggle)
+  })
+
   const containers = [...document.getElementsByClassName("global-graph-outer")] as HTMLElement[]
   async function renderGlobalGraph() {
     const slug = getFullSlug(window)
