@@ -3,32 +3,14 @@
 // Altezza della navbar fissa (deve coincidere con $navH in custom.scss)
 $navH: 60px;
 
-// ── Riga "header" della sidebar: spazio dedicato in alto al toggle ───────────
-// Aumenta il padding-top della sidebar per ricavare una piccola "barra" in
-// cima dove il toggle vive comodamente, senza sovrapporsi a HomeLink.
-html:not([data-sidebar-collapsed="true"]) .page > #quartz-body > .sidebar.left {
-  padding-top: calc(#{$navH} + 2.6rem) !important;
-}
-
-// ── Toggle: stile discreto, top-right INSIDE della sidebar ───────────────────
-// Renderizzato fuori dalla sidebar (afterBody) e ancorato visualmente con
-// position:fixed così sopravvive a `display: none` della sidebar quando
-// l'utente la collassa.
+// ── Stile base condiviso da entrambe le istanze del bottone ──────────────────
+// La sidebar ne renderizza due copie: una dentro la sidebar (inline, al posto
+// suo nel flusso) e una dentro .page-footer (floating, mostrata solo quando
+// la sidebar è collassata così l'utente ha sempre un modo per riaprirla).
 .sidebar-toggle {
-  position: fixed;
-  // Posizionato dentro la "barra header" della sidebar
-  // (top sidebar = $navH + 0.75rem margin; +0.6rem di spazio dall'angolo)
-  top: calc(#{$navH} + 1.35rem);
-  // Right-side inside: $sidePanelWidth (380px) - margin-right (0.75rem)
-  //                    - padding-right (1rem) - button width (22px)
-  // → ~328px dal bordo sinistro: angolo destro inside
-  left: calc(#{$sidePanelWidth} - 1.75rem - 22px);
-  z-index: 60;
-
   width: 22px;
   height: 22px;
   padding: 0;
-  // Niente bordo / sfondo: si fonde col beige della sidebar
   background: transparent;
   border: none;
   border-radius: 5px;
@@ -37,14 +19,12 @@ html:not([data-sidebar-collapsed="true"]) .page > #quartz-body > .sidebar.left {
   align-items: center;
   justify-content: center;
   color: var(--gray);
-  // Discreto a riposo, pieno all'hover
   opacity: 0.6;
   transition:
-    left 0.25s ease,
-    top 0.25s ease,
     color 0.15s ease,
     background 0.15s ease,
-    opacity 0.15s ease;
+    opacity 0.15s ease,
+    border-color 0.15s ease;
 
   &:hover {
     color: var(--secondary);
@@ -64,14 +44,32 @@ html:not([data-sidebar-collapsed="true"]) .page > #quartz-body > .sidebar.left {
   }
 }
 
+// ── Toggle "inline" — figlio diretto della sidebar, in alto a destra ─────────
+// Niente position:fixed: scorre nel flusso normale come prima riga della
+// sidebar. align-self: flex-end lo spinge sul bordo destro (la sidebar è un
+// flex column, vedi base.scss).
+.sidebar.left > .sidebar-toggle {
+  align-self: flex-end;
+  margin: 0 0 0.25rem 0;
+  flex: 0 0 auto;
+}
+
+// ── Toggle "floating" — figlio diretto di .page-footer (afterBody) ──────────
+// Nascosto di default: serve solo quando la sidebar è collassata, così
+// l'utente ha un bottone visibile per riaprirla.
+.page-footer > .sidebar-toggle {
+  display: none;
+}
+
 // ── Stato "collassato" ───────────────────────────────────────────────────────
-// Sidebar nascosta, bottone galleggiante a sinistra, icona ruotata 180°.
-// Bordino visibile per dare al bottone forma autonoma quando non c'è la
-// sidebar a fargli da contesto.
+// Sidebar nascosta → mostra il bottone galleggiante a sinistra, icona ruotata.
 html[data-sidebar-collapsed="true"] {
-  .sidebar-toggle {
-    left: 0.5rem;
+  .page-footer > .sidebar-toggle {
+    display: flex;
+    position: fixed;
     top: calc(#{$navH} + 1.25rem);
+    left: 0.5rem;
+    z-index: 60;
     border: 1px solid var(--lightgray);
     background: var(--light);
     opacity: 1;
@@ -85,9 +83,9 @@ html[data-sidebar-collapsed="true"] {
     }
   }
 
-  // Nascondi la sidebar e ricomponi il grid (template-columns + areas)
-  // come fa focus-mode, così il contenuto centrale si espande pulitamente
-  // senza che restino "fantasmi" della prima colonna.
+  // Nascondi la sidebar e ricomponi il grid (template-columns + areas) come fa
+  // focus-mode, così il contenuto centrale si espande pulitamente senza che
+  // restino "fantasmi" della prima colonna.
   .page > #quartz-body > .sidebar.left {
     display: none !important;
   }

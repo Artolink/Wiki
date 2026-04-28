@@ -107,6 +107,10 @@ export const defaultContentPageLayout: PageLayout = {
     Component.SidebarToggle(),
   ],
   left: [
+    // Toggle in cima alla sidebar (figlio diretto, allineato a destra via CSS).
+    // Quando la sidebar viene collassata, sparisce insieme al parent — il
+    // suo "gemello" in afterBody prende il suo posto galleggiando a sinistra.
+    Component.SidebarToggle(),
     // Mantenuti nella sidebar per stabilità del grid (nascosti su desktop via CSS)
     Component.PageTitle(),
     Component.MobileOnly(Component.Spacer()),
@@ -140,6 +144,7 @@ export const defaultListPageLayout: PageLayout = {
     Component.ContentMeta(),
   ],
   left: [
+    Component.SidebarToggle(),
     Component.PageTitle(),
     Component.MobileOnly(Component.Spacer()),
     Component.Flex({
