@@ -11,24 +11,65 @@ Benvenuto nella mia Wiki! Qui trovi [chi sono io](https://www.linkedin.com/in/an
 In questa Wiki raccolgo tutto ciò che è fondamentale sapere per operare nei lavori che ti ho menzionato, in maniera **professionale** e **metodica**. 
 
 Ciò che distingue quindi queste note dal chiedere consigli all'AI di turno, è che qui trovi:
-- l'esperienza **vera** di una persona che ha lavorato in realtà **grandi** ed **internazionali**, su sistemi di **produzione** con turni di **reperibilità**.
-- contenuti **mirati** ma dettagliati, riportati in maniera concentrata e strettamente coerenti l'uno con l'altro.
-- integrazioni utili: collegamenti alla teoria, consigli e software per facilitare il lavoro e migliorarne la qualità.
+- l'esperienza **vera** di una persona che ha lavorato in realtà **grandi** ed **internazionali**, su sistemi di **produzione** con turni di **reperibilità**
+- contenuti **mirati** ma dettagliati, riportati in maniera concentrata e strettamente coerenti l'uno con l'altro
+- integrazioni utili: collegamenti alla teoria, consigli e software per facilitare il lavoro e migliorarne la qualità
  
 Le note sono **veramente** interconnesse: ogni appunto è un nodo in un grafo, per cui ognuna di esse contiene solo lo stretto necessario.<br>
-In questo modo puoi vedere **fisicamente** tutti i collegamenti che un argomento richiede a livello di conoscenze e navigare fra di essi senza trovare mai ripetizioni.
-L'insieme di tutti i collegamenti di un determinato argomento, ti fornisce una visione **concreta** della sua profondità e di ciò che ti serve per comprenderlo a fondo.
+Puoi quindi vedere fisicamente tutti i collegamenti che un argomento richiede a livello di conoscenze e navigare fra di essi senza trovare mai ripetizioni.
+L'insieme di tutti i collegamenti di un determinato argomento, ti fornisce una visione reale della sua profondità e di ciò che ti serve per comprenderlo a fondo.
 
 Inizia subito!
 
 ---
 
-## 🔎 Come navigare
+## 🛠️ Stack della Wiki
 
-- Usa la barra di ricerca in alto per trovare velocemente un macro-argomento
-- Espandi l'indice **Esplora** a sinistra per sfogliare per cartella
-- La **vista grafo** mostra le connessioni tra le note
+Il sito è generato con [Quartz 4](https://quartz.jzhao.xyz/), un generatore di siti statici basato su file Markdown pensato per pubblicare vault [Obsidian](https://obsidian.md/). 
+Il deploy avviene su VPS Ubuntu con Nginx come web server.
 
-## 📫 Contatti
+---
 
-Per discutere, commentare o correggermi, trovi i miei contatti nel mio [sito personale](https://farnetiandrea.it).
+## 🚀 Ripristino del blog su una macchina nuova
+
+Prerequisiti: Ubuntu 22.04+, utente non-root con `sudo`, Nginx e Certbot già configurati per il dominio.
+
+### 1. Installa Node.js 22
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+source ~/.bashrc
+nvm install 22
+nvm alias default 22
+```
+
+### 2. Clona la repo e installa le dipendenze
+
+```bash
+cd ~
+git clone git@github.com:Artolink/blog.git
+cd blog
+npm install
+```
+
+### 3. Genera il sito
+
+```bash
+npx quartz build
+```
+
+L'output finisce in `public/`. 
+Punta quindi il `root` di Nginx a `~/blog/public/` e ricarica.
+
+---
+
+## 📂 Struttura della repo
+
+- `content/` → markdown del vault (quello che diventa il sito)
+- `quartz/` → codice del generatore Quartz
+- `quartz.config.ts` → configurazione sito (titolo, colori, font, lingua)
+- `quartz.layout.ts` → layout dei componenti (sidebar, footer, ecc.)
+- `deploy.sh` → script di build e deploy
+- `public/` → output generato (non committato)
+
+Tutto il resto è infrastruttura Quartz, da non toccare.
