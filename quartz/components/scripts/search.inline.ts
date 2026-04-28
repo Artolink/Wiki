@@ -550,16 +550,25 @@ async function fillDocument(data: ContentIndex) {
   let id = 0
   const promises: Array<Promise<unknown>> = []
   for (const [slug, fileData] of Object.entries<ContentDetails>(data)) {
-    if (!isSearchable(slug)) continue
-    promises.push(
-      index.addAsync(id++, {
-        id,
-        slug: slug as FullSlug,
-        title: fileData.title,
-        content: fileData.content,
-        tags: fileData.tags,
-      }),
-    )
+    // Importante: incrementare `id` SEMPRE, anche per gli slug non cercabili.
+    // Il codice a valle (formatForDisplay) traduce l'id di FlexSearch in slug
+    // via `idDataMap[id]`, dove idDataMap = Object.keys(data) — quindi le id
+    // devono restare allineate alla posizione dello slug nel JSON. Se
+    // saltassimo l'id sui filtrati, il mapping si disallinea e i risultati
+    // della ricerca punterebbero a slug sbagliati.
+    if (isSearchable(slug)) {
+      const currentId = id
+      promises.push(
+        index.addAsync(currentId, {
+          id: currentId,
+          slug: slug as FullSlug,
+          title: fileData.title,
+          content: fileData.content,
+          tags: fileData.tags,
+        }),
+      )
+    }
+    id++
   }
 
   await Promise.all(promises)
