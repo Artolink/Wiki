@@ -1,22 +1,57 @@
-# Benvenuto!
+# Welcome!
 
-Benvenuto nella mia Wiki! Qui trovi [chi sono io](https://www.linkedin.com/in/andreafarneti/).
+Welcome to my Wiki! Here you can find [who I am](https://www.linkedin.com/in/andreafarneti/).
 
-**TL;DR** Il mio percorso lavorativo è stato il seguente:
-- **Riparazione/installazione HW**: prendevo il furgoncino e andavo a fare [queste cose](https://github.com/user-attachments/assets/0be38a78-6e00-4ac0-b0da-e6ef47d060eb): riparare, installare e configurare PC, rack, switch, router, firewall...
-- **IT Technical Specialist (NOC)**: supporto a 100+ clienti diversi con infrastrutture diverse e attività On-Site autonome.
-- **System Administrator (SOC)**: Malware e Mail Threat Analysis, gestione sicura del dominio aziendale, hardening del networking e di ogni endpoint.
-- **Cloud Engineer (Open-Source)**: Linux, Git, Ansible, AWX, Terraform/OpenTofu, MAAS, BareOS, KVM, QEMU, LXD/LXC, Docker, Kubernetes, Ceph, Openstack, Kafka, Observability (ELK Stack, Prometheus, Telegraf, Victoria Metrics, Grafana...), scripting (Bash, Python, Powershell), networking (e BGP) eccetera eccetera...
+**TL;DR** My career path has been the following:
 
-In questa Wiki raccolgo tutto ciò che è fondamentale sapere per operare nei lavori che ti ho menzionato, in maniera **professionale** e **metodica**. 
+- **Hardware repair/installation**: I used to drive the van and go to customers to do [these kinds of tasks](https://github.com/user-attachments/assets/0be38a78-6e00-4ac0-b0da-e6ef47d060eb): repairing, installing, and configuring PCs, racks, switches, routers, firewalls...
 
-Ciò che distingue quindi queste note dal chiedere consigli all'AI di turno, è che qui trovi:
-- l'esperienza **vera** di una persona che ha lavorato in realtà **grandi** ed **internazionali**, su sistemi di **produzione** con turni di **reperibilità**
-- contenuti **mirati** ma dettagliati, riportati in maniera concentrata e strettamente coerenti l'uno con l'altro
-- integrazioni utili: collegamenti alla teoria, consigli e software per facilitare il lavoro e migliorarne la qualità
- 
-Le note sono **veramente** interconnesse: ogni appunto è un nodo in un grafo, per cui ognuna di esse contiene solo lo stretto necessario.<br>
-Puoi quindi vedere fisicamente tutti i collegamenti che un argomento richiede a livello di conoscenze e navigare fra di essi senza trovare mai ripetizioni.
-L'insieme di tutti i collegamenti di un determinato argomento, ti fornisce una visione reale della sua profondità e di ciò che ti serve per comprenderlo a fondo.
+- **IT Technical Specialist (NOC)**: support for 100+ different customers with diverse infrastructures and autonomous on-site activities.
 
-Inizia subito!
+- **System Administrator (SOC)**: Malware and Mail Threat Analysis, secure domain management, networking and endpoint hardening.
+
+- **Cloud Engineer (Open-Source)**: Linux, Git, Ansible, AWX, Terraform/OpenTofu, MAAS, BareOS, KVM, QEMU, LXD/LXC, Docker, Kubernetes, Ceph, OpenStack, Kafka, Observability (ELK Stack, Prometheus, Telegraf, Victoria Metrics, Grafana...), scripting (Bash, Python, PowerShell), networking (including BGP), and much more...
+
+In this Wiki, I collect everything that is essential to operate in the roles mentioned above in a **professional** and **methodical** way.
+
+What sets these notes apart from simply asking an AI for advice is that here you’ll find:
+
+- **real-world experience** from someone who has worked in **large** and **international** environments, on **production** systems with **on-call rotations**
+
+- **focused yet detailed content**, presented in a concentrated and tightly consistent way
+
+- useful integrations: links to theory, tools, and software to simplify work and improve its quality
+
+The notes are **truly** interconnected: each one is a node in a graph, so they contain only what is strictly necessary.<br>
+
+You can physically see all the knowledge connections required for a topic, and navigate through them without ever encountering repetitions.
+
+The full set of connections around a given topic gives you a realistic view of its depth and what you need to fully understand it.
+
+
+
+Start now!
+
+  
+
+---
+
+  
+
+## 🔎 How to navigate
+
+  
+
+- Use the search bar at the top to quickly find a macro-topic
+
+- Expand the **NOTES** index on the left to browse by folder
+
+- The **graph view** shows connections between notes
+
+  
+
+## 📫 Contacts
+
+  
+
+To discuss, comment, or suggest corrections, you can find my contacts on my [personal website](https://farnetiandrea.it).
