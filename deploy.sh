@@ -27,4 +27,4 @@ else
     echo "==> Nessuna modifica da committare."
 fi
 
-echo "==> Deploy completato. Sito online: https://blog.farnetiandrea.it"
+echo "==> Deploy completato. Sito online: https://wiki.farnetiandrea.it"
