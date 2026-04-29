@@ -8,13 +8,13 @@ Benvenuto nella mia Wiki! Qui trovi [chi sono io](https://www.linkedin.com/in/an
 - **System Administrator (SOC)**: Malware e Mail Threat Analysis, gestione sicura del dominio aziendale, hardening del networking e di ogni endpoint.
 - **Cloud Engineer (Open-Source)**: Linux, Git, Ansible, AWX, Terraform/OpenTofu, MAAS, BareOS, KVM, QEMU, LXD/LXC, Docker, Kubernetes, Ceph, Openstack, Kafka, Observability (ELK Stack, Prometheus, Telegraf, Victoria Metrics, Grafana...), scripting (Bash, Python, Powershell), networking (e BGP) eccetera eccetera...
 
-In questa Wiki raccolgo tutto ciò che è fondamentale sapere per operare nei lavori che ti ho menzionato, in maniera **professionale** e **metodica**. 
+In questa Wiki raccolgo tutto ciò che è fondamentale sapere per operare nei lavori che ti ho menzionato, in maniera **professionale** e **metodica**.
 
 Ciò che distingue quindi queste note dal chiedere consigli all'AI di turno, è che qui trovi:
 - l'esperienza **vera** di una persona che ha lavorato in realtà **grandi** ed **internazionali**, su sistemi di **produzione** con turni di **reperibilità**
 - contenuti **mirati** ma dettagliati, riportati in maniera concentrata e strettamente coerenti l'uno con l'altro
 - integrazioni utili: collegamenti alla teoria, consigli e software per facilitare il lavoro e migliorarne la qualità
- 
+
 Le note sono **veramente** interconnesse: ogni appunto è un nodo in un grafo, per cui ognuna di esse contiene solo lo stretto necessario.<br>
 Puoi quindi vedere fisicamente tutti i collegamenti che un argomento richiede a livello di conoscenze e navigare fra di essi senza trovare mai ripetizioni.
 L'insieme di tutti i collegamenti di un determinato argomento, ti fornisce una visione reale della sua profondità e di ciò che ti serve per comprenderlo a fondo.
@@ -25,7 +25,7 @@ Inizia subito!
 
 ## 🛠️ Stack della Wiki
 
-Il sito è generato con [Quartz 4](https://quartz.jzhao.xyz/), un generatore di siti statici basato su file Markdown pensato per pubblicare vault [Obsidian](https://obsidian.md/). 
+Il sito è generato con [Quartz 4](https://quartz.jzhao.xyz/), un generatore di siti statici basato su file Markdown pensato per pubblicare vault [Obsidian](https://obsidian.md/).<br>
 Il deploy avviene su VPS Ubuntu con Nginx come web server.
 
 ---
@@ -47,7 +47,7 @@ nvm alias default 22
 
 ```bash
 cd ~
-git clone git@github.com:Artolink/blog.git wiki
+git clone git@github.com:Artolink/wiki.git
 cd wiki
 npm install
 ```
@@ -58,8 +58,40 @@ npm install
 npx quartz build
 ```
 
-L'output finisce in `public/`. 
+L'output finisce in `public/`.
 Punta quindi il `root` di Nginx a `~/wiki/public/` e ricarica.
+
+---
+
+## 🏗️ Architettura
+
+Il vault Obsidian vive sul mio PC. Uno script `sync-wiki.sh` lo sincronizza via `rsync` verso il VPS, dove `deploy.sh` lo trasforma con Quartz in HTML statico. Nginx serve i file. GitHub conserva una copia di backup per disaster recovery.
+
+```mermaid
+flowchart LR
+    Vault["📓 Vault Obsidian<br/>(PC Windows / WSL)"]
+
+    subgraph VPS["☁️ VPS Ubuntu"]
+        subgraph Repo["~/wiki/ — repo Git"]
+            Content["content/<br/>(.md sincronizzati)"]
+            Deploy["deploy.sh"]
+            QuartzCode["quartz/ + quartz.*.ts<br/>(generatore SSG)"]
+            Public["public/<br/>(HTML statico)"]
+        end
+        Nginx["Nginx + Certbot"]
+    end
+
+    GitHub["🐙 GitHub<br/>Artolink/wiki<br/>(backup + DR)"]
+    Visitor((🌍 wiki.farnetiandrea.it))
+
+    Vault -- "sync-wiki.sh<br/>rsync --delete" --> Content
+    Content --> Deploy
+    Deploy -- "npx quartz build" --> QuartzCode
+    QuartzCode --> Public
+    Public --> Nginx
+    Deploy -- "git commit + push" --> GitHub
+    Nginx -- "HTTPS" --> Visitor
+```
 
 ---
 
