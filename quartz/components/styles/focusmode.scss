@@ -56,4 +56,31 @@ html[focus-mode="on"] {
     margin-left: auto !important;
     margin-right: auto !important;
   }
+
+  // Navbar: la teniamo IDENTICA al normale (stessa height, stesso padding) —
+  // solo trasparente, così i 3 bottoni in alto a destra restano fissi nella
+  // stessa identica posizione di quando il menu è visibile. Non tocchiamo
+  // height/padding del header per evitare il "salto" verticale dei bottoni.
+  .page .page-header > header {
+    background: transparent !important;
+    border-bottom: none !important;
+  }
+  .page .page-header > header > :nth-child(1),
+  .page .page-header > header > :nth-child(2) {
+    display: none !important;
+  }
+  // Con i primi due figli display:none, il CSS Grid auto-placement
+  // sposterebbe il flex nella prima cella libera (a sinistra). Forzo
+  // grid-column: 3 così resta dove era nella navbar normale.
+  .page .page-header > header > :nth-child(3) {
+    grid-column: 3 / 4 !important;
+    justify-self: end !important;
+  }
+  // Il content mantiene lo stesso padding-top del normale (60px navbar +
+  // 1.5rem). Salire più in alto causerebbe overlap fra il titolo e i 3
+  // bottoni in alto a destra su schermi piccoli, dove il content si
+  // estende quasi fino al bordo destro.
+  .page > #quartz-body > .center {
+    padding-top: calc(60px + 1.5rem) !important;
+  }
 }

@@ -39,7 +39,7 @@ function setScale(v: number) {
 applyScale(readScale())
 
 // Soglia (px dal fondo del viewport) entro cui la barra diventa visibile
-const VISIBLE_THRESHOLD_PX = 110
+const VISIBLE_THRESHOLD_PX = 250
 
 document.addEventListener("nav", () => {
   const initial = readScale()

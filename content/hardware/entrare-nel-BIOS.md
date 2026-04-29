@@ -1,5 +1,0 @@
----
-
-title: Entrare nel BIOS
-
----
