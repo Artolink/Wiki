@@ -30,7 +30,7 @@ Il deploy avviene su VPS Ubuntu con Nginx come web server.
 
 ---
 
-## 🚀 Ripristino del blog su una macchina nuova
+## 🚀 Ripristino della Wiki su una macchina nuova
 
 Prerequisiti: Ubuntu 22.04+, utente non-root con `sudo`, Nginx e Certbot già configurati per il dominio.
 
@@ -47,8 +47,8 @@ nvm alias default 22
 
 ```bash
 cd ~
-git clone git@github.com:Artolink/blog.git
-cd blog
+git clone git@github.com:Artolink/blog.git wiki
+cd wiki
 npm install
 ```
 
@@ -59,7 +59,7 @@ npx quartz build
 ```
 
 L'output finisce in `public/`. 
-Punta quindi il `root` di Nginx a `~/blog/public/` e ricarica.
+Punta quindi il `root` di Nginx a `~/wiki/public/` e ricarica.
 
 ---
 

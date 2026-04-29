@@ -1,5 +1,5 @@
 #!/bin/bash
-# Deploy del blog Quartz
+# Deploy della Wiki Quartz
 # - Rigenera public/ con Quartz
 # - Committa e pusha su GitHub (backup + disaster recovery)
 
@@ -9,7 +9,7 @@ set -euo pipefail
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-cd ~/blog
+cd ~/wiki
 
 echo "==> [1/3] Build Quartz..."
 npx quartz build
