@@ -61,7 +61,7 @@ export const sharedPageComponents: SharedLayout = {
 }
 
 const gitHubEdit = Component.GitHubEdit({
-  repoUrl: "https://github.com/Artolink/blog",
+  repoUrl: "https://github.com/Artolink/wiki",
   branch: "main",
   contentDir: "content",
 })
