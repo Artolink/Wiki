@@ -3,7 +3,7 @@ title: How to enter the UEFI / BIOS
 ---
 # 🖥️ How to Enter the UEFI / BIOS
 
-This guide explains how to access your system's firmware settings (UEFI or legacy BIOS) in order to change hardware-level options such as enabling CPU virtualization.
+This guide explains how to access your system's firmware settings (UEFI or legacy BIOS) in order to change hardware-level options.
 
 > ℹ️ **UEFI vs Legacy BIOS:** UEFI is the modern firmware standard and allows direct access from within Windows. Legacy BIOS is older firmware with no OS-level entry point — the only way in is through keyboard input at boot time (POST).
 
@@ -55,7 +55,7 @@ ls /sys/firmware/efi
 
 > ℹ️ These methods only work if your system is booted in **UEFI mode**.
 
-### ⚡ Method 1 — Direct command (recommended)
+### Method 1 — Direct command (recommended)
 
 Open PowerShell as Administrator:
 
@@ -65,7 +65,7 @@ shutdown /r /fw /t 0
 
 Windows passes the `/fw` flag to the UEFI boot manager, which redirects directly to the firmware setup on next boot. This is the cleanest and most reliable method.
 
-### 🪟 Method 2 — Advanced Startup (GUI)
+### Method 2 — Advanced Startup (GUI)
 
 Navigate to:
 
@@ -79,10 +79,6 @@ Once in the recovery environment, follow this path:
 Troubleshoot → Advanced options → UEFI Firmware Settings → Restart
 ```
 
-### ⚠️ UEFI Limitations
-
-- **Fast Boot** can block keyboard input at POST, but does **not** block the OS-level methods above.
-- On some OEM systems or enterprise hardware, firmware bugs may prevent even `/fw` from working. In those cases, fall back to the keyboard method below.
 
 ***
 
@@ -90,7 +86,7 @@ Troubleshoot → Advanced options → UEFI Firmware Settings → Restart
 
 > ⚠️ There is **no OS-level method** to enter a legacy BIOS. Windows has no communication channel with legacy firmware. The only option is keyboard input during POST.
 
-### ⚡ Method 1 — Key press at POST (the only reliable way)
+### Method 1 — Key press at POST (the only reliable way)
 
 1. Restart the system normally from Windows
 2. As soon as the screen turns on (during POST), repeatedly press the firmware key for your manufacturer:
@@ -105,7 +101,7 @@ Troubleshoot → Advanced options → UEFI Firmware Settings → Restart
 | MSI | `DEL` |
 | Generic / unknown | `DEL`, `F2`, `F10` |
 
-### 🐢 Method 2 — Slow down POST (if boot is too fast)
+### Method 2 — Slow down POST (if boot is too fast)
 
 If the system boots too quickly to catch the key press:
 
@@ -126,13 +122,3 @@ If you cannot access the firmware at all (forgotten password, corrupted settings
 > ⚠️ Both methods reset **all** BIOS/UEFI settings to factory defaults, including boot order, SATA mode, and any custom configuration.
 
 ***
-
-## 4️⃣ Methods at a Glance
-
-| Method | UEFI | Legacy BIOS |
-|---|---|---|
-| `shutdown /r /fw /t 0` | ✅ | ❌ |
-| Shift + Restart (GUI) | ✅ | ❌ |
-| Settings → UEFI Firmware Settings | ✅ | ❌ |
-| Key press at POST (F2, DEL...) | ✅ | ✅ |
-| CMOS reset | ⚠️ fallback | ⚠️ fallback |

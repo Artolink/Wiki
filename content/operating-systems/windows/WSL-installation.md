@@ -15,7 +15,7 @@ This allows you to have a separate environment for testing, run scripts, create 
 
 **Requirements:**
 - Windows 10+
-- Virtualization (Intel VT-x / AMD-V) enabled in your UEFI (or the legacy BIOS)
+- Virtualization (Intel VT-x / AMD-V) enabled in your system's firmware settings (UEFI or the legacy BIOS)
 
 Check if virtualization is enabled:
 
@@ -23,7 +23,7 @@ Check if virtualization is enabled:
 systeminfo | find "Virtualization"
 ```
 
-If it's disabled, you need to enable it in your UEFI (or BIOS)!
+If it's disabled, we have to enable it by editing the firmware!
 
 If you don't know how to get there, check out [how to enter the UEFI-BIOS](enter-the-UEFI-BIOS.md).
 
@@ -31,7 +31,7 @@ If you don't know how to get there, check out [how to enter the UEFI-BIOS](enter
 
 
 
-### Enable virtualization in UEFI (or BIOS)
+### Enable Firmware CPU virtualization
 
 Now that you are inside your system's UEFI/BIOS, you have to find the option for enabling CPU virtualization.
 
