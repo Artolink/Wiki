@@ -1,0 +1,46 @@
+// Indicatore di progresso scroll: barra fina in basso al viewport + piccola
+// pillola con percentuale numerica accanto. Visibile solo durante lo scroll
+// (toggle .visible dal JS), scompare dopo qualche centinaio di ms di pausa.
+
+.scroll-progress {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 900;
+  pointer-events: none;
+  background: transparent;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+
+  &.visible {
+    opacity: 1;
+  }
+}
+
+.scroll-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--secondary);
+  transition: width 0.08s linear;
+}
+
+// Pillola con la percentuale numerica, in basso a destra sopra la barra.
+// Stile coerente col resto della UI: sfondo card, bordo soft, color secondary.
+.scroll-progress-label {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: var(--light);
+  border: 1px solid var(--lightgray);
+  color: var(--secondary);
+  font-family: var(--bodyFont);
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  white-space: nowrap;
+}

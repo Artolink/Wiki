@@ -44,14 +44,16 @@ $navH: 60px;
   }
 }
 
-// ── Toggle "inline" — figlio diretto della sidebar, in alto a destra ─────────
-// Niente position:fixed: scorre nel flusso normale come prima riga della
-// sidebar. align-self: flex-end lo spinge sul bordo destro (la sidebar è un
-// flex column, vedi base.scss).
+// ── Toggle "inline" — figlio della sidebar in alto a destra. È in
+// position:absolute così non occupa altezza nel flusso: il bottone Home
+// (primo figlio inline) sale subito sotto al padding-top della sidebar,
+// e la freccia "<" galleggia alla stessa altezza del Home, sull'asse destro.
 .sidebar.left > .sidebar-toggle {
-  align-self: flex-end;
-  margin: 0 0 0.25rem 0;
-  flex: 0 0 auto;
+  position: absolute !important;
+  top: 1.25rem !important;
+  right: 1rem !important;
+  margin: 0 !important;
+  z-index: 1;
 }
 
 // ── Toggle "floating" — figlio diretto di .page-footer (afterBody) ──────────

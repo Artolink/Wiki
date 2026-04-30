@@ -81,10 +81,13 @@ html[saved-theme="dark"] {
   align-items: center;
   gap: 1.5rem;
 
-  // Colonna 1 (brand) — sinistra
+  // Colonna 1 (brand) — sinistra. Aggiungo un padding-left così il brand
+  // (foto + "Andrea Farneti - Wiki") è allineato col contenuto della
+  // sidebar sinistra invece che col bordo viewport.
   & > :nth-child(1) {
     justify-self: start;
     min-width: 0;
+    padding-left: 1rem;
   }
 
   // Colonna 2 (search) — centro
@@ -218,8 +221,12 @@ html[saved-theme="dark"] .page .page-header > header .flex-component > button:ho
   border-radius: 14px;
   // Margine attorno → la sidebar diventa una "bolla" che galleggia, lasciando
   // bianco/dark la pagina ai suoi lati. Top compensa la navbar fissa.
-  margin: calc(#{$navH} + 1.5rem) 0.75rem 0.75rem 1.5rem !important;
+  margin: calc(#{$navH} + 1rem) 0.75rem 0.75rem 1.5rem !important;
   padding: 1rem !important;
+  // sticky (non relative): la sidebar resta ancorata a top:$navH durante
+  // lo scroll, invece di scorrere via insieme al content. sticky è un
+  // containing block valido per i figli absolute (vedi sidebar-toggle).
+  position: sticky !important;
   // Altezza naturale: la sidebar si estende quanto serve per il suo contenuto.
   // Niente scrollbar interna — se il contenuto è più alto del viewport, basta
   // scrollare la pagina per vederne il resto.
@@ -228,7 +235,7 @@ html[saved-theme="dark"] .page .page-header > header .flex-component > button:ho
   // riempire la cella del grid (default = stretch). Senza questa, il background
   // beige continuerebbe fino in fondo alla pagina.
   align-self: start;
-  top: calc(#{$navH} + 1.5rem) !important;
+  top: calc(#{$navH} + 1rem) !important;
   box-sizing: border-box;
   overflow: visible !important;
 
@@ -605,18 +612,16 @@ html[saved-theme="dark"] .page .page-header > header .search > .search-button {
   font-size: calc(1em * var(--font-scale, 1));
 }
 
-// ── Testo giustificato — solo su pagine selezionate ──────────────────────────
-// Test su 2 markdown: home (index) + guida K8s. Per estendere ad altri,
-// aggiungere il loro slug all'elenco. `hyphens: auto` evita gli spazi
-// vuoti enormi tra le parole tipici della giustificazione "raw".
-body[data-slug="index"],
-body[data-slug="virtualization/kubernetes/rinnovo-certificati-controlplane-kubespray-etcd-esterno"] {
-  & article.popover-hint p,
-  & article.popover-hint li {
-    text-align: justify;
-    hyphens: auto;
-    -webkit-hyphens: auto;
-  }
+// ── Testo giustificato — applicato a TUTTI i markdown del sito ───────────────
+// Tutti i paragrafi e item di lista degli article (.popover-hint) escono
+// giustificati. `hyphens: auto` evita gli spazi vuoti enormi tra le parole
+// tipici della giustificazione "raw". Vale automaticamente anche per le
+// note future, senza dover toccare nulla.
+article.popover-hint p,
+article.popover-hint li {
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
 }
 
 // Code blocks / immagini / tabelle non devono mai sfondare la colonna

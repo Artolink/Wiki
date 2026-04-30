@@ -105,6 +105,9 @@ export const defaultContentPageLayout: PageLayout = {
     Component.FontResizer(),
     // Pulsante per nascondere/mostrare il menu di sinistra
     Component.SidebarToggle(),
+    // Indicatore percentuale di scorrimento del file (solo content pages):
+    // barra in basso + pillola con numero. Visibile solo durante lo scroll.
+    Component.ScrollProgress(),
   ],
   left: [
     // Toggle in cima alla sidebar (figlio diretto, allineato a destra via CSS).
