@@ -122,5 +122,3 @@ If you cannot access the firmware in any way:
 - **Battery method:** remove the CMOS coin cell battery (CR2032) for ~30 seconds, then reinsert it
 
 > ⚠️ Both methods reset **all** BIOS/UEFI settings to factory defaults, including boot order, SATA mode, and any custom configuration!
-
-***
