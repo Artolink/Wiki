@@ -1,5 +1,5 @@
 ---
-title: Regex for Grep (Perl with Posix support)
+title: Regex for grep (Perl with Posix support)
 ---
 
 > `grep` regex is Perl-compatible (PCRE): refer to [the VSCode regex](regex-vscode) for the core syntax.

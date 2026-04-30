@@ -8,12 +8,12 @@ Different tools implement slightly different flavors — knowing which one you'r
 
 ## Flavors & Tools
 
-| Tool | Regex Flavor | Reference |
-|------|-------------|-----------|
-| `sed` | POSIX | [[regex_sed]] |
-| `vim` | POSIX-like (with extensions) | *(page coming soon)* |
-| `grep -P` | Perl / PCRE | *(page coming soon)* |
-| VSCode | JavaScript (similar to Perl) | [[regex_vscode]] |
+| Tool      | Regex Flavor                 | Reference                    |
+| --------- | ---------------------------- | ---------------------------- |
+| `sed`     | POSIX                        | [sed Regex](regex-sed)       |
+| `vim`     | POSIX-like (with extensions) | [vim Regex](regex-vim.md)    |
+| `grep -P` | Perl / PCRE                  | [grep Regex](regex-grep)     |
+| VSCode    | JavaScript (similar to Perl) | [VSCode Regex](regex-vscode) |
 
 > **In practice: learn SED and VSCode — the others follow naturally.**
 > - `vim` is similar to `sed` → refer to the SED page
