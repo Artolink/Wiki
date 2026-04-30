@@ -1,7 +1,6 @@
 ---
 title: Regex in VSCode (JavaScript / Perl-like)
 ---
-# Regex — VSCode (JavaScript / Perl-like)
 
 > **Also valid for:** `grep -P` (add `-P` flag for PCRE mode — covers almost everything below)
 
