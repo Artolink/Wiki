@@ -99,7 +99,6 @@ WSL allows access to both Windows and Linux file systems. Here's how you can acc
 | `wsl --status` | Check WSL status |
 | `wsl --shutdown` | Stop all running WSL instances |
 | `wsl -l -v` | List all installed distros with their WSL version and state |
-| `wsl -t <DISTRO_NAME>` | Stop a specific distro |
 | `wsl --set-default <DISTRO_NAME>` | Set the default distro |
 
 ---
@@ -114,10 +113,6 @@ WSL allows you to call Windows executables directly from the Linux shell. Any `.
 | `explorer.exe .` | Open the current directory in Windows File Explorer |
 | `notepad.exe <file>` | Open a file with Notepad |
 | `explorer.exe <file>` | Open a file with its default Windows application |
-| `powershell.exe -c "<command>"` | Run a PowerShell command from WSL |
-| `cat <file> \| clip.exe` | Copy command output to the Windows clipboard |
-| `wslpath -w <linux_path>` | Convert a WSL path to its Windows equivalent |
-| `wslpath -u '<windows_path>'` | Convert a Windows path to its WSL equivalent |
 
 ---
 
