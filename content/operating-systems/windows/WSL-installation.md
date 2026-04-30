@@ -24,7 +24,8 @@ systeminfo | find "Virtualization"
 ```
 
 If its disabled, you need to enable it in your UEFI/BIOS!
-If you don't know how to get there, check out [how to enter the UEFI/BIOS](enter-the-UEFI-BIOS.md).
+
+If you don't know how to get there, check out [how to enter the UEFI / BIOS](enter-the-UEFI-BIOS.md).
 
 ***
 

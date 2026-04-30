@@ -1,3 +1,3 @@
 ---
-title: How to enter the UEFI (or BIOS)
+title: How to enter the UEFI / BIOS
 ---
