@@ -1,8 +1,6 @@
 ---
 title: How to enter the UEFI / BIOS
 ---
-# 🖥️ How to Enter the UEFI / BIOS
-
 This guide explains how to access your system's firmware settings (UEFI or legacy BIOS) in order to change hardware-level options.
 
 > ℹ️ **UEFI vs Legacy BIOS:** UEFI is the modern firmware standard and allows direct access from within Windows. Legacy BIOS is older firmware with no OS-level entry point — the only way in is through keyboard input at boot time (POST).
@@ -103,7 +101,7 @@ There is **no OS-level method** to enter a legacy BIOS. Windows has no communica
 | MSI | `DEL` |
 | Generic / unknown | `DEL`, `F2`, `F10` |
 
-### Slow down POST (if boot is too fast)
+### Slow down POST
 
 If the system boots too quickly to catch the key press:
 
