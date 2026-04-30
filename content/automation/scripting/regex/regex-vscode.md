@@ -97,7 +97,7 @@ Matches: `High-level`, `Mid-level`, `Low-level`
 
 ## Exercises
 
-### Match phone number format `123-45-6789`
+### Match a phone number
 
 ```text
 [0-9]{3}-[0-9]{2}-[0-9]{4}
