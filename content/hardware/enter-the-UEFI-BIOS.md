@@ -114,7 +114,7 @@ These are workarounds, not direct entry methods.
 
 ***
 
-## 3️⃣ Last Resort: CMOS Reset
+## ⚠️ Last Resort: CMOS Reset
 
 If you cannot access the firmware in any way:
 
