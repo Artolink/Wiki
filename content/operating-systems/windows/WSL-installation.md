@@ -23,25 +23,26 @@ Check if virtualization is enabled:
 systeminfo | find "Virtualization"
 ```
 
-> ⚠️ If it's disabled, you need to enable it in your UEFI (or BIOS)!
-> If you don't know how to get there, check out [how to enter the UEFI-BIOS](enter-the-UEFI-BIOS.md).
+If it's disabled, you need to enable it in your UEFI (or BIOS)!
+
+If you don't know how to get there, check out [how to enter the UEFI-BIOS](enter-the-UEFI-BIOS.md).
 
 > ℹ️ Virtualization support is determined exclusively by the CPU. It is independent of whether the system firmware is legacy BIOS or UEFI.
 
-### Make changes in the UEFI (or BIOS)
+### Enable virtualization in UEFI (or BIOS)
 
 Now that you are inside your system's UEFI/BIOS, you have to find the option for enabling CPU virtualization.
 
 Here's a list of the main manufacturers and how to enable it:
 
-| PC Manufacturer | Link |
-|---|---|
-| Acer | [How to Enable Virtualization Technology on Acer Products](https://community.acer.com/kb/articles/14750) |
-| Asus | For AMD processors: [How to enable or disable AMD Virtualization (AMD-V™) technology?](https://www.asus.com/support/FAQ/1043992)<br><br>For Intel processors:<br>[How to enable Intel(VMX) Virtualization Technology in the BIOS?](https://www.asus.com/support/FAQ/1043786)<br>[How to enable or disable Intel® Virtualization Technology (VT-x)?](https://www.asus.com/support/FAQ/1043181) |
-| Dell | [How To Enable or Disable Hardware Virtualization on Dell Systems](https://www.dell.com/support/kbdoc/000195978/) |
-| HP | [HP PCs - Enable Virtualization Technology in the BIOS](https://support.hp.com/us-en/document/ish_5637142-5637191-16) |
-| Lenovo | [How to enable Virtualization Technology on Lenovo PC computers](https://support.lenovo.com/solutions/ht500006) |
-| Microsoft | Virtualization is already enabled on Surface devices. |
+| PC Manufacturer | Link                                                                                                                                                                                                                                                                                                                                                                                      |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Acer            | [How to Enable Virtualization Technology on Acer Products](https://community.acer.com/kb/articles/14750)                                                                                                                                                                                                                                                                                  |
+| Asus            | For AMD processors: [How to enable or disable AMD Virtualization (AMD-V™) technology?](https://www.asus.com/support/FAQ/1043992)<br>For Intel processors:<br>[How to enable Intel(VMX) Virtualization Technology in the BIOS?](https://www.asus.com/support/FAQ/1043786)<br>[How to enable or disable Intel® Virtualization Technology (VT-x)?](https://www.asus.com/support/FAQ/1043181) |
+| Dell            | [How To Enable or Disable Hardware Virtualization on Dell Systems](https://www.dell.com/support/kbdoc/000195978/)                                                                                                                                                                                                                                                                         |
+| HP              | [HP PCs - Enable Virtualization Technology in the BIOS](https://support.hp.com/us-en/document/ish_5637142-5637191-16)                                                                                                                                                                                                                                                                     |
+| Lenovo          | [How to enable Virtualization Technology on Lenovo PC computers](https://support.lenovo.com/solutions/ht500006)                                                                                                                                                                                                                                                                           |
+| Microsoft       | Virtualization is already enabled on Surface devices.                                                                                                                                                                                                                                                                                                                                     |
 
 ---
 
@@ -72,6 +73,8 @@ If you are not on WSL2, upgrade with:
 ```powershell
 wsl --set-version Ubuntu 2
 ```
+
+And... that's it!
 
 ---
 
