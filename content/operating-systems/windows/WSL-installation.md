@@ -15,7 +15,7 @@ This allows you to have a separate environment for testing, run scripts, create 
 
 **Requirements:**
 - Windows 10+
-- Virtualization (Intel VT-x / AMD-V) enabled in your UEFI/BIOS
+- Virtualization (Intel VT-x / AMD-V) enabled in your UEFI (or the legacy BIOS)
 
 Check if virtualization is enabled:
 
@@ -23,8 +23,24 @@ Check if virtualization is enabled:
 systeminfo | find "Virtualization"
 ```
 
-> ⚠️ If it's disabled, you need to enable it in your UEFI/BIOS!
-> If you don't know how to get there, check out [how to enter the UEFI-BIOS](enter-the-UEFI-BIOS.md).
+If it's disabled, you need to enable it in your UEFI (or BIOS)!
+If you don't know how to get there, check out [how to enter the UEFI-BIOS](enter-the-UEFI-BIOS.md).
+>Please note: Virtualization support is determined exclusively by the CPU. It is independent of whether the system firmware is legacy BIOS or UEFI.
+
+### Make changes in the UEFI (or BIOS)
+
+Now that you are inside your system's UEFI/BIOS, you have to find the option for enabling CPU virtualization.
+Here's a list of the main ones and how to enable it:
+
+| PC Manufacturer | Link                                                                                                                                                                                                                                                                                                                                                                                                            |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Acer            | [How to Enable Virtualization Technology on Acer Products](https://community.acer.com/kb/articles/14750)                                                                                                                                                                                                                                                                                                        |
+| Asus            | For PCs with AMD processors: [How to enable or disable AMD Virtualization (AMD-V™) technology?](https://www.asus.com/support/FAQ/1043992)<br><br>For PCs with Intel processors:<br>[How to enable Intel(VMX) Virtualization Technology in the BIOS?](https://www.asus.com/support/FAQ/1043786)<br>[How to enable or disable Intel® Virtualization Technology (VT-x)?](https://www.asus.com/support/FAQ/1043181) |
+| Dell            | [How To Enable or Disable Hardware Virtualization on Dell Systems](https://www.dell.com/support/kbdoc/000195978/)                                                                                                                                                                                                                                                                                               |
+| HP              | [HP PCs - Enable Virtualization Technology in the BIOS](https://support.hp.com/us-en/document/ish_5637142-5637191-16)                                                                                                                                                                                                                                                                                           |
+| Lenovo          | [How to enable Virtualization Technology on Lenovo PC computers](https://support.lenovo.com/solutions/ht500006)                                                                                                                                                                                                                                                                                                 |
+| Microsoft       | Virtualization is already enabled on Surface devices.                                                                                                                                                                                                                                                                                                                                                           |
+
 
 ---
 
@@ -58,25 +74,7 @@ wsl --set-version Ubuntu 2
 
 ---
 
-## 3️⃣ Install Other Distros
-
-If you don't want to use Ubuntu, or you want to use multiple OS, you can install additional distros.
-
-List what's available:
-
-```powershell
-wsl --list --online
-```
-
-Then install the one you want:
-
-```powershell
-wsl --install -d <DISTRO_NAME>
-```
-
----
-
-## 4️⃣ Accessing the File Systems
+## 3️⃣ Accessing the File Systems
 
 WSL allows access to both Windows and Linux file systems. Here's how you can access them:
 
@@ -90,7 +88,7 @@ WSL allows access to both Windows and Linux file systems. Here's how you can acc
 
 ---
 
-## 5️⃣ Basic Commands
+## 4️⃣ Basic Commands
 
 | Command | Description |
 |---|---|
@@ -99,11 +97,13 @@ WSL allows access to both Windows and Linux file systems. Here's how you can acc
 | `wsl --status` | Check WSL status |
 | `wsl --shutdown` | Stop all running WSL instances |
 | `wsl -l -v` | List all installed distros with their WSL version and state |
+| `wsl --list --online` | List all available distros to install |
+| `wsl --install -d <DISTRO_NAME>` | Install a specific distro |
 | `wsl --set-default <DISTRO_NAME>` | Set the default distro |
 
 ---
 
-## 6️⃣ Interoperability
+## 5️⃣ Interoperability
 
 WSL allows you to call Windows executables directly from the Linux shell. Any `.exe` in the Windows PATH is accessible from WSL.
 
@@ -116,7 +116,7 @@ WSL allows you to call Windows executables directly from the Linux shell. Any `.
 
 ---
 
-## 7️⃣ Basic Configuration
+## 6️⃣ Basic Configuration
 
 System update:
 
@@ -124,56 +124,3 @@ System update:
 sudo apt update && sudo apt upgrade -y
 ```
 
-Useful tools:
-
-```bash
-sudo apt install -y curl wget git vim net-tools htop
-```
-
----
-
-## 8️⃣ Advanced: Backup & Restore
-
-### Backup
-
-> ⚠️ The WSL environment must be fully stopped before exporting.
-
-**Template:**
-
-```powershell
-wsl --shutdown
-$DATE = Get-Date -Format "yyyy-MM-dd_HH-mm"
-wsl --export <DISTRO_NAME> <BACKUP_PATH>\<DISTRO_NAME>-$DATE.vhdx --vhd
-```
-
-**Example:**
-
-```powershell
-wsl --shutdown
-$DATE = Get-Date -Format "yyyy-MM-dd_HH-mm"
-wsl --export Ubuntu C:\backups\Ubuntu-$DATE.vhdx --vhd
-```
-
-### Restore
-
-**Template:**
-
-```powershell
-wsl --import <NEW_DISTRO_NAME> <INSTALL_LOCATION> <VHDX_FILE_PATH> --vhd
-```
-
-**Example:**
-
-```powershell
-wsl --import Ubu2 C:\WSL\Ubu2 C:\backups\Ubuntu-2026-04-30_14-00.vhdx --vhd
-```
-
----
-
-## 9️⃣ Useful Links
-
-- [WSL Official Documentation](https://learn.microsoft.com/en-us/windows/wsl/) — Microsoft Learn
-- [Install WSL](https://learn.microsoft.com/en-us/windows/wsl/install) — Step-by-step official install guide
-- [Troubleshooting WSL](https://learn.microsoft.com/en-us/windows/wsl/troubleshooting) — Microsoft Learn official troubleshooting page
-- [WSL Troubleshooting Guide](https://learn.microsoft.com/en-us/windows/wsl/troubleshooting-guide) — Extended guide by Microsoft
-- [Basic WSL Commands](https://learn.microsoft.com/en-us/windows/wsl/basic-commands) — Full command reference
