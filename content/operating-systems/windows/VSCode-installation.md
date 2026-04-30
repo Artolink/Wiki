@@ -45,4 +45,4 @@ sudo apt install code
 
 ## Regular Expressions (Regex)
 
-> 🚧 *This section is a placeholder — content coming soon.*
+To learn about Regex in VSCode, check out [the dedicated page!](_index_regex)
