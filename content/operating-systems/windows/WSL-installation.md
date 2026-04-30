@@ -23,24 +23,25 @@ Check if virtualization is enabled:
 systeminfo | find "Virtualization"
 ```
 
-If it's disabled, you need to enable it in your UEFI (or BIOS)!
-If you don't know how to get there, check out [how to enter the UEFI-BIOS](enter-the-UEFI-BIOS.md).
->Please note: Virtualization support is determined exclusively by the CPU. It is independent of whether the system firmware is legacy BIOS or UEFI.
+> ⚠️ If it's disabled, you need to enable it in your UEFI (or BIOS)!
+> If you don't know how to get there, check out [how to enter the UEFI-BIOS](enter-the-UEFI-BIOS.md).
+
+> ℹ️ Virtualization support is determined exclusively by the CPU. It is independent of whether the system firmware is legacy BIOS or UEFI.
 
 ### Make changes in the UEFI (or BIOS)
 
 Now that you are inside your system's UEFI/BIOS, you have to find the option for enabling CPU virtualization.
-Here's a list of the main ones and how to enable it:
 
-| PC Manufacturer | Link                                                                                                                                                                                                                                                                                                                                                                                                            |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Acer            | [How to Enable Virtualization Technology on Acer Products](https://community.acer.com/kb/articles/14750)                                                                                                                                                                                                                                                                                                        |
-| Asus            | For PCs with AMD processors: [How to enable or disable AMD Virtualization (AMD-V™) technology?](https://www.asus.com/support/FAQ/1043992)<br><br>For PCs with Intel processors:<br>[How to enable Intel(VMX) Virtualization Technology in the BIOS?](https://www.asus.com/support/FAQ/1043786)<br>[How to enable or disable Intel® Virtualization Technology (VT-x)?](https://www.asus.com/support/FAQ/1043181) |
-| Dell            | [How To Enable or Disable Hardware Virtualization on Dell Systems](https://www.dell.com/support/kbdoc/000195978/)                                                                                                                                                                                                                                                                                               |
-| HP              | [HP PCs - Enable Virtualization Technology in the BIOS](https://support.hp.com/us-en/document/ish_5637142-5637191-16)                                                                                                                                                                                                                                                                                           |
-| Lenovo          | [How to enable Virtualization Technology on Lenovo PC computers](https://support.lenovo.com/solutions/ht500006)                                                                                                                                                                                                                                                                                                 |
-| Microsoft       | Virtualization is already enabled on Surface devices.                                                                                                                                                                                                                                                                                                                                                           |
+Here's a list of the main manufacturers and how to enable it:
 
+| PC Manufacturer | Link |
+|---|---|
+| Acer | [How to Enable Virtualization Technology on Acer Products](https://community.acer.com/kb/articles/14750) |
+| Asus | For AMD processors: [How to enable or disable AMD Virtualization (AMD-V™) technology?](https://www.asus.com/support/FAQ/1043992)<br><br>For Intel processors:<br>[How to enable Intel(VMX) Virtualization Technology in the BIOS?](https://www.asus.com/support/FAQ/1043786)<br>[How to enable or disable Intel® Virtualization Technology (VT-x)?](https://www.asus.com/support/FAQ/1043181) |
+| Dell | [How To Enable or Disable Hardware Virtualization on Dell Systems](https://www.dell.com/support/kbdoc/000195978/) |
+| HP | [HP PCs - Enable Virtualization Technology in the BIOS](https://support.hp.com/us-en/document/ish_5637142-5637191-16) |
+| Lenovo | [How to enable Virtualization Technology on Lenovo PC computers](https://support.lenovo.com/solutions/ht500006) |
+| Microsoft | Virtualization is already enabled on Surface devices. |
 
 ---
 
@@ -124,3 +125,56 @@ System update:
 sudo apt update && sudo apt upgrade -y
 ```
 
+Useful tools:
+
+```bash
+sudo apt install -y curl wget git vim net-tools htop
+```
+
+---
+
+## 7️⃣ Advanced: Backup & Restore
+
+### Backup
+
+> ⚠️ The WSL environment must be fully stopped before exporting.
+
+**Template:**
+
+```powershell
+wsl --shutdown
+$DATE = Get-Date -Format "yyyy-MM-dd_HH-mm"
+wsl --export <DISTRO_NAME> <BACKUP_PATH>\<DISTRO_NAME>-$DATE.vhdx --vhd
+```
+
+**Example:**
+
+```powershell
+wsl --shutdown
+$DATE = Get-Date -Format "yyyy-MM-dd_HH-mm"
+wsl --export Ubuntu C:\backups\Ubuntu-$DATE.vhdx --vhd
+```
+
+### Restore
+
+**Template:**
+
+```powershell
+wsl --import <NEW_DISTRO_NAME> <INSTALL_LOCATION> <VHDX_FILE_PATH> --vhd
+```
+
+**Example:**
+
+```powershell
+wsl --import Ubu2 C:\WSL\Ubu2 C:\backups\Ubuntu-2026-04-30_14-00.vhdx --vhd
+```
+
+---
+
+## 8️⃣ Useful Links
+
+- [WSL Official Documentation](https://learn.microsoft.com/en-us/windows/wsl/) — Microsoft Learn
+- [Install WSL](https://learn.microsoft.com/en-us/windows/wsl/install) — Step-by-step official install guide
+- [Troubleshooting WSL](https://learn.microsoft.com/en-us/windows/wsl/troubleshooting) — Microsoft Learn official troubleshooting page
+- [WSL Troubleshooting Guide](https://learn.microsoft.com/en-us/windows/wsl/troubleshooting-guide) — Extended guide by Microsoft
+- [Basic WSL Commands](https://learn.microsoft.com/en-us/windows/wsl/basic-commands) — Full command reference
