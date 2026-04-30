@@ -29,7 +29,8 @@ If you don't know how to get there, check out [how to enter the UEFI-BIOS](enter
 
 > ℹ️ Virtualization support is determined exclusively by the CPU. It is independent of whether the system firmware is legacy BIOS or UEFI.
 
-<br>
+
+
 ### Enable virtualization in UEFI (or BIOS)
 
 Now that you are inside your system's UEFI/BIOS, you have to find the option for enabling CPU virtualization.
