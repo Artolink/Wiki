@@ -1,4 +1,6 @@
-# Visual Studio Code - Reference Guide
+---
+title: Visual Studio Code - Reference Guide
+---
 
 ## Installation
 
