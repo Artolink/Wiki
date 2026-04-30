@@ -13,7 +13,7 @@ This guide explains how to access your system's firmware settings (UEFI or legac
 
 Before trying any method, confirm your firmware type.
 
-### Windows
+#### If you are on Windows
 
 Open PowerShell and run:
 
@@ -28,7 +28,7 @@ Look for the `path` field:
 | `\Windows\system32\winload.efi` | ✅ UEFI |
 | `\Windows\system32\winload.exe` | ❌ Legacy BIOS |
 
-### Linux
+#### If you are on Linux
 
 The kernel exposes firmware info directly via the filesystem. Run:
 
