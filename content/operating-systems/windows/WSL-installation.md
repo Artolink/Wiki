@@ -3,14 +3,11 @@ title: Use Linux shell in Windows! - WSL Installation (Windows Subsystem for Lin
 ---
 ## 🔎 Overview
 
-This guide walks you through the complete setup of Windows Subsystem for Linux (WSL) on Windows.
-It covers the installation of WSL2, the setup of a Linux distribution, and the essential commands
-to get started.
+This guide walks you through the complete setup of Windows Subsystem for Linux (WSL) on Windows. It covers the installation of WSL2, the setup of a Linux distribution, and the essential commands to get started.
 
-WSL2 is a lightweight, Hyper-V–based virtualized Linux environment, tightly integrated with Windows.
-You get the benefits of using popular Linux distributions (Ubuntu, Debian, Kali...) and their tools
-while staying within your Windows environment. This allows you to have a separate environment for
-testing, run scripts, create automations and much more!
+WSL2 is a lightweight, Hyper-V–based virtualized Linux environment, tightly integrated with Windows. You get the benefits of using popular Linux distributions (Ubuntu, Debian, Kali...) and their tools while staying within your Windows environment. 
+
+This allows you to have a separate environment for testing, run scripts, create automations and much more!
 
 ***
 
@@ -18,7 +15,7 @@ testing, run scripts, create automations and much more!
 
 **Requirements:**
 - Windows 10+
-- Virtualization (Intel VT-x / AMD-V) enabled in your BIOS
+- Virtualization (Intel VT-x / AMD-V) enabled in your UEFI/BIOS
 
 Check if virtualization is enabled:
 
@@ -26,12 +23,12 @@ Check if virtualization is enabled:
 systeminfo | find "Virtualization"
 ```
 
-If disabled, you need to enable it in your BIOS/UEFI.
-First, check out [how to enter the BIOS](enter-the-BIOS).
+If its disabled, you need to enable it in your UEFI/BIOS!
+If you don't know how to get there, check out [how to enter the UEFI/BIOS](enter-the-UEFI-BIOS.md).
 
 ***
 
-## 1️⃣ Install WSL
+## 1️⃣ WSL installation
 
 Open PowerShell as Administrator:
 
@@ -39,9 +36,8 @@ Open PowerShell as Administrator:
 wsl --install
 ```
 
-This command enables the required Windows features, installs WSL2, and automatically installs Ubuntu.
-Restart Windows when prompted. After reboot, Ubuntu will start automatically and you will be prompted
-to create a username and password.
+This command enables the required Windows features, installs WSL2, and automatically installs Ubuntu. A reboot is required for the changes to take effect. 
+After reboot, Ubuntu will start automatically and you will be prompted to create a username and password for your new OS.
 
 ***
 
@@ -50,7 +46,7 @@ to create a username and password.
 Check that you are running WSL Version 2:
 
 ```powershell
-wsl --list --verbose
+wsl --version
 ```
 
 If you are not on WSL2, upgrade with:
@@ -63,7 +59,7 @@ wsl --set-version Ubuntu 2
 
 ## 3️⃣ Install Other Distros
 
-If you don't want to use Ubuntu, or you want multiple options available, you can install additional
+If you don't want to use Ubuntu, or you want to use multiple OS, you can install additional
 distros.
 
 List what's available:
@@ -79,32 +75,43 @@ wsl --install -d <DISTRO_NAME>
 ```
 
 ***
+## 4️⃣ Accessing the File Systems
 
-## 4️⃣ Basic Commands
+WSL allows access to both Windows and Linux file systems.
+Here’s how you can access them:
+
+| Location                      | Path                    | Description                                      |
+| ----------------------------- | ----------------------- | ------------------------------------------------ |
+| WSL filesystem (from Windows) | `\\wsl$\<DISTRO_NAME>\` | The WSL FS is exposed as a virtual network share |
+| Windows filesystem (from WSL) | `/mnt/c/`               | Automatic mount of Windows drives inside WSL     |
+⚠️ **Best practice:** 
+Avoid working directly under `/mnt/c` for I/O-intensive workloads (e.g. managing a Git repo), as performance is slower!  Use `/mnt/c` mainly for Windows file access and exchange and prefer storing code and projects inside the WSL filesystem for optimal performance.
+
+***
+
+##  5️⃣ Basic Commands
 
 Enter WSL (default distro):
 
 ```powershell
 wsl
 ```
+You can add "-d <DISTRO_NAME>" to enter a specific distro you installed.
 
-Or enter a specific distro:
+Update WSL:
 
 ```powershell
-wsl -d Ubuntu
+wsl --update
 ```
 
-***
+Check WSL status:
 
-## 5️⃣ File System
+```powershell
+wsl --update
+```
 
-| Location                        | Path               |
-|---------------------------------|--------------------|
-| WSL filesystem (from Windows)   | `\\wsl$\Ubuntu\`   |
-| Windows filesystem (from WSL)   | `/mnt/c/`          |
 
 ***
-
 ## 6️⃣ Basic Configuration
 
 System update:
@@ -121,94 +128,36 @@ sudo apt install -y curl wget git vim net-tools htop
 
 ***
 
-## 7️⃣ Common Issues
+##  5️⃣ Advanced: backup & restore your WSL environment
 
-### Virtualization not enabled
 
-Enable Hyper-V and Virtual Machine Platform via PowerShell, then reboot:
+### Backup
 
-```powershell
-bcdedit /set hypervisorlaunchtype auto
-```
-
-***
-
-### Kernel update required
-
-**Error:** `WSL 2 requires an update to its kernel component`
-
-The Linux kernel package is missing or outdated. Update it with:
-
-```powershell
-wsl --update
-```
-
-Then set WSL2 as the default version:
-
-```powershell
-wsl --set-default-version 2
-```
-
-***
-
-### WslRegisterDistribution failed
-
-**Error:** `WslRegisterDistribution failed with error: 0x800700c1` (common after Windows Updates)
-
-The `LxssManager` service may not be running. Set it to start automatically:
-
-```powershell
-Get-Service LxssManager | Set-Service -StartupType Automatic
-Start-Service LxssManager
-```
-
-If the issue persists, try repairing WSL from **Settings → Installed Apps → Windows Subsystem
-for Linux → Advanced Options → Repair**.
-
-***
-
-### No internet access inside WSL
-
-DNS resolution may be broken. Override it manually:
-
-```bash
-echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
-```
-
-To make it persistent, disable automatic DNS generation in `/etc/wsl.conf`:
-
-```ini
-[network]
-generateResolvConf = false
-```
-
-***
-
-### WSL broken after Windows Update
-
-A Windows update can break WSL. First, try repairing or resetting from
-**Settings → Installed Apps → Windows Subsystem for Linux → Advanced Options**.
-
-If that doesn't help, reinstall WSL cleanly:
-
-```powershell
-wsl --unregister Ubuntu
-wsl --install -d Ubuntu
-```
-
-***
-
-### Filesystem corruption (dirty shutdown)
-
-If WSL fails to start after an unexpected shutdown or power loss, the virtual disk may be corrupt.
-Check and repair the ext4 image:
-
+Template:
+> ⚠️ The WSL environment must be fully stopped before exporting.
 ```powershell
 wsl --shutdown
-wsl --mount --vhd "$env:LOCALAPPDATA\Packages\...\ext4.vhdx" --bare
+$DATE = Get-Date -Format "yyyy-MM-dd_HH-mm"
+wsl --export <DISTRO_NAME> <BACKUP_PATH>\<DISTRO_NAME>-$DATE.vhdx --vhd
 ```
 
-Then run `fsck` on the mounted partition from a live Linux environment or WSL recovery.
+Example:
+```powershell
+wsl --shutdown
+$DATE = Get-Date -Format "yyyy-MM-dd_HH-mm"
+wsl --export Ubuntu C:\backups\ubuntu-$DATE.vhdx --vhd
+```
+### Restore
+
+Template:
+```powershell
+wsl --import <NEW_DISTRO_NAME> <INSTALL_LOCATION> <VHDX_FILE_PATH> --vhd
+```
+
+Example:
+```powershell
+wsl --import Ubu2 C:\WSL\Ubu2 C:\backups\ubuntu-2026-04-30.vhdx --vhd
+```
 
 ***
 
@@ -218,11 +167,9 @@ Then run `fsck` on the mounted partition from a live Linux environment or WSL re
 
 - [WSL Official Documentation](https://learn.microsoft.com/en-us/windows/wsl/) — Microsoft Learn
 - [Install WSL](https://learn.microsoft.com/en-us/windows/wsl/install) — Step-by-step official install guide
-- [Basic WSL Commands](https://learn.microsoft.com/en-us/windows/wsl/basic-commands) — Full command reference
-
-### Common Issues Sources
-
 - [Troubleshooting WSL](https://learn.microsoft.com/en-us/windows/wsl/troubleshooting) — Microsoft Learn official troubleshooting page
 - [WSL Troubleshooting Guide](https://learn.microsoft.com/en-us/windows/wsl/troubleshooting-guide) — Extended guide by Microsoft
-- [WSL Error Messages and Codes](https://www.thewindowsclub.com/troubleshoot-windows-subsystem-for-linux-error-messages-and-codes) — TheWindowsClub: common error codes and fixes
-- [WSL GitHub Issues](https://github.com/microsoft/wsl/issues) — Official issue tracker, useful for edge cases and bug reports
+- [Basic WSL Commands](https://learn.microsoft.com/en-us/windows/wsl/basic-commands) — Full command reference
+
+***
+
