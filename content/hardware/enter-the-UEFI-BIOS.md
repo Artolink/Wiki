@@ -55,7 +55,7 @@ ls /sys/firmware/efi
 
 > ℹ️ These methods only work if your system is booted in **UEFI mode**.
 
-### Via CMD command
+#### Via CMD command
 
 Open PowerShell as Administrator:
 
@@ -65,7 +65,7 @@ shutdown /r /fw /t 0
 
 Windows passes the `/fw` flag to the UEFI boot manager, which redirects directly to the firmware setup on next boot. This is the cleanest and most reliable method.
 
-### Advanced Startup (GUI)
+#### Advanced Startup (GUI)
 
 Navigate to:
 
@@ -88,7 +88,7 @@ Troubleshoot → Advanced options → UEFI Firmware Settings → Restart
 
 There is **no OS-level method** to enter a legacy BIOS. Windows has no communication channel with legacy firmware. The only option is keyboard input during POST.
 
-### Key press at POST
+#### Key press at POST
 
 1. Restart the system normally from Windows
 2. As soon as the screen turns on (during POST), repeatedly press the firmware key for your manufacturer:
@@ -103,7 +103,7 @@ There is **no OS-level method** to enter a legacy BIOS. Windows has no communica
 | MSI | `DEL` |
 | Generic / unknown | `DEL`, `F2`, `F10` |
 
-### Slow down POST
+#### Slow down POST
 
 If the system boots too quickly to catch the key press:
 
