@@ -143,7 +143,7 @@ sed -E -i 's/foo/bar/g' file.txt    # replace all "foo" with "bar" in-place
 sed '/^$/d' file.txt
 ```
 
-### Match phone number format `123-45-6789`
+### Match a phone number
 
 ```bash
 sed -E 's/[0-9]{3}-[0-9]{2}-[0-9]{4}/PHONE/g' file.txt
