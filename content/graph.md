@@ -2,8 +2,8 @@
 title: Graph view
 ---
 
-Questo è il grafo generale: non è utile come i singoli grafi contenuti all'interno di ogni nota, ma fornisce una visione generale della Wiki.
+This is the general graph: it is not as useful as the individual graphs contained within each note, but it provides an overall view of the Wiki.  
 
-È una mappa viva in continua espansione che diventa sempre più intelligente: puoi vederla come un cervello umano che possiede i suoi neuroni (nodi) connessi dalle sinapsi (collegamenti).
+It is a living map in continuous expansion that becomes increasingly intelligent: you can think of it as a human brain with its neurons (nodes) connected by synapses (links).  
 
-**Zooma nel grafo per vederne i dettagli!**
+**Zoom into the graph to see its details!**
