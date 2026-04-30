@@ -14,7 +14,7 @@ The real power is in **linking notes together** and visualising connections thro
 2. Run the `.exe` installer and follow the wizard
 3. Launch Obsidian from the Start Menu
 
-### Linux - .deb (Debian/Ubuntu)
+### Linux (Debian/Ubuntu)
 
 ```bash
 wget https://github.com/obsidianmd/obsidian-releases/releases/latest/download/obsidian_amd64.deb
