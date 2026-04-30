@@ -24,7 +24,7 @@ systeminfo | find "Virtualization"
 ```
 
 > ⚠️ If it's disabled, you need to enable it in your UEFI/BIOS!
-> If you don't know how to get there, check out [how to enter the UEFI / BIOS](enter-the-UEFI-BIOS.md).
+> If you don't know how to get there, check out [how to enter the UEFI-BIOS](enter-the-UEFI-BIOS.md).
 
 ---
 
@@ -92,29 +92,36 @@ WSL allows access to both Windows and Linux file systems. Here's how you can acc
 
 ## 5️⃣ Basic Commands
 
-Enter WSL (default distro):
-
-```powershell
-wsl
-```
-
-You can add `-d <DISTRO_NAME>` to enter a specific distro you installed.
-
-Update WSL:
-
-```powershell
-wsl --update
-```
-
-Check WSL status:
-
-```powershell
-wsl --status
-```
+| Command | Description |
+|---|---|
+| `wsl` | Enter WSL (default distro). Add `-d <DISTRO_NAME>` to enter a specific one |
+| `wsl --update` | Update WSL |
+| `wsl --status` | Check WSL status |
+| `wsl --shutdown` | Stop all running WSL instances |
+| `wsl -l -v` | List all installed distros with their WSL version and state |
+| `wsl -t <DISTRO_NAME>` | Stop a specific distro |
+| `wsl --set-default <DISTRO_NAME>` | Set the default distro |
 
 ---
 
-## 6️⃣ Basic Configuration
+## 6️⃣ Interoperability
+
+WSL allows you to call Windows executables directly from the Linux shell. Any `.exe` in the Windows PATH is accessible from WSL.
+
+| Command | Description |
+|---|---|
+| `code .` | Open the current directory in VS Code (via WSL Remote Extension) |
+| `explorer.exe .` | Open the current directory in Windows File Explorer |
+| `notepad.exe <file>` | Open a file with Notepad |
+| `explorer.exe <file>` | Open a file with its default Windows application |
+| `powershell.exe -c "<command>"` | Run a PowerShell command from WSL |
+| `cat <file> \| clip.exe` | Copy command output to the Windows clipboard |
+| `wslpath -w <linux_path>` | Convert a WSL path to its Windows equivalent |
+| `wslpath -u '<windows_path>'` | Convert a Windows path to its WSL equivalent |
+
+---
+
+## 7️⃣ Basic Configuration
 
 System update:
 
@@ -130,7 +137,7 @@ sudo apt install -y curl wget git vim net-tools htop
 
 ---
 
-## 7️⃣ Advanced: Backup & Restore
+## 8️⃣ Advanced: Backup & Restore
 
 ### Backup
 
@@ -168,7 +175,7 @@ wsl --import Ubu2 C:\WSL\Ubu2 C:\backups\Ubuntu-2026-04-30_14-00.vhdx --vhd
 
 ---
 
-## 8️⃣ Useful Links
+## 9️⃣ Useful Links
 
 - [WSL Official Documentation](https://learn.microsoft.com/en-us/windows/wsl/) — Microsoft Learn
 - [Install WSL](https://learn.microsoft.com/en-us/windows/wsl/install) — Step-by-step official install guide
