@@ -9,7 +9,7 @@ This guide explains how to access your system's firmware settings (UEFI or legac
 
 ***
 
-## 0️⃣ Check if Your System is UEFI or Legacy BIOS
+## 0️⃣ Check if your System is UEFI or BIOS
 
 Before trying any method, confirm your firmware type.
 
