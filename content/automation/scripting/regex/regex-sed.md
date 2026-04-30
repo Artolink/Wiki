@@ -2,7 +2,7 @@
 title: Regex for SED (Posix)
 ---
 
-> **Also valid for:** `vim` (POSIX-like with minor extensions — behavior is nearly identical)
+> **Also valid for** [vim](regex-VIM) (POSIX-like with minor extensions — behavior is nearly identical)
 
 > **Important:** SED has two modes:
 > - **BRE** (Basic Regular Expressions) — default, `sed 'pattern'`
