@@ -1,8 +1,6 @@
 ---
 title: 🧩 RegEx (regular expressions)
 ---
-# Regular Expressions — Index
-
 ## What Are Regex?
 
 Regular expressions (regex) are patterns used to match, search, and manipulate text.
@@ -29,7 +27,7 @@ Always use **single quotes `'`** instead of double quotes `"` around regex patte
 This prevents the shell from interpreting special characters like `$`.
 
 | Character | How to escape |
-|-----------|--------------|
-| `'` | `\'` |
-| `"` | `\"` |
-| `\` | `\\` |
+| --------- | ------------- |
+| `'`       | `\'`          |
+| `"`       | `\"`          |
+| `\`       | `\\`          |
