@@ -14,25 +14,7 @@ The real power is in **linking notes together** and visualising connections thro
 2. Run the `.exe` installer and follow the wizard
 3. Launch Obsidian from the Start Menu
 
-### macOS
-1. Go to [https://obsidian.md/download](https://obsidian.md/download) and click **Universal**
-2. Open the `.dmg` and drag Obsidian into **Applications**
-3. Launch Obsidian from Launchpad or Spotlight
-
-### Linux — AppImage (recommended)
-
-```bash
-chmod +x Obsidian-*.AppImage
-./Obsidian-*.AppImage
-```
-
-### Linux — Snap
-
-```bash
-sudo snap install obsidian --classic
-```
-
-### Linux — .deb (Debian/Ubuntu)
+### Linux - .deb (Debian/Ubuntu)
 
 ```bash
 wget https://github.com/obsidianmd/obsidian-releases/releases/latest/download/obsidian_amd64.deb
@@ -105,22 +87,22 @@ created: 2026-04-30
 
 *(Settings → Core plugins)*
 
-| Plugin | Why enable it |
-|--------|--------------|
-| **Backlinks** | See which notes link to the current one |
-| **Outgoing links** | See all links from the current note |
-| **Templates** | Insert reusable note templates |
-| **Daily notes** | Auto-create a note for each day |
-| **Quick switcher** | Fast navigation between notes |
-| **File recovery** | Snapshots of your notes — useful safety net |
-| **Canvas** | Visual board to connect notes freely |
+| Plugin             | Why enable it                               |
+| ------------------ | ------------------------------------------- |
+| **Backlinks**      | See which notes link to the current one     |
+| **Outgoing links** | See all links from the current note         |
+| **Templates**      | Insert reusable note templates              |
+| **Daily notes**    | Auto-create a note for each day             |
+| **Quick switcher** | Fast navigation between notes               |
+| **File recovery**  | Snapshots of your notes — useful safety net |
+| **Canvas**         | Visual board to connect notes freely        |
 
 ***
 
 ## Sync Options (Free)
 
-| Method | Notes |
-|--------|-------|
-| **Git + GitHub** | Best for technical users — version control included |
-| **iCloud / OneDrive / Dropbox** | Works by pointing the vault to a synced folder |
-| **Syncthing** | Peer-to-peer, no cloud, works great on Linux |
+| Method                          | Notes                                              |
+| ------------------------------- | -------------------------------------------------- |
+| **Git + GitHub**                | Best for technical users: version control included |
+| **iCloud / OneDrive / Dropbox** | Works by pointing the vault to a synced folder     |
+| **Syncthing**                   | Peer-to-peer, no cloud, works great on Linux       |
