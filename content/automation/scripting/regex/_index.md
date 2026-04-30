@@ -1,10 +1,6 @@
 ---
 title: 🧩 RegEx (regular expressions)
 ---
-# Regular Expressions — Index
-
-  
-
 ## What Are Regex?
 
   
