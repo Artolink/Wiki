@@ -51,11 +51,11 @@ ls /sys/firmware/efi
 
 ***
 
-## 1️⃣ UEFI — Enter from Windows
+## 1️⃣ UEFI: Enter from Windows
 
 > ℹ️ These methods only work if your system is booted in **UEFI mode**.
 
-### Method 1 — Direct command (recommended)
+### 1) Via CMD command
 
 Open PowerShell as Administrator:
 
@@ -65,7 +65,7 @@ shutdown /r /fw /t 0
 
 Windows passes the `/fw` flag to the UEFI boot manager, which redirects directly to the firmware setup on next boot. This is the cleanest and most reliable method.
 
-### Method 2 — Advanced Startup (GUI)
+### 2) Advanced Startup (GUI)
 
 Navigate to:
 
@@ -82,11 +82,13 @@ Troubleshoot → Advanced options → UEFI Firmware Settings → Restart
 
 ***
 
-## 2️⃣ Legacy BIOS — Enter at Boot
+## 2️⃣ Legacy BIOS: Enter at Boot
 
-> ⚠️ There is **no OS-level method** to enter a legacy BIOS. Windows has no communication channel with legacy firmware. The only option is keyboard input during POST.
+> ℹ️ The following methods can also work in UEFI firmwares
 
-### Method 1 — Key press at POST (the only reliable way)
+There is **no OS-level method** to enter a legacy BIOS. Windows has no communication channel with legacy firmware. The only option is keyboard input during POST.
+
+### 1) Key press at POST
 
 1. Restart the system normally from Windows
 2. As soon as the screen turns on (during POST), repeatedly press the firmware key for your manufacturer:
@@ -101,7 +103,7 @@ Troubleshoot → Advanced options → UEFI Firmware Settings → Restart
 | MSI | `DEL` |
 | Generic / unknown | `DEL`, `F2`, `F10` |
 
-### Method 2 — Slow down POST (if boot is too fast)
+### 2) Slow down POST (if boot is too fast)
 
 If the system boots too quickly to catch the key press:
 
@@ -112,13 +114,13 @@ These are workarounds, not direct entry methods.
 
 ***
 
-## 3️⃣ Last Resort — CMOS Reset
+## 3️⃣ Last Resort: CMOS Reset
 
-If you cannot access the firmware at all (forgotten password, corrupted settings):
+If you cannot access the firmware in any way:
 
 - **Jumper method:** locate the CMOS reset jumper on the motherboard and short it for a few seconds with the system powered off
 - **Battery method:** remove the CMOS coin cell battery (CR2032) for ~30 seconds, then reinsert it
 
-> ⚠️ Both methods reset **all** BIOS/UEFI settings to factory defaults, including boot order, SATA mode, and any custom configuration.
+> ⚠️ Both methods reset **all** BIOS/UEFI settings to factory defaults, including boot order, SATA mode, and any custom configuration!
 
 ***
