@@ -1,5 +1,7 @@
 ---
 title: NGINX Made Easy - Simple, Secure Web Server Setup
+tags:
+  - WebsiteCreation
 ---
 
 ## What is Nginx?
