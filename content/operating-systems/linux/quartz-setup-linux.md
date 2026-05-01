@@ -126,4 +126,4 @@ chmod -R o+rX public/
 
 Then point Nginx `root` at `~/wiki/public/` and reload.
 
-For the full pipeline (Obsidian vault on PC → rsync → VPS → Quartz build → Nginx + GitHub backup), see [how to create a Wiki like mine!](create-a-wiki-like-this).
+For the full pipeline (Obsidian vault on PC → rsync → VPS → Quartz build → Nginx + GitHub backup), see [how to create a Wiki like mine!](create-a-wiki-like-this.md).
