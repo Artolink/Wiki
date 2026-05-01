@@ -1,5 +1,7 @@
 ---
 title: " Take notes like a Pro! - Obsidian guide & setup"
+tags:
+  - StartingTools
 ---
 
 ## What is Obsidian?

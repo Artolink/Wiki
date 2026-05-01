@@ -1,5 +1,7 @@
 ---
 title: Visual Studio Code - Reference Guide
+tags:
+  - StartingTools
 ---
 
 ## Installation

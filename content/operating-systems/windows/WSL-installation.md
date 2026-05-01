@@ -1,5 +1,7 @@
 ---
 title: Use Linux shell in Windows! - WSL Installation (Windows Subsystem for Linux)
+tags:
+  - StartingTools
 ---
 # 🔎 Overview
 
