@@ -32,12 +32,11 @@ const explorerSortFn = (a: FileTrieNode, b: FileTrieNode): number => {
   return a.isFolder ? -1 : 1
 }
 
-// Esclude "tags" (default Quartz), "graph" e "starting-tools" dall'explorer —
+// Esclude "tags" (default Quartz) e "graph" dall'explorer —
 // sono già accessibili via i pulsanti dedicati nella sidebar.
 const explorerFilterFn = (node: FileTrieNode): boolean =>
   node.slugSegment !== "tags" &&
-  node.slugSegment !== "graph" &&
-  node.slugSegment !== "starting-tools"
+  node.slugSegment !== "graph"
 
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
@@ -126,7 +125,7 @@ export const defaultContentPageLayout: PageLayout = {
     }),
     Component.HomeLink(),
     Component.SidebarLink({ label: "Graph view", icon: "🕸️", slug: "graph" }),
-    Component.SidebarLink({ label: "Starting Tools", icon: "🛠️", slug: "starting-tools" }),
+    Component.SidebarLink({ label: "Starting Tools", icon: "🛠️", slug: "tags/StartingTools" }),
     Component.Explorer({ title: "Notes", sortFn: explorerSortFn, filterFn: explorerFilterFn }),
   ],
   right: [
@@ -158,7 +157,7 @@ export const defaultListPageLayout: PageLayout = {
     }),
     Component.HomeLink(),
     Component.SidebarLink({ label: "Graph view", icon: "🕸️", slug: "graph" }),
-    Component.SidebarLink({ label: "Starting Tools", icon: "🛠️", slug: "starting-tools" }),
+    Component.SidebarLink({ label: "Starting Tools", icon: "🛠️", slug: "tags/StartingTools" }),
     Component.Explorer({ title: "Notes", sortFn: explorerSortFn, filterFn: explorerFilterFn }),
   ],
   right: [],
