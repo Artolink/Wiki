@@ -1,5 +1,7 @@
 ---
 title: Quartz setup - Transform your notes in a site!
+tags:
+  - WebsiteCreation
 ---
 
 ## What is Quartz?
