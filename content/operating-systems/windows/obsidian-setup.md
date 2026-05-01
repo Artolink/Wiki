@@ -1,3 +1,6 @@
+---
+title: The ultimate Obsidian setup! - Installation & Configuration
+---
 
 ## What is Obsidian?
 

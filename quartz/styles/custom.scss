@@ -624,6 +624,16 @@ article.popover-hint li {
   -webkit-hyphens: auto;
 }
 
+// Eccezione: la pagina /graph (Graph view) è una landing breve che descrive
+// il grafo. Centrata sta meglio della giustificazione (frasi corte → buchi
+// brutti). Specificità maggiore della regola base grazie al body[data-slug].
+body[data-slug="graph"] article.popover-hint p,
+body[data-slug="graph"] article.popover-hint li {
+  text-align: center;
+  hyphens: manual;
+  -webkit-hyphens: manual;
+}
+
 // Code blocks / immagini / tabelle non devono mai sfondare la colonna
 .page > #quartz-body > .center pre,
 .page > #quartz-body > .center img,

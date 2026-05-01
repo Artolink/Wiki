@@ -1,7 +1,10 @@
+---
+title: Quartz setup - Transform your notes in a site!
+---
 
 ## What is Quartz?
 
-Quartz is a fast, batteries-included **static site generator** that turns a folder of Markdown files (typically an [[The ultimate Obsidian setup! - Installation & Configuration|Obsidian]] vault) into a fully-functional website.
+Quartz is a fast, batteries-included **static site generator** that turns a folder of Markdown files (typically an [[obsidian-setup|Obsidian]] vault) into a fully-functional website.
 
 The site is built once with `npx quartz build`, the output is plain HTML/CSS/JS in `public/`, and you can serve it from any web server (Nginx, Caddy, GitHub Pages, Netlify, …).
 
@@ -123,4 +126,4 @@ chmod -R o+rX public/
 
 Then point Nginx `root` at `~/wiki/public/` and reload.
 
-For the full pipeline (Obsidian vault on PC → rsync → VPS → Quartz build → Nginx + GitHub backup), see [[Create a Wiki like this!]].
+For the full pipeline (Obsidian vault on PC → rsync → VPS → Quartz build → Nginx + GitHub backup), see [how to create a Wiki like mine!](create-a-wiki-like-this).
