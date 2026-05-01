@@ -1,5 +1,5 @@
 ---
-title: Create a Wiki like this!
+title: The ultimate note-taking setup! Create a Wiki like this!
 ---
 
 ## Goal

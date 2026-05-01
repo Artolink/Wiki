@@ -1,5 +1,5 @@
 ---
-title: The ultimate Obsidian setup! - Installation & Configuration
+title: " Take notes like a Pro! - Obsidian guide & setup"
 ---
 
 ## What is Obsidian?
