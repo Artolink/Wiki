@@ -1,3 +1,6 @@
+---
+title: Create a Wiki like this!
+---
 
 ## Goal
 
