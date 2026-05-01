@@ -8,7 +8,7 @@ tags:
 
 Quartz is a fast, batteries-included **static site generator** that turns a folder of Markdown files (typically an [[obsidian-setup|Obsidian]] vault) into a fully-functional website.
 
-The site is built once with `npx quartz build`, the output is plain HTML/CSS/JS in `public/`, and you can serve it from any web server (Nginx, Caddy, GitHub Pages, Netlify, …).
+The site is built once with `npx quartz build`, the output is plain HTML/CSS/JS in `public/`, and you can serve it from any web server ([Nginx](nginx-web-server-setup), Apache, GitHub Pages…).
 
 ***
 
@@ -116,7 +116,7 @@ Write notes locally in Obsidian, publish them as-is. No syntax conversion requir
 
 ## Deploy
 
-Smallest possible deploy script (Linux + Nginx):
+Smallest possible deploy script (Linux + [Nginx](nginx-web-server-setup)):
 
 ```bash
 #!/bin/bash

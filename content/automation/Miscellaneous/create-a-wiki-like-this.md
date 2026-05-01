@@ -65,7 +65,7 @@ You need:
 - A non-root user with `sudo` privileges
 - A public IPv4 address (e.g. `123.456.0.100`)
 - A domain pointing to the VPS (e.g. `wiki.yourdomain.com`--> `123.456.0.100`)
-- **Nginx** + [Certbot](certbot-setup-guide) for publishing the domain in HTTPS
+- [Nginx](nginx-web-server-setup) + [Certbot](certbot-setup-guide) for publishing the domain in HTTPS
 
 ***
 
@@ -168,10 +168,10 @@ That's it. Vault → VPS → Quartz build → Nginx serves the site → GitHub g
 
 ## Why this setup?
 
-| Aspect                                           | Why this choice                                                                    |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------- |
-| **Obsidian**                                     | Best-in-class local editing, graph view, no vendor lock-in (notes are plain `.md`) |
-| **Quartz**                                       | Static site, fast, native support for Obsidian wikilinks / callouts / embeds       |
-| **Plain rsync**                                  | No vendor, no daemons, dead-simple, works over SSH                                 |
-| **VPS + Nginx + [Certbot](certbot-setup-guide)** | Full control, no platform limits, cheap                                            |
-| **GitHub backup**                                | Free off-site copy + commit history, useful for disaster recovery                  |
+| Aspect                                                                     | Why this choice                                                                    |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| **Obsidian**                                                               | Best-in-class local editing, graph view, no vendor lock-in (notes are plain `.md`) |
+| **Quartz**                                                                 | Static site, fast, native support for Obsidian wikilinks / callouts / embeds       |
+| **Plain rsync**                                                            | No vendor, no daemons, dead-simple, works over SSH                                 |
+| **VPS + [Nginx](nginx-web-server-setup) + [Certbot](certbot-setup-guide)** | Full control, no platform limits, cheap                                            |
+| **GitHub backup**                                                          | Free off-site copy + commit history, useful for disaster recovery                  |
