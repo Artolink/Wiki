@@ -65,6 +65,15 @@ const gitHubEdit = Component.GitHubEdit({
   contentDir: "content",
 })
 
+// Colori custom per singoli tag nel grafo. Chiave = nome esatto del tag come
+// nel frontmatter (case-sensitive), valore = qualsiasi colore CSS valido.
+// I tag elencati qui appaiono come cerchi pieni del colore indicato; gli altri
+// restano col default Quartz (cerchio vuoto, bordo --tertiary).
+const tagColors: Record<string, string> = {
+  WebsiteCreation: "#3b82f6", // blu
+  StartingTools: "#a16207",   // marrone caldo (ambra scuro)
+}
+
 // Graph "fullscreen" usato sulla pagina /grafico — depth: -1 mostra TUTTI i nodi
 // (vs il graph nella sidebar destra che mostra solo i vicini con depth: 1)
 const fullPageGraph = Component.Graph({
@@ -80,7 +89,15 @@ const fullPageGraph = Component.Graph({
     removeTags: [],
     focusOnHover: true,
     enableRadial: true,
+    tagColors,
   },
+})
+
+// Graph nella sidebar destra delle pagine: usa i default Quartz (depth:1, ecc.)
+// ma con i nostri colori custom per i tag.
+const sidebarGraph = Component.Graph({
+  localGraph: { tagColors },
+  globalGraph: { tagColors },
 })
 
 export const defaultContentPageLayout: PageLayout = {
@@ -129,7 +146,7 @@ export const defaultContentPageLayout: PageLayout = {
     Component.Explorer({ title: "Notes", sortFn: explorerSortFn, filterFn: explorerFilterFn }),
   ],
   right: [
-    Component.Graph(),
+    sidebarGraph,
     Component.DesktopOnly(Component.TableOfContents()),
     Component.Backlinks(),
   ],

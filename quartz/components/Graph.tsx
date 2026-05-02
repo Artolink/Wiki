@@ -19,6 +19,11 @@ export interface D3Config {
   showTags: boolean
   focusOnHover?: boolean
   enableRadial?: boolean
+  // Colori custom per singoli tag nel grafo. Chiave = nome del tag come scritto
+  // nel frontmatter (es. "WebsiteCreation"), valore = colore CSS (hex/rgb/...).
+  // I tag elencati qui vengono disegnati come cerchi pieni del colore indicato
+  // invece del default (cerchio vuoto col bordo --tertiary).
+  tagColors?: Record<string, string>
 }
 
 interface GraphOptions {
@@ -39,6 +44,7 @@ const defaultOptions: GraphOptions = {
     opacityScale: 1,
     showTags: true,
     removeTags: [],
+    tagColors: {},
     focusOnHover: false,
     enableRadial: false,
   },
@@ -54,6 +60,7 @@ const defaultOptions: GraphOptions = {
     opacityScale: 1,
     showTags: true,
     removeTags: [],
+    tagColors: {},
     focusOnHover: true,
     enableRadial: true,
   },

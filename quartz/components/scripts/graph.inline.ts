@@ -87,7 +87,9 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     showTags,
     focusOnHover,
     enableRadial,
+    tagColors,
   } = JSON.parse(graph.dataset["cfg"]!) as D3Config
+  const tagColorMap: Record<string, string> = tagColors ?? {}
 
   const data: Map<SimpleSlug, ContentDetails> = new Map(
     Object.entries<ContentDetails>(await fetchData).map(([k, v]) => [
@@ -198,11 +200,15 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     const isCurrent = d.id === slug
     if (isCurrent) {
       return computedStyleMap["--secondary"]
-    } else if (visited.has(d.id) || d.id.startsWith("tags/")) {
-      return computedStyleMap["--tertiary"]
-    } else {
-      return computedStyleMap["--gray"]
     }
+    if (d.id.startsWith("tags/")) {
+      const tagName = d.id.substring("tags/".length)
+      return tagColorMap[tagName] ?? computedStyleMap["--tertiary"]
+    }
+    if (visited.has(d.id)) {
+      return computedStyleMap["--tertiary"]
+    }
+    return computedStyleMap["--gray"]
   }
 
   function nodeRadius(d: NodeData) {
@@ -391,6 +397,13 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
 
     let oldLabelOpacity = 0
     const isTagNode = nodeId.startsWith("tags/")
+    const customTagColor = isTagNode
+      ? tagColorMap[nodeId.substring("tags/".length)]
+      : undefined
+    // Tag senza colore custom: cerchio vuoto col bordo --tertiary (default Quartz).
+    // Tag con colore custom: cerchio pieno del colore richiesto, per spiccare.
+    const tagFill = customTagColor ?? computedStyleMap["--light"]
+    const tagStroke = customTagColor ?? computedStyleMap["--tertiary"]
     const gfx = new Graphics({
       interactive: true,
       label: nodeId,
@@ -399,7 +412,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
       cursor: "pointer",
     })
       .circle(0, 0, nodeRadius(n))
-      .fill({ color: isTagNode ? computedStyleMap["--light"] : color(n) })
+      .fill({ color: isTagNode ? tagFill : color(n) })
       .on("pointerover", (e) => {
         updateHoverInfo(e.target.label)
         oldLabelOpacity = label.alpha
@@ -416,7 +429,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
       })
 
     if (isTagNode) {
-      gfx.stroke({ width: 2, color: computedStyleMap["--tertiary"] })
+      gfx.stroke({ width: 2, color: tagStroke })
     }
 
     nodesContainer.addChild(gfx)
