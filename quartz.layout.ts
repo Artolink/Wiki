@@ -67,8 +67,9 @@ const gitHubEdit = Component.GitHubEdit({
 
 // Colori custom per singoli tag nel grafo. Chiave = nome esatto del tag come
 // nel frontmatter (case-sensitive), valore = qualsiasi colore CSS valido.
-// I tag elencati qui appaiono come cerchi pieni del colore indicato; gli altri
-// restano col default Quartz (cerchio vuoto, bordo --tertiary).
+// I tag elencati qui hanno il bordo del cerchio del colore indicato (gli altri
+// restano col default --tertiary). Inoltre, in hover sul tag, le note collegate
+// e i link incidenti vengono tinti dello stesso colore.
 const tagColors: Record<string, string> = {
   WebsiteCreation: "#3b82f6", // blu
   StartingTools: "#a16207",   // marrone caldo (ambra scuro)

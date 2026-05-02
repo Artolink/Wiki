@@ -50,6 +50,10 @@ type LinkRenderData = GraphicsInfo & {
 type NodeRenderData = GraphicsInfo & {
   simulationData: NodeData
   label: Text
+  isTag: boolean
+  defaultFill: string
+  defaultStroke?: string
+  radius: number
 }
 
 const localStorageKey = "graph-visited"
@@ -255,9 +259,26 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   let dragStartTime = 0
   let dragging = false
 
+  // Ridisegna un Graphics di un nodo con i parametri richiesti. Pixi Graphics non
+  // supporta cambiare fill/stroke a posteriori: bisogna fare clear + ridisegnare.
+  function drawNode(gfx: Graphics, r: number, fill: string, stroke?: string) {
+    gfx.clear().circle(0, 0, r).fill({ color: fill })
+    if (stroke) {
+      gfx.stroke({ width: 2, color: stroke })
+    }
+  }
+
+  // Se l'hover è su un tag che ha un colore custom, ritorna quel colore;
+  // altrimenti null. Usato per tingere link e vicini durante l'hover.
+  function getHoveredTagColor(): string | null {
+    if (hoveredNodeId === null || !hoveredNodeId.startsWith("tags/")) return null
+    return tagColorMap[hoveredNodeId.substring("tags/".length)] ?? null
+  }
+
   function renderLinks() {
     tweens.get("link")?.stop()
     const tweenGroup = new TweenGroup()
+    const hoverTagColor = getHoveredTagColor()
 
     for (const l of linkRenderData) {
       let alpha = 1
@@ -268,7 +289,11 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
         alpha = l.active ? 1 : 0.2
       }
 
-      l.color = l.active ? computedStyleMap["--gray"] : computedStyleMap["--lightgray"]
+      if (l.active) {
+        l.color = hoverTagColor ?? computedStyleMap["--gray"]
+      } else {
+        l.color = computedStyleMap["--lightgray"]
+      }
       tweenGroup.add(new Tweened<LinkRenderData>(l).to({ alpha }, 200))
     }
 
@@ -324,6 +349,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
 
   function renderNodes() {
     tweens.get("hover")?.stop()
+    const hoverTagColor = getHoveredTagColor()
 
     const tweenGroup = new TweenGroup()
     for (const n of nodeRenderData) {
@@ -332,6 +358,21 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
       // if we are hovering over a node, we want to highlight the immediate neighbours
       if (hoveredNodeId !== null && focusOnHover) {
         alpha = n.active ? 1 : 0.2
+      }
+
+      // Quando l'hover è su un tag con colore custom, tingiamo i suoi vicini con
+      // quel colore: le note (cerchi pieni) cambiano fill, eventuali altri tag
+      // vicini cambiano stroke. Il tag hovered mantiene il proprio aspetto.
+      const isHoveredNode = n.simulationData.id === hoveredNodeId
+      const shouldTint = hoverTagColor !== null && n.active && !isHoveredNode
+      if (shouldTint) {
+        if (n.isTag) {
+          drawNode(n.gfx, n.radius, n.defaultFill, hoverTagColor!)
+        } else {
+          drawNode(n.gfx, n.radius, hoverTagColor!, n.defaultStroke)
+        }
+      } else {
+        drawNode(n.gfx, n.radius, n.defaultFill, n.defaultStroke)
       }
 
       tweenGroup.add(new Tweened<Graphics>(n.gfx, tweenGroup).to({ alpha }, 200))
@@ -400,19 +441,20 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     const customTagColor = isTagNode
       ? tagColorMap[nodeId.substring("tags/".length)]
       : undefined
-    // Tag senza colore custom: cerchio vuoto col bordo --tertiary (default Quartz).
-    // Tag con colore custom: cerchio pieno del colore richiesto, per spiccare.
-    const tagFill = customTagColor ?? computedStyleMap["--light"]
-    const tagStroke = customTagColor ?? computedStyleMap["--tertiary"]
+    // I tag restano sempre cerchi "vuoti" (fill --light) per essere riconoscibili
+    // come tag. Il colore custom — se presente — finisce sul bordo.
+    const defaultFill = isTagNode ? computedStyleMap["--light"] : color(n)
+    const defaultStroke = isTagNode
+      ? (customTagColor ?? computedStyleMap["--tertiary"])
+      : undefined
+    const radius = nodeRadius(n)
     const gfx = new Graphics({
       interactive: true,
       label: nodeId,
       eventMode: "static",
-      hitArea: new Circle(0, 0, nodeRadius(n)),
+      hitArea: new Circle(0, 0, radius),
       cursor: "pointer",
     })
-      .circle(0, 0, nodeRadius(n))
-      .fill({ color: isTagNode ? tagFill : color(n) })
       .on("pointerover", (e) => {
         updateHoverInfo(e.target.label)
         oldLabelOpacity = label.alpha
@@ -427,10 +469,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
           renderPixiFromD3()
         }
       })
-
-    if (isTagNode) {
-      gfx.stroke({ width: 2, color: tagStroke })
-    }
+    drawNode(gfx, radius, defaultFill, defaultStroke)
 
     nodesContainer.addChild(gfx)
     labelsContainer.addChild(label)
@@ -442,6 +481,10 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
       color: color(n),
       alpha: 1,
       active: false,
+      isTag: isTagNode,
+      defaultFill,
+      defaultStroke,
+      radius,
     }
 
     nodeRenderData.push(nodeRenderDatum)

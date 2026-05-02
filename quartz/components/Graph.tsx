@@ -21,8 +21,9 @@ export interface D3Config {
   enableRadial?: boolean
   // Colori custom per singoli tag nel grafo. Chiave = nome del tag come scritto
   // nel frontmatter (es. "WebsiteCreation"), valore = colore CSS (hex/rgb/...).
-  // I tag elencati qui vengono disegnati come cerchi pieni del colore indicato
-  // invece del default (cerchio vuoto col bordo --tertiary).
+  // Effetto: il bordo del nodo tag prende quel colore (vs. --tertiary di default),
+  // e in hover sul tag i vicini e i link incidenti vengono tinti dello stesso
+  // colore per renderli immediatamente identificabili.
   tagColors?: Record<string, string>
 }
 
