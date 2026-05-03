@@ -259,6 +259,19 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   let dragStartTime = 0
   let dragging = false
 
+  // Long press touch: tenere premuto un nodo (>LONG_PRESS_MS) attiva
+  // l'highlight come l'hover desktop e impedisce la navigazione al rilascio.
+  // Tap rapido continua a navigare normalmente (gestito dal drag end di d3).
+  let longPressTimer: ReturnType<typeof setTimeout> | null = null
+  let longPressActive = false
+  const LONG_PRESS_MS = 400
+  function clearLongPressTimer() {
+    if (longPressTimer !== null) {
+      clearTimeout(longPressTimer)
+      longPressTimer = null
+    }
+  }
+
   // Ridisegna un Graphics di un nodo con i parametri richiesti. Pixi Graphics non
   // supporta cambiare fill/stroke a posteriori: bisogna fare clear + ridisegnare.
   function drawNode(gfx: Graphics, r: number, fill: string, stroke?: string) {
@@ -462,7 +475,45 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
           renderPixiFromD3()
         }
       })
+      .on("pointerdown", (e) => {
+        // Su touch il pointerover non scatta (o scatta e poi pointerleave
+        // arriva subito al touchend). Attiviamo qui il long press timer:
+        // se l'utente tiene premuto >LONG_PRESS_MS mostriamo l'highlight e
+        // saltiamo la navigazione al rilascio.
+        // Settiamo anche subito hoveredNodeId, altrimenti il drag d3 non
+        // trova il subject e la navigazione non parte nemmeno con tap rapido.
+        const targetId = e.target.label as string
+        if (hoveredNodeId !== targetId) {
+          updateHoverInfo(targetId)
+          oldLabelOpacity = label.alpha
+          if (!dragging) {
+            renderPixiFromD3()
+          }
+        }
+        if (e.pointerType === "touch") {
+          clearLongPressTimer()
+          longPressActive = false
+          longPressTimer = setTimeout(() => {
+            longPressActive = true
+            longPressTimer = null
+            // Re-render per assicurarsi che l'highlight sia visibile
+            // (in caso il dragging fosse iniziato e l'avesse oscurato).
+            updateHoverInfo(targetId)
+            if (!dragging) {
+              renderPixiFromD3()
+            }
+          }, LONG_PRESS_MS)
+        }
+      })
+      .on("pointerup", clearLongPressTimer)
+      .on("pointerupoutside", clearLongPressTimer)
       .on("pointerleave", () => {
+        clearLongPressTimer()
+        // Se il long press è attivo (utente ha tenuto premuto e poi rilasciato),
+        // manteniamo l'highlight visibile finché un altro nodo non viene
+        // selezionato — così il colore dei vicini resta osservabile dopo il
+        // rilascio del dito su mobile.
+        if (longPressActive) return
         updateHoverInfo(null)
         label.alpha = oldLabelOpacity
         if (!dragging) {
@@ -534,9 +585,13 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
           event.subject.fx = null
           event.subject.fy = null
           dragging = false
+          clearLongPressTimer()
 
           // if the time between mousedown and mouseup is short, we consider it a click
-          if (Date.now() - dragStartTime < 500) {
+          // — ma se il long press è scattato (touch) non navighiamo: l'utente
+          // voleva vedere l'highlight, non aprire la pagina.
+          const isClick = Date.now() - dragStartTime < 500
+          if (isClick && !longPressActive) {
             const node = graphData.nodes.find((n) => n.id === event.subject.id) as NodeData
             const targ = resolveRelative(fullSlug, node.id)
             window.spaNavigate(new URL(targ, window.location.toString()))
