@@ -65,14 +65,22 @@ html[focus-mode="on"] {
     background: transparent !important;
     border-bottom: none !important;
   }
-  .page .page-header > header > :nth-child(1),
-  .page .page-header > header > :nth-child(2) {
+  // Indici DOM dell'header (vedi quartz.layout.ts):
+  //   1 = mobile-sidebar-toggle (display:none su desktop)
+  //   2 = brand
+  //   3 = search
+  //   4 = flex (graph-toggle / darkmode / focusmode)
+  //   5 = mobile-sidebar-right-toggle (display:none su desktop)
+  // In focus mode su desktop nascondiamo brand e search e teniamo solo il
+  // flex dei 3 bottoni utility, ancorato a destra come nella navbar normale.
+  .page .page-header > header > :nth-child(2),
+  .page .page-header > header > :nth-child(3) {
     display: none !important;
   }
-  // Con i primi due figli display:none, il CSS Grid auto-placement
-  // sposterebbe il flex nella prima cella libera (a sinistra). Forzo
-  // grid-column: 3 così resta dove era nella navbar normale.
-  .page .page-header > header > :nth-child(3) {
+  // Con brand e search hidden, il CSS Grid auto-placement sposterebbe il
+  // flex nella prima cella libera (a sinistra). Forzo grid-column: 3 così
+  // resta dove era nella navbar normale.
+  .page .page-header > header > :nth-child(4) {
     grid-column: 3 / 4 !important;
     justify-self: end !important;
   }
