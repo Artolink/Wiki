@@ -132,7 +132,7 @@ html[saved-theme="dark"] {
 
   & .flex-component {
     display: flex;
-    gap: 0.75rem;
+    gap: 1rem;
     align-items: center;
     justify-content: flex-end;
 
@@ -141,7 +141,9 @@ html[saved-theme="dark"] {
     // stili diversi (graph: padding 0.4rem; darkmode: SVG position absolute;
     // focusmode: opacity 0.8). Forzo tutto con !important + min/max per
     // assicurare che siano visivamente identici.
-    & > button {
+    // NB: usiamo `button` (descendant) e non `> button` perché il Flex.tsx
+    // wrappa ogni componente in un <div>, quindi i bottoni sono nipoti.
+    button {
       width: 32px !important;
       min-width: 32px !important;
       max-width: 32px !important;
@@ -194,7 +196,7 @@ html[saved-theme="dark"] {
 }
 
 // Hover bg dark mode: usa un bianco caldo translucido invece del nero
-html[saved-theme="dark"] .page .page-header > header .flex-component > button:hover {
+html[saved-theme="dark"] .page .page-header > header .flex-component button:hover {
   background: rgba(231, 229, 228, 0.10) !important;
 }
 

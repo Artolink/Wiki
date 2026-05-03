@@ -64,7 +64,8 @@ html[saved-theme="dark"] .mobile-sidebar-right-toggle:hover {
       gap: 1rem !important;
       z-index: 250;
       overflow-y: auto !important;
-      background: var(--sidebar-bg);
+      background: var(--light);
+      border-left: 1px solid var(--lightgray);
       border-radius: 0;
       box-shadow: -2px 0 16px rgba(0, 0, 0, 0.25);
       animation: mobile-sidebar-right-slide-in 0.22s ease-out;
@@ -107,8 +108,55 @@ html[saved-theme="dark"] .mobile-sidebar-right-toggle:hover {
   html[data-mobile-sidebar-right-open="true"] .page > #quartz-body > .sidebar.right > .flex-component {
     display: flex;
     justify-content: flex-start;
-    gap: 0.75rem;
+    gap: 1rem;
     padding-bottom: 0.75rem;
     border-bottom: 1px solid var(--lightgray);
+
+    // Uniforma i 3 bottoni utility (graph-toggle / darkmode / focusmode):
+    // ognuno arriva con stili nativi diversi (es. .darkmode width:20px,
+    // .graph-toggle padding:0.4rem, .focusmode padding:0). Forziamo qui un
+    // box identico così il gap fra bottoni risulta costante.
+    button {
+      width: 36px !important;
+      min-width: 36px !important;
+      max-width: 36px !important;
+      height: 36px !important;
+      min-height: 36px !important;
+      max-height: 36px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex-shrink: 0 !important;
+      box-sizing: border-box !important;
+      position: static !important;
+      background: transparent !important;
+      border: none !important;
+      border-radius: 6px !important;
+      color: var(--darkgray) !important;
+      opacity: 1 !important;
+
+      &:hover {
+        background: rgba(17, 24, 39, 0.10) !important;
+        color: var(--secondary) !important;
+      }
+    }
+
+    button > svg {
+      width: 22px !important;
+      height: 22px !important;
+      position: static !important;
+      top: auto !important;
+      left: auto !important;
+      display: block !important;
+      fill: currentColor !important;
+    }
   }
+}
+
+html[saved-theme="dark"][data-mobile-sidebar-right-open="true"]
+  .page > #quartz-body > .sidebar.right > .flex-component
+  button:hover {
+  background: rgba(231, 229, 228, 0.10) !important;
 }
