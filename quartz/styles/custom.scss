@@ -172,6 +172,11 @@ html[saved-theme="dark"] {
         color: var(--secondary) !important;
       }
 
+      // NB: niente `display` forzato qui. I bottoni darkmode/focusmode
+      // hanno DUE svg che si alternano via display:none|block in base allo
+      // stato (saved-theme, focus-mode); forzare display:block li renderebbe
+      // entrambi visibili contemporaneamente. Confidiamo nei display
+      // naturali dei singoli componenti.
       & > svg {
         width: 20px !important;
         height: 20px !important;
@@ -187,7 +192,6 @@ html[saved-theme="dark"] {
         right: auto !important;
         bottom: auto !important;
         transform: none !important;
-        display: block !important;
         flex-shrink: 0 !important;
         fill: currentColor !important;
       }

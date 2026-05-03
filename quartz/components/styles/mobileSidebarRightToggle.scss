@@ -143,13 +143,14 @@ html[saved-theme="dark"] .mobile-sidebar-right-toggle:hover {
       }
     }
 
+    // NB: niente `display` forzato — vedi nota in custom.scss. Gli svg
+    // alternati di darkmode/focusmode si gestiscono da soli.
     button > svg {
       width: 22px !important;
       height: 22px !important;
       position: static !important;
       top: auto !important;
       left: auto !important;
-      display: block !important;
       fill: currentColor !important;
     }
   }
