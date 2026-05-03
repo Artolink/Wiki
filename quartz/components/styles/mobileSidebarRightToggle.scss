@@ -1,0 +1,114 @@
+@use "../../styles/variables.scss" as *;
+
+// Altezza navbar (deve coincidere con $navH in custom.scss)
+$navH: 60px;
+
+// Stesso breakpoint del drawer sinistro: sotto i 1100px la sidebar.right è
+// già nascosta dall'auto-focus-mode in custom.scss → diamo accesso via drawer.
+$mobileMenu: "(max-width: 1100px)";
+
+// ── Bottone hamburger destro (icona "panel-right") ──────────────────────────
+.mobile-sidebar-right-toggle {
+  display: none;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  color: var(--darkgray);
+  transition: background 0.15s ease, color 0.15s ease;
+
+  & > svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+  }
+
+  &:hover {
+    background: rgba(17, 24, 39, 0.10);
+    color: var(--secondary);
+  }
+
+  @media all and #{$mobileMenu} {
+    display: inline-flex;
+  }
+}
+
+html[saved-theme="dark"] .mobile-sidebar-right-toggle:hover {
+  background: rgba(231, 229, 228, 0.10);
+}
+
+// ── Stato aperto: drawer destro ──────────────────────────────────────────────
+@media all and #{$mobileMenu} {
+  html[data-mobile-sidebar-right-open="true"] {
+    // La sidebar.right diventa drawer fisso che entra da destra.
+    // Override del `display: none` impostato sotto 1100/1500 in custom.scss.
+    .page > #quartz-body > .sidebar.right {
+      display: flex !important;
+      position: fixed !important;
+      top: $navH !important;
+      right: 0 !important;
+      left: auto !important;
+      bottom: 0 !important;
+      width: min(85vw, 340px) !important;
+      height: calc(100vh - #{$navH}) !important;
+      max-height: calc(100vh - #{$navH}) !important;
+      margin: 0 !important;
+      padding: 1.25rem 1rem 1rem 1rem !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 1rem !important;
+      z-index: 250;
+      overflow-y: auto !important;
+      background: var(--sidebar-bg);
+      border-radius: 0;
+      box-shadow: -2px 0 16px rgba(0, 0, 0, 0.25);
+      animation: mobile-sidebar-right-slide-in 0.22s ease-out;
+
+      // I figli (Flex pulsanti, Graph, TOC, Backlinks) tornano a riempire
+      // la larghezza piena del drawer, annullando il flex:1 / max-height
+      // imposti in base.scss per il layout orizzontale mobile.
+      & > * {
+        flex: initial !important;
+        max-height: none !important;
+      }
+    }
+
+    .mobile-sidebar-right-toggle {
+      color: var(--secondary);
+    }
+  }
+}
+
+@keyframes mobile-sidebar-right-slide-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+// ── Flex pulsanti utility nel drawer destro ─────────────────────────────────
+// Il primo Flex(GraphToggle, Darkmode, FocusMode) è figlio diretto di
+// .sidebar.right. Su desktop ≥1500px la sidebar.right è inline (col TOC e
+// Graph), e i 3 pulsanti sono già in topbar → qui li nascondiamo. Sotto
+// 1100px li mostriamo nel drawer (la topbar invece li nasconde, vedi
+// custom.scss).
+.page > #quartz-body > .sidebar.right > .flex-component {
+  display: none;
+}
+
+@media all and #{$mobileMenu} {
+  html[data-mobile-sidebar-right-open="true"] .page > #quartz-body > .sidebar.right > .flex-component {
+    display: flex;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--lightgray);
+  }
+}

@@ -61,16 +61,26 @@ html[saved-theme="dark"] .mobile-sidebar-toggle:hover {
   transition: opacity 0.2s ease;
 }
 
-// ── Stato aperto ─────────────────────────────────────────────────────────────
+// ── Backdrop / scroll lock condivisi ────────────────────────────────────────
+// Il backdrop e il blocco scroll del body si attivano per ENTRAMBI i drawer
+// (sx e dx). Le regole specifiche al drawer di destra stanno in
+// mobileSidebarRightToggle.scss.
+html[data-mobile-sidebar-open="true"] .mobile-sidebar-backdrop,
+html[data-mobile-sidebar-right-open="true"] .mobile-sidebar-backdrop {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+html[data-mobile-sidebar-open="true"] body,
+html[data-mobile-sidebar-right-open="true"] body {
+  overflow: hidden;
+}
+
+// ── Stato aperto: drawer sinistro ────────────────────────────────────────────
 // Solo sotto i 1100px ha senso (altrimenti la sidebar è già in pagina).
 @media all and #{$mobileMenu} {
   html[data-mobile-sidebar-open="true"] {
-    .mobile-sidebar-backdrop {
-      display: block;
-      opacity: 1;
-      pointer-events: auto;
-    }
-
     // La sidebar diventa drawer fisso che entra da sinistra. Override del
     // `display: none` impostato in custom.scss "Auto focus-mode" (≤1100px).
     .page > #quartz-body > .sidebar.left {
@@ -95,14 +105,8 @@ html[saved-theme="dark"] .mobile-sidebar-toggle:hover {
       animation: mobile-sidebar-slide-in 0.22s ease-out;
     }
 
-    // Quando il drawer è aperto blocchiamo lo scroll del body in background
-    // così non si "scrolla la pagina dietro al menu".
-    body {
-      overflow: hidden;
-    }
-
-    // L'hamburger durante l'apertura cambia lievemente colore per dare
-    // feedback (è ancora cliccabile per richiudere).
+    // L'hamburger durante l'apertura cambia colore per dare feedback
+    // (è ancora cliccabile per richiudere).
     .mobile-sidebar-toggle {
       color: var(--secondary);
     }

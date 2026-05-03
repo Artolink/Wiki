@@ -34,6 +34,7 @@ import GraphToggle from "./GraphToggle"
 import FontResizer from "./FontResizer"
 import SidebarToggle from "./SidebarToggle"
 import MobileSidebarToggle from "./MobileSidebarToggle"
+import MobileSidebarRightToggle from "./MobileSidebarRightToggle"
 import ScrollProgress from "./ScrollProgress"
 
 export {
@@ -73,5 +74,6 @@ export {
   FontResizer,
   SidebarToggle,
   MobileSidebarToggle,
+  MobileSidebarRightToggle,
   ScrollProgress,
 }

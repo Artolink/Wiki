@@ -41,10 +41,12 @@ const explorerFilterFn = (node: FileTrieNode): boolean =>
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
   // Top navbar: full-width fixed.
-  // Desktop: tre colonne (brand / search / links). L'hamburger è display:none
-  // e viene ignorato dal grid.
-  // Mobile (≤1100px): quattro colonne (hamburger / brand / search / links),
-  // l'hamburger apre il drawer con la sidebar sinistra (vedi MobileSidebarToggle).
+  // Desktop (>1100px): tre colonne (brand / search / links). I due hamburger
+  // sono display:none e ignorati dal grid.
+  // Mobile (≤1100px): quattro colonne (hamburger-sx / brand / search /
+  // hamburger-dx). Il flex con i 3 pulsanti utility viene nascosto in topbar
+  // e mostrato dentro al drawer di destra (vedi quartz/styles/custom.scss e
+  // mobileSidebarRightToggle.scss). Aprire un drawer chiude l'altro.
   header: [
     Component.MobileSidebarToggle(),
     Component.SiteBrand(),
@@ -56,6 +58,7 @@ export const sharedPageComponents: SharedLayout = {
         { Component: Component.FocusMode() },
       ],
     }),
+    Component.MobileSidebarRightToggle(),
   ],
   // FontResizer floating + SidebarToggle su list pages (folder/tag). Per le
   // content pages le versioni sono in defaultContentPageLayout.afterBody
@@ -106,6 +109,19 @@ const sidebarGraph = Component.Graph({
   globalGraph: { tagColors },
 })
 
+// Pulsanti utility (graph-toggle / darkmode / focus-mode) replicati come
+// primo elemento della sidebar.right. Su desktop ≥1500px sono nascosti via
+// CSS (sono già nella topbar); sotto i 1100px la topbar li nasconde e questi
+// diventano l'unica copia, accessibile dal drawer destro.
+// Vedi mobileSidebarRightToggle.scss per le regole di display.
+const sidebarRightActions = Component.Flex({
+  components: [
+    { Component: Component.GraphToggle() },
+    { Component: Component.Darkmode() },
+    { Component: Component.FocusMode() },
+  ],
+})
+
 export const defaultContentPageLayout: PageLayout = {
   beforeBody: [
     Component.Flex({
@@ -152,6 +168,7 @@ export const defaultContentPageLayout: PageLayout = {
     Component.Explorer({ title: "Notes", sortFn: explorerSortFn, filterFn: explorerFilterFn }),
   ],
   right: [
+    sidebarRightActions,
     sidebarGraph,
     Component.DesktopOnly(Component.TableOfContents()),
     Component.Backlinks(),
@@ -183,5 +200,7 @@ export const defaultListPageLayout: PageLayout = {
     Component.SidebarLink({ label: "Starting Tools", icon: "🛠️", slug: "tags/StartingTools" }),
     Component.Explorer({ title: "Notes", sortFn: explorerSortFn, filterFn: explorerFilterFn }),
   ],
-  right: [],
+  // Solo i pulsanti utility nel drawer destro (no Graph/TOC/Backlinks per le
+  // list pages). Nascosti su desktop, visibili solo nel drawer mobile.
+  right: [sidebarRightActions],
 }
