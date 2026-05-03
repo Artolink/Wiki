@@ -1,0 +1,119 @@
+@use "../../styles/variables.scss" as *;
+
+// Altezza navbar (deve coincidere con $navH in custom.scss)
+$navH: 60px;
+
+// Soglia oltre la quale la sidebar sinistra non è visibile in pagina
+// (vedi custom.scss -> "Auto focus-mode" sotto i 1100px). Sotto questo
+// breakpoint mostriamo l'hamburger e il drawer.
+$mobileMenu: "(max-width: 1100px)";
+
+// ── Bottone hamburger ────────────────────────────────────────────────────────
+// Default desktop: nascosto (display:none → ignorato dal grid del header).
+.mobile-sidebar-toggle {
+  display: none;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  color: var(--darkgray);
+  transition: background 0.15s ease, color 0.15s ease;
+
+  & > svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+  }
+
+  &:hover {
+    background: rgba(17, 24, 39, 0.10);
+    color: var(--secondary);
+  }
+
+  @media all and #{$mobileMenu} {
+    display: inline-flex;
+  }
+}
+
+html[saved-theme="dark"] .mobile-sidebar-toggle:hover {
+  background: rgba(231, 229, 228, 0.10);
+}
+
+// ── Backdrop ─────────────────────────────────────────────────────────────────
+// Creato dinamicamente dallo script (figlio di body). z-index sotto la navbar
+// fissa (200) ma sopra tutto il resto del contenuto, in modo che la navbar
+// resti interattiva mentre il drawer è aperto.
+.mobile-sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+// ── Stato aperto ─────────────────────────────────────────────────────────────
+// Solo sotto i 1100px ha senso (altrimenti la sidebar è già in pagina).
+@media all and #{$mobileMenu} {
+  html[data-mobile-sidebar-open="true"] {
+    .mobile-sidebar-backdrop {
+      display: block;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    // La sidebar diventa drawer fisso che entra da sinistra. Override del
+    // `display: none` impostato in custom.scss "Auto focus-mode" (≤1100px).
+    .page > #quartz-body > .sidebar.left {
+      display: flex !important;
+      position: fixed !important;
+      top: $navH !important;
+      left: 0 !important;
+      bottom: 0 !important;
+      width: min(85vw, 320px) !important;
+      height: calc(100vh - #{$navH}) !important;
+      max-height: calc(100vh - #{$navH}) !important;
+      margin: 0 !important;
+      padding: 1.25rem 1rem 1rem 1rem !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 0.75rem !important;
+      z-index: 250;
+      overflow-y: auto !important;
+      background: var(--sidebar-bg);
+      border-radius: 0;
+      box-shadow: 2px 0 16px rgba(0, 0, 0, 0.25);
+      animation: mobile-sidebar-slide-in 0.22s ease-out;
+    }
+
+    // Quando il drawer è aperto blocchiamo lo scroll del body in background
+    // così non si "scrolla la pagina dietro al menu".
+    body {
+      overflow: hidden;
+    }
+
+    // L'hamburger durante l'apertura cambia lievemente colore per dare
+    // feedback (è ancora cliccabile per richiudere).
+    .mobile-sidebar-toggle {
+      color: var(--secondary);
+    }
+  }
+}
+
+@keyframes mobile-sidebar-slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}

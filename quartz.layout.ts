@@ -40,8 +40,13 @@ const explorerFilterFn = (node: FileTrieNode): boolean =>
 
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
-  // Top navbar: full-width fixed, organizzata in tre colonne (brand / search / links)
+  // Top navbar: full-width fixed.
+  // Desktop: tre colonne (brand / search / links). L'hamburger è display:none
+  // e viene ignorato dal grid.
+  // Mobile (≤1100px): quattro colonne (hamburger / brand / search / links),
+  // l'hamburger apre il drawer con la sidebar sinistra (vedi MobileSidebarToggle).
   header: [
+    Component.MobileSidebarToggle(),
     Component.SiteBrand(),
     Component.Search({ enablePreview: false }),
     Component.Flex({

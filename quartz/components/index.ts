@@ -33,6 +33,7 @@ import FocusMode from "./FocusMode"
 import GraphToggle from "./GraphToggle"
 import FontResizer from "./FontResizer"
 import SidebarToggle from "./SidebarToggle"
+import MobileSidebarToggle from "./MobileSidebarToggle"
 import ScrollProgress from "./ScrollProgress"
 
 export {
@@ -71,5 +72,6 @@ export {
   GraphToggle,
   FontResizer,
   SidebarToggle,
+  MobileSidebarToggle,
   ScrollProgress,
 }
