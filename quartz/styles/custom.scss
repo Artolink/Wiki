@@ -955,6 +955,24 @@ html[focus-mode="on"] {
     margin-right: auto !important;
     width: 100% !important;
   }
+
+  // Mobile: in focus mode la topbar è ridotta al solo hamburger destro
+  // (l'unico modo per uscire da focus mode tramite il drawer).
+  @media all and (max-width: 1100px) {
+    .page .page-header > header {
+      grid-template-columns: 1fr !important;
+
+      & > :nth-child(1),  // hamburger sinistro
+      & > :nth-child(2),  // brand (logo + nome)
+      & > :nth-child(3) { // search
+        display: none !important;
+      }
+
+      & > :nth-child(5) { // hamburger destro: unico elemento visibile, a destra
+        justify-self: end;
+      }
+    }
+  }
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
