@@ -73,7 +73,7 @@ The vault is just a normal folder on disk, so just pick a path you'll remember, 
 
 `~/Documents/ObsidianVault` on Linux 
 
-`C:\Users\you\Documents\ObsidianVault` on Windows (accessible from WSL as `/mnt/c/Users/you/Documents/ObsidianVault`).
+`C:\Users\you\Documents\ObsidianVault` on Windows (`/mnt/c/Users/you/Documents/ObsidianVault` from WSL).
 
 ***
 
