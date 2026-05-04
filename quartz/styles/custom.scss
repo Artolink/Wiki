@@ -394,11 +394,11 @@ html[saved-theme="dark"] .page .page-header > header .flex-component button:hove
     }
   }
 
-  // Folder aperto: linea guida più sottile
+  // Folder aperto: solo indentazione, niente linea guida verticale.
   & .folder-outer > ul {
     margin-left: 0.75rem;
     padding-left: 0.75rem;
-    border-left: 1px solid var(--lightgray);
+    border-left: none;
   }
 
   // Leaf item (file dentro una cartella) — testo troncato su singola riga.
