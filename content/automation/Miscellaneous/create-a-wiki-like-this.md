@@ -155,6 +155,8 @@ server {
 }
 ```
 
+***
+
 ## 6. Setup Certbot
 
 Certbot is the software that issues a certificate for your domain, so that it can run in HTTPS.
@@ -185,6 +187,8 @@ And... we are done!
 Your personal Wiki should be online.
 
 Now I'll show you a couple scripts to automate the pipeline process, so that you just need to worry about writing the notes and then sync, publish and back them up on GitHub with a click! 
+
+***
 
 ## EXTRA. Automating the process
 
