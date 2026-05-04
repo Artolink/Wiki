@@ -410,6 +410,9 @@ html[saved-theme="dark"] .page .page-header > header .flex-component button:hove
     border-radius: 6px;
     font-size: 0.82rem;
     line-height: 1.35;
+    // Override del font-weight globale (base.scss imposta semi-bold su
+    // TUTTI gli <a>): le note nell'explorer le vogliamo regular.
+    font-weight: 400;
     opacity: 1;
     color: var(--darkgray);
     transition: background 0.12s ease, color 0.12s ease;
