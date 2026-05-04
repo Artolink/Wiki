@@ -154,7 +154,7 @@ server {
 
 ***
 
-## 6. Setup Certbot
+## 6. Certbot Installation
 
 Certbot is the software that issues a certificate for your domain, so that it can run in HTTPS.
 
