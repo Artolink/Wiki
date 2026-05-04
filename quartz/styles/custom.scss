@@ -394,6 +394,15 @@ html[saved-theme="dark"] .page .page-header > header .flex-component button:hove
     }
   }
 
+  // Top-level folder (figli diretti di .explorer-content > ul): bold pieno
+  // per distinguerli dalle sotto-cartelle (che restano semi-bold a 500).
+  & .explorer-content > ul > li > .folder-container {
+    & div > a,
+    & div > button span {
+      font-weight: 700;
+    }
+  }
+
   // Folder aperto: solo indentazione, niente linea guida verticale.
   & .folder-outer > ul {
     margin-left: 0.75rem;
