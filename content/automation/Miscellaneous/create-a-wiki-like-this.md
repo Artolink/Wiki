@@ -74,7 +74,7 @@ The vault is just a normal folder on disk, so just pick a path you'll remember, 
 
 ***
 
-## 2. Set up the VPS
+## 2. Set up your VPS
 
 Since my goal is to avoid vendor lock-in and keep everything fully open source, I use a Linux machine with a public IPv4 address. 
 I host Nginx as my web server to publish my entire website on the domain _farnetiandrea.it_, which points directly to that IP address.
@@ -128,7 +128,7 @@ git remote add origin git@github.com:<your-username>/wiki.git
 git push -u origin main
 ```
 
-This is essential so that `deploy.sh`, the script that we'll later create for automating the process, can run `git push` without issues.
+This is essential so that `deploy.sh`, the script that we'll create for automating the process, can run `git push` without issues.
 
 ***
 
