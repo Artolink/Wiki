@@ -3,9 +3,6 @@ title: The ultimate note taking setup! Create a Wiki like this!
 tags:
   - WebsiteCreation
 ---
-
-## Goal
-
 Hi there!
 
 Today I'm going to show you how I transformed the act of daily note-taking into a system that:
