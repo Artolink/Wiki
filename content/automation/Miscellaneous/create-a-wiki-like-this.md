@@ -94,13 +94,12 @@ If you want to use the same setup, I recommend:
 
 ## 3. Install Quartz on the VPS
 
-Quartz is what converts your Markdown notes in a real site.
+Quartz is what converts your Markdown notes into a real site.
 
 You can follow the [Quartz setup on Linux](quartz-setup-linux) for the detailed explanation. 
 
 **TL;DR:** you want to clone Quartz in any folder that you want to use as the "container" for your site.
-
-In my case, I host this Wiki in the folder "wiki" of my VPS, so i'll use that as a reference:
+In my case, I host this Wiki in the folder "wiki" of my VPS, so i'll use that as a reference throughout the guide:
 ```bash
 git clone https://github.com/jackyzha0/quartz.git wiki
 cd wiki
@@ -111,8 +110,6 @@ npx quartz build # it creates public/, the actual HMTL page of your website
 ```
 
 Quartz will create the `content/` folder, and here's where we have to sync our markdown notes!
-
-The content of the folder is what will be used to generate the website.
 
 You can later also customize `quartz.config.ts` (title, colors, locale) and `quartz.layout.ts` (header, sidebar order) to make the webpage yours.
 
