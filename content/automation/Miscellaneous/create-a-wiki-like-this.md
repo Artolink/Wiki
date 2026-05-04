@@ -6,19 +6,36 @@ tags:
 
 ## Goal
 
-Build a personal, link-rich wiki where:
-- You write everyday notes on your PC using OneNote, and consolidate them at the end of the day into a clean Markdown version using [Obsidian](obsidian-setup).
-- A single command sends them to your VPS and publishes them as a static site under your domain.
-- GitHub keeps a backup for disaster recovery.
+Hi there!
 
-This guide stitches together [[obsidian-setup|Obsidian]] + [Quartz](quartz-setup-linux) into a complete pipeline.
+Today I'm going to show you how I transformed the act of daily note-taking into a system that:
+
+- helps me consolidate what I do during the day
+
+- maps out arguments by showing their evolutions and ramifications
+
+- automatically creates value not just for you, but for others too
+
+The result is a personal, link-rich wiki to show off!
+
+Here is what I actually do:
+
+- I take notes with screenshots on my work latop, using OneNote
+
+- At the end of the day I finalize them by converting them in Markdown, using [Obsidian](obsidian-setup).
+
+- I push them to my VPS using a script
+
+- As soon as they arrive, a static site is automatically generated using [Quartz](quartz-setup-linux), and everything is pushed to GitHub for backup.
+
+This guide walks you through this entire pipeline.
 
 ***
 
 ## Architecture
 
-The Obsidian vault lives on your PC. 
-A `sync-wiki.sh` script pushes it to the VPS via `rsync`, where `deploy.sh` turns it into static HTML with Quartz.  Nginx publishes the site. 
+The Obsidian vault lives on your PC, here is where you finalize the notes. 
+A `sync-wiki.sh` script pushes them to the VPS via `rsync`, where `deploy.sh` turns them into static HTML using Quartz, and commits everything to GitHub. Nginx publishes the site via HTTPS. 
 
 ```mermaid
 flowchart LR
@@ -50,38 +67,136 @@ flowchart LR
 
 ## 1. Install Obsidian on your PC
 
-Follow [the Obsidian setup](obsidian-setup) to install Obsidian, create a vault, and learn the essentials (wikilinks, tags, callouts, frontmatter).
+Follow [the Obsidian setup](obsidian-setup) to install Obsidian, create a vault, and learn the essentials (mainly wikilinks and tags, but also callouts and embeds).
 
-The vault is just a normal folder on disk: pick a path you'll remember: 
+The vault is just a normal folder on disk, so just pick a path you'll remember, for example:
+
 `~/Documents/ObsidianVault` on Linux 
+
 `C:\Users\you\Documents\ObsidianVault` on Windows (accessible from WSL as `/mnt/c/Users/you/Documents/ObsidianVault`).
 
 ***
 
 ## 2. Set up the VPS
 
-You need:
-- **Ubuntu 22.04+** (or any recent Debian-like distro)
-- A non-root user with `sudo` privileges
+Since my goal is to avoid vendor lock-in and keep everything fully open source, I use a Linux machine with a public IPv4 address. 
+I host Nginx as my web server to publish my entire website on the domain _farnetiandrea.it_, which points directly to that IP address.
+
+If you want to use the same setup, I recommend:
+
+- A VPS with **Ubuntu 22.04+** (or any recent Debian-like distro)
+- A non-root user with `sudo` privileges (the correct way to handle privileges in Linux)
 - A public IPv4 address (e.g. `123.456.0.100`)
-- A domain pointing to the VPS (e.g. `wiki.yourdomain.com`--> `123.456.0.100`)
-- [Nginx](nginx-web-server-setup) + [Certbot](certbot-setup-guide) for publishing the domain in HTTPS
+- A domain and its DNS pointed to the VPS (e.g. `wiki.yourdomain.com`--> `123.456.0.100`)
+- [Nginx](nginx-web-server-setup) + [Certbot](certbot-setup-guide) for publishing the domain via HTTPS
 
 ***
 
 ## 3. Install Quartz on the VPS
 
-Follow the [Quartz setup on Linux](quartz-setup-linux) to install Node.js 22, clone Quartz, run `npm install`, and verify with a first `npx quartz build`. 
-Point Nginx `root` at `~/wiki/public/`.
+Quartz is what converts your Markdown notes in a real site.
 
-Customize `quartz.config.ts` (title, colors, locale) and `quartz.layout.ts` (header, sidebar order) to make it yours.
+You can follow the [Quartz setup on Linux](quartz-setup-linux) for the detailed explanation. 
+
+**TL;DR:** you want to clone Quartz in any folder that you want to use as the "container" for your site.
+
+In my case, I host this Wiki in the folder "wiki" of my VPS, so i'll use that as a reference:
+```bash
+git clone https://github.com/jackyzha0/quartz.git wiki
+cd wiki
+rm -rf .git # remove the connection with the official Quartz upstream
+git init # create a new Git repo
+npm install
+npx quartz build # it creates public/, the actual HMTL page of your website
+```
+
+Quartz will create the `content/` folder, and here's where we have to sync our markdown notes!
+
+The content of the folder is what will be used to generate the website.
+
+You can later also customize `quartz.config.ts` (title, colors, locale) and `quartz.layout.ts` (header, sidebar order) to make the webpage yours.
 
 ***
 
-## 4. Create `deploy.sh` on the VPS
+## 4. GitHub setup
 
-Inside `~/wiki`:
+Create a new empty repository on GitHub called `wiki` (no README, no license, leave it completely empty).
 
+See "how to set up your first GitHub page", if you don't know the basics.
+
+On your VPS:
+```bash
+cd ~/wiki
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin git@github.com:<your-username>/wiki.git
+git push -u origin main
+```
+
+This is essential so that `deploy.sh`, the script that we'll later create for automating the process, can run `git push` without issues.
+
+***
+
+## 5. Configure Nginx
+
+Nginx is the web-server that allows you to publish the site you just created with Quartz.
+
+You can see a detailed explanation of Nginx and the configuration I use [here](nginx-web-server-setup).
+
+**TL;DR:** you just need to point Nginx `root` at `~/wiki/public/`:
+```nginx
+server {
+    server_name wiki.<YOUR_SITE.COM>;
+
+    root /home/<YOUR_USER>/wiki/public; #points nginx to /public 
+    index index.html;
+
+    location / {
+        try_files $uri $uri.html $uri/ =404;
+    }
+}
+```
+
+## 6. Setup Certbot
+
+Certbot is the software that issues a certificate for your domain, so that it can run in HTTPS.
+
+You can see the [Certbot setup guide](certbot-setup-guide) to install Certbot and activate it for you website.
+
+**TL;DR:** it will add the following lines to your Nginx configuration:
+```nginx
+server {
+    server_name wiki.<YOUR_SITE.COM>;
+
+    root /home/<YOUR_USER>/wiki/public;
+    index index.html;
+
+    location / {
+        try_files $uri $uri.html $uri/ =404;
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate     /etc/letsencrypt/live/wiki.farnetiandrea.it/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/wiki.farnetiandrea.it/privkey.pem;
+    # …other Certbot directives…
+}
+``````
+
+And... we are done!
+
+Your personal Wiki should be online.
+
+Now I'll show you a couple scripts to automate the pipeline process, so that you just need to worry about writing the notes and then sync, publish and back them up on GitHub with a click! 
+
+## EXTRA. Automating the process
+
+For automating the entire pipeline, we are going to need two scripts:
+
+- `deploy.sh`: lives inside my "wiki" folder on the VPS. Deploys everything on GitHub and generates the site
+- `sync-wiki.sh`: lives inside my work laptop. Syncs every note on the VPS and calls deploy.sh
+
+`deploy.sh`:
 ```bash
 #!/bin/bash
 # Build Quartz, fix perms, push to GitHub as backup
@@ -100,18 +215,7 @@ if [[ -n "$(git status --porcelain)" ]]; then
 fi
 ```
 
-Make it executable:
-
-```bash
-chmod +x deploy.sh
-```
-
-***
-
-## 5. Create `sync-wiki.sh` on your PC
-
-This is the script that ties everything together: rsync the vault to the VPS, then trigger `deploy.sh` over SSH.
-
+`sync-wiki.sh`:
 ```bash
 #!/bin/bash
 # Sync vault to VPS, then deploy
@@ -137,8 +241,18 @@ ssh "$VPS_ALIAS" "cd ~/wiki && ./deploy.sh"
 echo "==> Done. Site live at https://wiki.yourdomain.com"
 ```
 
-Configure the SSH alias to your VPS in `~/.ssh/config`:
+To correctly run this script, you also need to configure an SSH alias for your VPS.
 
+Basically, an SSH alias let's you do:
+```bash
+ssh my-vps
+```
+Instead of :
+```bash
+ssh -i <PATH_TO_YOUR_SSHKEY> <NAME>@<IP>
+```
+
+To do that, you need to edit accordingly your `~/.ssh/config` in your [WSL](WSL-installation) installation:
 ```
 Host my-vps
     HostName 1.2.3.4
@@ -146,32 +260,20 @@ Host my-vps
     IdentityFile ~/.ssh/id_ed25519
 ```
 
-***
+Now we are finally ready to publish!
 
-## 6. Publish
+Open WSL in your work laptop, and launch:
 
 ```bash
 ./sync-wiki.sh
 ```
 
-That's it. Vault → VPS → Quartz build → Nginx serves the site → GitHub gets a backup commit.
+That's it. 
 
-***
-
-## Daily workflow
+From now on, your daily workflow is the following:
 
 1. Edit the final notes in Obsidian (fully offline).
 2. When you want to publish them: `./sync-wiki.sh`.
 3. Refresh your wiki: changes are live in a few seconds.
 
-***
-
-## Why this setup?
-
-| Aspect                                                                     | Why this choice                                                                    |
-| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| **Obsidian**                                                               | Best-in-class local editing, graph view, no vendor lock-in (notes are plain `.md`) |
-| **Quartz**                                                                 | Static site, fast, native support for Obsidian wikilinks / callouts / embeds       |
-| **Plain rsync**                                                            | No vendor, no daemons, dead-simple, works over SSH                                 |
-| **VPS + [Nginx](nginx-web-server-setup) + [Certbot](certbot-setup-guide)** | Full control, no platform limits, cheap                                            |
-| **GitHub backup**                                                          | Free off-site copy + commit history, useful for disaster recovery                  |
+Vault → VPS → Quartz build → Nginx serves the site → GitHub gets a backup commit.

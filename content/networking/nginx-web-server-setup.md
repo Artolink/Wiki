@@ -120,22 +120,6 @@ server {
 }
 ```
 
-### 3. Reverse proxy with WebSocket (e.g. Socket.IO)
-
-```nginx
-location /socket.io/ {
-    proxy_pass http://127.0.0.1:3000;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade    $http_upgrade;
-    proxy_set_header Connection "upgrade";
-    proxy_set_header Host       $host;
-    proxy_read_timeout 60s;
-    proxy_send_timeout 60s;
-}
-```
-
-`Upgrade`/`Connection: upgrade` are what turn the HTTP connection into a WebSocket.
-
 ### 4. Hardening headers (one-liner per header)
 
 ```nginx
@@ -217,6 +201,4 @@ server {
 > [!NOTE]
 > Nginx does **not** expand `~` to the user's home directory — that's a shell convention, not an Nginx one. In a real config use the absolute path (e.g. `/var/www/wiki` or the full home path). `~/wiki/public` is shown here only to keep the example free of personal account details.
 
-The same VPS also hosts `farnetiandrea.it` (a small landing page + a reverse-proxied Node app called *OfficeGamble*). One file per domain in `conf.d/`, `nginx -t`, `systemctl reload nginx` — that's the whole loop.
-
-For the broader pipeline (Obsidian → rsync → Quartz → Nginx + Certbot), see [[Create a Wiki like this!]].
+The same VPS also hosts `farnetiandrea.it` (a small landing page + a reverse-proxied Node app called *OfficeGamble*). One file per domain in `conf.d/`!

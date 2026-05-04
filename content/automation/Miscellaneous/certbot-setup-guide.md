@@ -196,5 +196,3 @@ server {
 The renewal config in `/etc/letsencrypt/renewal/wiki.farnetiandrea.it.conf` declares `authenticator = nginx, installer = nginx` — so Certbot reuses the Nginx plugin both to validate and to install renewed certs. No webroot, no manual reload: `certbot.timer` handles everything twice a day.
 
 A single, non-wildcard domain → `--nginx` is the right choice here. If I ever wanted `*.farnetiandrea.it`, I'd switch to a DNS-01 plugin (see [warning above](#%EF%B8%8F-wildcard-certificates)).
-
-For the broader pipeline this wiki uses (Obsidian → rsync → Quartz → Nginx + this Certbot setup), see [how to create a Wiki like this!](create-a-wiki-like-this)

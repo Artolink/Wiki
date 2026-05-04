@@ -6,9 +6,9 @@ tags:
 
 ## What is Quartz?
 
-Quartz is a fast, batteries-included **static site generator** that turns a folder of Markdown files (typically an [[obsidian-setup|Obsidian]] vault) into a fully-functional website.
+Quartz is a fast **static site generator** that turns a folder of Markdown files (typically an [[obsidian-setup|Obsidian]] vault) into a fully-functional website.
 
-The site is built once with `npx quartz build`, the output is plain HTML/CSS/JS in `public/`, and you can serve it from any web server ([Nginx](nginx-web-server-setup), Apache, GitHub Pages…).
+The site is built once with `npx quartz build`, the output is plain HTML/CSS/JS in the `public/` folder, and you can serve it from any web server ([Nginx](nginx-web-server-setup), Apache, GitHub Pages…).
 
 ***
 
@@ -37,6 +37,9 @@ node -v   # -> v22.x
 
 ### 2. Clone Quartz
 
+Clone Quartz in any folder that you want to use as the "container" for your site.
+
+In my case, I host this Wiki in the folder "wiki" of my VPS, so:
 ```bash
 cd ~
 git clone https://github.com/jackyzha0/quartz.git wiki
@@ -44,15 +47,17 @@ cd wiki
 npm install
 ```
 
-If you already have your own fork (recommended for customization), use that URL instead.
-
 ### 3. First build
 
 ```bash
 npx quartz build
 ```
 
-The output ends up in `public/`. For a local preview:
+The output ends up in `public/`. 
+
+The content of the site (so our Markdown notes) has to go in `content/`.
+
+For a local preview, you can use:
 
 ```bash
 npx quartz build --serve
@@ -108,24 +113,6 @@ left: [
 
 ## Linking from Obsidian
 
-If your `content/` folder *is* (or mirrors) your Obsidian vault, all your wikilinks `[[note-name]]` already work in Quartz — handled by the `ObsidianFlavoredMarkdown` plugin. Same for callouts (`> [!NOTE]`), embeds (`![[note]]`), tags.
+If your `content/` folder *is* (or mirrors) your Obsidian vault, all your wikilinks `[[note-name]]` already work in Quartz, handled by the `ObsidianFlavoredMarkdown` plugin. Same for callouts (`> [!NOTE]`), embeds (`![[note]]`), tags.
 
-Write notes locally in Obsidian, publish them as-is. No syntax conversion required.
-
-***
-
-## Deploy
-
-Smallest possible deploy script (Linux + [Nginx](nginx-web-server-setup)):
-
-```bash
-#!/bin/bash
-set -euo pipefail
-cd ~/wiki
-npx quartz build
-chmod -R o+rX public/
-```
-
-Then point Nginx `root` at `~/wiki/public/` and reload.
-
-For the full pipeline (Obsidian vault on PC → rsync → VPS → Quartz build → Nginx + GitHub backup), see [how to create a Wiki like mine!](create-a-wiki-like-this.md).
+So basically: write notes locally in Obsidian, and they will be published as-is!
