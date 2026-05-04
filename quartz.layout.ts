@@ -83,6 +83,11 @@ const tagColors: Record<string, string> = {
   StartingTools: "#a16207",   // marrone caldo (ambra scuro)
 }
 
+// Colore del nodo "tu sei qui" nel grafo: distingue la pagina aperta dagli
+// altri nodi. I nodi normali diventano cerchi pieni di questo colore; le tag
+// pages hanno bordo di questo colore (mantengono il fill vuoto).
+const currentNodeColor = "#dc2626" // rosso
+
 // Graph "fullscreen" usato sulla pagina /grafico — depth: -1 mostra TUTTI i nodi
 // (vs il graph nella sidebar destra che mostra solo i vicini con depth: 1)
 const fullPageGraph = Component.Graph({
@@ -99,14 +104,15 @@ const fullPageGraph = Component.Graph({
     focusOnHover: true,
     enableRadial: true,
     tagColors,
+    currentNodeColor,
   },
 })
 
 // Graph nella sidebar destra delle pagine: usa i default Quartz (depth:1, ecc.)
-// ma con i nostri colori custom per i tag.
+// ma con i nostri colori custom per i tag e il nodo corrente.
 const sidebarGraph = Component.Graph({
-  localGraph: { tagColors },
-  globalGraph: { tagColors },
+  localGraph: { tagColors, currentNodeColor },
+  globalGraph: { tagColors, currentNodeColor },
 })
 
 // Pulsanti utility (graph-toggle / darkmode / focus-mode) replicati come

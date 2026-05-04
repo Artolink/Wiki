@@ -25,6 +25,11 @@ export interface D3Config {
   // e in hover sul tag i vicini e i link incidenti vengono tinti dello stesso
   // colore per renderli immediatamente identificabili.
   tagColors?: Record<string, string>
+  // Colore del nodo che rappresenta la pagina corrente. Se non specificato,
+  // ricade su `--secondary` (default Quartz). I nodi normali diventano cerchi
+  // pieni di questo colore; i tag che coincidono con la pagina aperta hanno
+  // bordo di questo colore.
+  currentNodeColor?: string
 }
 
 interface GraphOptions {

@@ -92,6 +92,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     focusOnHover,
     enableRadial,
     tagColors,
+    currentNodeColor,
   } = JSON.parse(graph.dataset["cfg"]!) as D3Config
   const tagColorMap: Record<string, string> = tagColors ?? {}
 
@@ -200,10 +201,11 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   )
 
   // calculate color
+  const currentColor = currentNodeColor ?? computedStyleMap["--secondary"]
   const color = (d: NodeData) => {
     const isCurrent = d.id === slug
     if (isCurrent) {
-      return computedStyleMap["--secondary"]
+      return currentColor
     }
     if (d.id.startsWith("tags/")) {
       const tagName = d.id.substring("tags/".length)
@@ -451,14 +453,18 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
 
     let oldLabelOpacity = 0
     const isTagNode = nodeId.startsWith("tags/")
+    const isCurrentNode = nodeId === slug
     const customTagColor = isTagNode
       ? tagColorMap[nodeId.substring("tags/".length)]
       : undefined
     // I tag restano sempre cerchi "vuoti" (fill --light) per essere riconoscibili
-    // come tag. Il colore custom — se presente — finisce sul bordo.
+    // come tag. Il colore custom — se presente — finisce sul bordo. Se il tag è
+    // la pagina corrente, il bordo prende il currentColor per spiccare.
     const defaultFill = isTagNode ? computedStyleMap["--light"] : color(n)
     const defaultStroke = isTagNode
-      ? (customTagColor ?? computedStyleMap["--tertiary"])
+      ? (isCurrentNode
+          ? currentColor
+          : (customTagColor ?? computedStyleMap["--tertiary"]))
       : undefined
     const radius = nodeRadius(n)
     const gfx = new Graphics({
