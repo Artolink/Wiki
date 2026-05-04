@@ -177,7 +177,9 @@ export const defaultContentPageLayout: PageLayout = {
     sidebarRightActions,
     sidebarGraph,
     Component.DesktopOnly(Component.TableOfContents()),
-    Component.Backlinks(),
+    // Backlinks disabilitati a livello di layout — il componente esiste ancora
+    // in quartz/components/Backlinks.tsx, basta rimettere `Component.Backlinks()`
+    // qui sotto per riattivarli.
   ],
 }
 
