@@ -394,9 +394,11 @@ html[saved-theme="dark"] .page .page-header > header .flex-component button:hove
     }
   }
 
-  // Top-level folder (figli diretti di .explorer-content > ul): bold pieno
-  // per distinguerli dalle sotto-cartelle (che restano semi-bold a 500).
-  & .explorer-content > ul > li > .folder-container {
+  // Top-level folder (figli diretti del primo <ul> dentro .explorer-content):
+  // bold pieno per distinguerli dalle sotto-cartelle (che restano a 500).
+  // NB: siamo già dentro .sidebar.left .explorer-content { … } quindi
+  // il `&` parte da lì. Usare `> ul > li > .folder-container` direttamente.
+  & > ul > li > .folder-container {
     & div > a,
     & div > button span {
       font-weight: 700;
