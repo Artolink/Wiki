@@ -81,6 +81,7 @@ const gitHubEdit = Component.GitHubEdit({
 const tagColors: Record<string, string> = {
   WebsiteCreation: "#3b82f6", // blu
   StartingTools: "#a16207",   // marrone caldo (ambra scuro)
+  Basics: "#ec4899",          // rosa
 }
 
 // Colore del nodo "tu sei qui" nel grafo: distingue la pagina aperta dagli
