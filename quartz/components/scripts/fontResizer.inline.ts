@@ -49,14 +49,31 @@ document.addEventListener("nav", () => {
   applyScale(initial)
   syncSliders(initial)
 
-  // ── Visibilità floating: appare quando il mouse scende sotto la metà ──
-  // La barra è position:fixed in basso al centro, opacity:0 di default.
-  // Aggiungiamo `.visible` quando il puntatore supera la soglia verticale,
-  // e la rimuoviamo altrimenti. Throttle via requestAnimationFrame.
+  // ── Visibilità floating: appare solo se il mouse è sopra al contenuto ──
+  // Vincoli combinati:
+  //   1) puntatore sotto la soglia verticale (metà schermo, vedi
+  //      VISIBLE_THRESHOLD_FRACTION) → non distrae mentre leggi l'inizio.
+  //   2) puntatore sopra al .center (la colonna del file md) → su finestre
+  //      larghe, le aree vuote ai lati delle sidebar non attivano la barra.
+  // La barra è position:fixed in basso al centro, opacity:0 di default;
+  // toggle della classe `.visible` controlla la transizione opacity. Throttle
+  // dei mousemove via requestAnimationFrame.
   let mouseTracking = false
-  function updateVisibility(mouseY: number) {
+  function updateVisibility(mouseX: number, mouseY: number) {
     const threshold = window.innerHeight * VISIBLE_THRESHOLD_FRACTION
-    const shouldBeVisible = mouseY > threshold
+    const belowMidpoint = mouseY > threshold
+
+    // Range orizzontale del contenuto: usiamo .center (column del file md).
+    // Fallback su window.innerWidth se per qualche motivo manca (es. layout
+    // diverso) → in quel caso il check X è disabilitato di fatto.
+    const center = document.querySelector(".page > #quartz-body > .center")
+    let overContent = true
+    if (center) {
+      const rect = (center as HTMLElement).getBoundingClientRect()
+      overContent = mouseX >= rect.left && mouseX <= rect.right
+    }
+
+    const shouldBeVisible = belowMidpoint && overContent
     for (const el of document.getElementsByClassName("font-resizer-floating")) {
       el.classList.toggle("visible", shouldBeVisible)
     }
@@ -64,8 +81,10 @@ document.addEventListener("nav", () => {
   function onMouseMove(e: MouseEvent) {
     if (mouseTracking) return
     mouseTracking = true
+    const x = e.clientX
+    const y = e.clientY
     requestAnimationFrame(() => {
-      updateVisibility(e.clientY)
+      updateVisibility(x, y)
       mouseTracking = false
     })
   }
