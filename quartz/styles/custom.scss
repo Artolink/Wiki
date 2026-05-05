@@ -1305,3 +1305,31 @@ html[saved-theme="dark"] {
       0 4px 12px rgba(0, 0, 0, 0.3);
   }
 }
+
+// ──────────────────────────────────────────────────────────────────────────────
+// TAG PAGES — accent color allineato al colore del tag nel grafo
+// ──────────────────────────────────────────────────────────────────────────────
+// Quando si visita /tags/<NomeTag>, override delle CSS vars di accent
+// (--secondary / --tertiary / --highlight) così il sito assume il colore
+// del tag che si sta esplorando: titoli, sidebar link attivo, chip, hover…
+// I valori devono restare allineati alla mappa `tagColors` in
+// quartz.layout.ts. `html[saved-theme]` davanti al body alza la specificità
+// sopra a `:root[saved-theme="..."]` (dove Quartz scrive le vars di base).
+
+html[saved-theme] body[data-slug="tags/StartingTools"] {
+  --secondary: #a16207;
+  --tertiary:  #ca8a04;
+  --highlight: rgba(161, 98, 7, 0.15);
+}
+
+html[saved-theme] body[data-slug="tags/Basics"] {
+  --secondary: #ec4899;
+  --tertiary:  #f472b6;
+  --highlight: rgba(236, 72, 153, 0.15);
+}
+
+html[saved-theme] body[data-slug="tags/WebsiteCreation"] {
+  --secondary: #3b82f6;
+  --tertiary:  #60a5fa;
+  --highlight: rgba(59, 130, 246, 0.15);
+}
