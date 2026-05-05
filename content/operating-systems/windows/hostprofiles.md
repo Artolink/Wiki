@@ -1,5 +1,5 @@
 ---
-title: " HostProfiles: instant switching between hosts file profiles"
+title: " HostProfiles: switch instantly your host file"
 tags:
   - Utilities
 ---
