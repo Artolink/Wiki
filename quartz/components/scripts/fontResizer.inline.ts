@@ -38,22 +38,25 @@ function setScale(v: number) {
 // ma il componente usa afterDOMLoaded — leggera latenza accettabile).
 applyScale(readScale())
 
-// Soglia (px dal fondo del viewport) entro cui la barra diventa visibile
-const VISIBLE_THRESHOLD_PX = 250
+// Soglia di visibilità espressa come frazione dell'altezza del viewport,
+// così la barra appare alla stessa "altezza relativa" su monitor di
+// dimensioni diverse. 0.5 = il mouse deve superare la metà dello schermo
+// (dal top) perché la barra entri in scena.
+const VISIBLE_THRESHOLD_FRACTION = 0.5
 
 document.addEventListener("nav", () => {
   const initial = readScale()
   applyScale(initial)
   syncSliders(initial)
 
-  // ── Visibilità floating: appare quando il mouse è vicino al bordo basso ──
+  // ── Visibilità floating: appare quando il mouse scende sotto la metà ──
   // La barra è position:fixed in basso al centro, opacity:0 di default.
-  // Aggiungiamo `.visible` quando il puntatore entra negli ultimi N pixel del
-  // viewport, e la rimuoviamo altrimenti. Throttle via requestAnimationFrame.
+  // Aggiungiamo `.visible` quando il puntatore supera la soglia verticale,
+  // e la rimuoviamo altrimenti. Throttle via requestAnimationFrame.
   let mouseTracking = false
   function updateVisibility(mouseY: number) {
-    const distFromBottom = window.innerHeight - mouseY
-    const shouldBeVisible = distFromBottom < VISIBLE_THRESHOLD_PX
+    const threshold = window.innerHeight * VISIBLE_THRESHOLD_FRACTION
+    const shouldBeVisible = mouseY > threshold
     for (const el of document.getElementsByClassName("font-resizer-floating")) {
       el.classList.toggle("visible", shouldBeVisible)
     }
