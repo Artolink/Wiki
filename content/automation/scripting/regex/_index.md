@@ -1,5 +1,7 @@
 ---
 title: 🧩 RegEx (regular expressions)
+tags:
+  - Basics
 ---
 ## What Are Regex?
 

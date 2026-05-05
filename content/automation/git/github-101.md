@@ -1,7 +1,7 @@
 ---
 title: " Get started with GitHub"
 tags:
-  - StartingTools
+  - Basics
 ---
 
 ## What is GitHub?

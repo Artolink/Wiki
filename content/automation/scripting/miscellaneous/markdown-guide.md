@@ -1,5 +1,7 @@
 ---
 title: " Master Markdown — the only syntax you need to write notes"
+tags:
+  - Basics
 ---
 
 ## What is Markdown?
