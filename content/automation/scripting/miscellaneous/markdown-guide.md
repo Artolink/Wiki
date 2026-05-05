@@ -6,7 +6,7 @@ title: " Master Markdown — the only syntax you need to write notes"
 
 The document you are reading right now, is in Markdown.
 
-Every note in this Wiki is written using Markdown.
+Every note in this Wiki is written using Markdown... and it's super easy!
 
 Markdown is a tiny set of conventions for writing plain text that **looks structured** when rendered. You don't need a special editor — any `.txt` will do — but tools like [[obsidian-setup|Obsidian]] turn the syntax into a clean visual document as you type.
 

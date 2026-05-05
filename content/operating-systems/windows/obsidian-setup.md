@@ -7,7 +7,10 @@ tags:
 ## What is Obsidian?
 
 Obsidian is a local-first Markdown note-taking app built around a **personal knowledge base** (vault).
-Notes are plain `.md` files stored on your machine — no lock-in, no cloud required.
+Notes are plain `.md` files stored on your machine... What?
+
+You don't know how to write Markdown files? It's super simple! Check my [guide](markdown-guide).
+
 The real power is in **linking notes together** and visualising connections through the graph view.
 
 ***
