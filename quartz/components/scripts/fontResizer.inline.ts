@@ -63,13 +63,16 @@ document.addEventListener("nav", () => {
     const threshold = window.innerHeight * VISIBLE_THRESHOLD_FRACTION
     const belowMidpoint = mouseY > threshold
 
-    // Range orizzontale del contenuto: usiamo .center (column del file md).
-    // Fallback su window.innerWidth se per qualche motivo manca (es. layout
-    // diverso) → in quel caso il check X è disabilitato di fatto.
-    const center = document.querySelector(".page > #quartz-body > .center")
+    // Range orizzontale del contenuto: usiamo <article> (il body del file md
+    // dentro .center). Articolo è più stretto del .center perché ha padding
+    // e max-width applicati, quindi rispecchia il "testo effettivo". Fallback
+    // su .center per le list pages che non hanno <article>.
+    const article =
+      document.querySelector(".page > #quartz-body > .center article") ||
+      document.querySelector(".page > #quartz-body > .center")
     let overContent = true
-    if (center) {
-      const rect = (center as HTMLElement).getBoundingClientRect()
+    if (article) {
+      const rect = (article as HTMLElement).getBoundingClientRect()
       overContent = mouseX >= rect.left && mouseX <= rect.right
     }
 
