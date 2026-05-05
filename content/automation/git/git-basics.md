@@ -1,5 +1,5 @@
 ---
-title: " Get fluent with Git — the daily-use commands"
+title: " Get fluent with Git: the daily-use commands"
 tags:
   - Basics
 ---
