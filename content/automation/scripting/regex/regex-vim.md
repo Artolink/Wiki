@@ -1,8 +1,9 @@
 ---
 title: Regex for Vim (Posix-like)
 ---
-
+> [!NOTE]
 > VIM regex is based on POSIX: check out the [Regex for SED](regex-sed) for the core syntax.
+
 ---
 
 ## VIM-Specific Extensions

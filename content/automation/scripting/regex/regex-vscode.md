@@ -1,10 +1,11 @@
 ---
 title: Regex in VSCode (JavaScript / Perl-like)
 ---
-
+> [!NOTE]
 > **Also valid for:** `grep -P` (add `-P` flag for PCRE mode — covers almost everything below)
 
-> **Tip:** Once you have matched what you want with a regex, to select **all occurrences** found: `ALT + ENTER`
+> [!TIP]
+>  Once you have matched what you want with a regex, to select **all occurrences** found: `ALT + ENTER`
 
 ---
 
@@ -108,5 +109,3 @@ Matches: `High-level`, `Mid-level`, `Low-level`
 ```text
 \b\d{1,3}(\.\d{1,3}){3}\b
 ```
-
-> **Note:** This does not validate whether octets exceed 255 — handling that would make the regex significantly more complex.

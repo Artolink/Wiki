@@ -21,7 +21,7 @@ Here is what I actually do:
 
 - At the end of the day I finalize them by converting them in [Markdown](markdown-guide), using [Obsidian](obsidian-setup).
 
-- I push them to my VPS using a script
+- I push them to my VPS using a Python script
 
 - As soon as they arrive, a static site is automatically generated using [Quartz](quartz-setup-linux), and everything is pushed to [GitHub](github-101) for backup, using [Git](git-basics) for versioning.
 
@@ -112,13 +112,13 @@ You can later also customize `quartz.config.ts` (title, colors, locale) and `qua
 
 ***
 
-## 4. GitHub setup
+## 4. Git & GitHub setup
 
 Create a new empty repository on GitHub called `wiki` (no README, no license, leave it completely empty).
 
-See "how to set up your first GitHub page", if you don't know the basics.
+See [how to set up your first GitHub page](github-101), if you don't know the basics.
 
-On your VPS:
+On your VPS, initialize `~/wiki` as a [Git repository](git-basics) and connect it to GitHub:
 ```bash
 cd ~/wiki
 git add .
@@ -273,5 +273,3 @@ From now on, your daily workflow is the following:
 1. Edit the final notes in Obsidian (fully offline).
 2. When you want to publish them: `./sync-wiki.sh`.
 3. Refresh your wiki: changes are live in a few seconds.
-
-Vault → VPS → Quartz build → Nginx serves the site → GitHub gets a backup commit.

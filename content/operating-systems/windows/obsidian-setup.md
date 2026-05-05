@@ -88,29 +88,3 @@ tags: [linux, sysadmin]
 created: 2026-04-30
 ---
 ```
-
-***
-
-## Recommended Core Plugins to Enable
-
-*(Settings → Core plugins)*
-
-| Plugin             | Why enable it                               |
-| ------------------ | ------------------------------------------- |
-| **Backlinks**      | See which notes link to the current one     |
-| **Outgoing links** | See all links from the current note         |
-| **Templates**      | Insert reusable note templates              |
-| **Daily notes**    | Auto-create a note for each day             |
-| **Quick switcher** | Fast navigation between notes               |
-| **File recovery**  | Snapshots of your notes — useful safety net |
-| **Canvas**         | Visual board to connect notes freely        |
-
-***
-
-## Sync Options (Free)
-
-| Method                          | Notes                                              |
-| ------------------------------- | -------------------------------------------------- |
-| **Git + GitHub**                | Best for technical users: version control included |
-| **iCloud / OneDrive / Dropbox** | Works by pointing the vault to a synced folder     |
-| **Syncthing**                   | Peer-to-peer, no cloud, works great on Linux       |

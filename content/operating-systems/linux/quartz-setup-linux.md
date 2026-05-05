@@ -6,7 +6,7 @@ tags:
 
 ## What is Quartz?
 
-Quartz is a fast **static site generator** that turns a folder of Markdown files (typically an [[obsidian-setup|Obsidian]] vault) into a fully-functional website.
+Quartz is a fast **static site generator** that turns a folder of [Markdown](markdown-guide) files (typically an [[obsidian-setup|Obsidian]] vault) into a fully-functional website.
 
 The site is built once with `npx quartz build`, the output is plain HTML/CSS/JS in the `public/` folder, and you can serve it from any web server ([Nginx](nginx-web-server-setup), Apache, GitHub Pages…).
 
@@ -83,7 +83,7 @@ Anything outside `content/`, `quartz.config.ts`, `quartz.layout.ts` is Quartz in
 
 ## Customization basics
 
-### Site identity — `quartz.config.ts`
+### Site identity: `quartz.config.ts`
 
 ```ts
 configuration: {
@@ -97,7 +97,7 @@ configuration: {
 }
 ```
 
-### Layout — `quartz.layout.ts`
+### Layout: `quartz.layout.ts`
 
 Header, sidebars and footer are composed by listing components:
 
@@ -109,10 +109,3 @@ left: [
 ]
 ```
 
-***
-
-## Linking from Obsidian
-
-If your `content/` folder *is* (or mirrors) your Obsidian vault, all your wikilinks `[[note-name]]` already work in Quartz, handled by the `ObsidianFlavoredMarkdown` plugin. Same for callouts (`> [!NOTE]`), embeds (`![[note]]`), tags.
-
-So basically: write notes locally in Obsidian, and they will be published as-is!

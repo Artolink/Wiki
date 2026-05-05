@@ -144,7 +144,7 @@ sudo systemctl reload nginx
 
 ## HTTPS
 
-Nginx doesn't issue certificates on its own. Pair it with [[Certbot setup]] — a single `sudo certbot --nginx -d your-domain.com` adds `listen 443 ssl`, the cert paths, and an HTTP→HTTPS redirect to the existing vhost, plus auto-renewal via `certbot.timer`.
+Nginx doesn't issue certificates on its own. Pair it with [Certbot](certbot-setup-guide): a single `sudo certbot --nginx -d your-domain.com` adds `listen 443 ssl`, the cert paths, and an HTTP→HTTPS redirect to the existing vhost, plus auto-renewal via `certbot.timer`.
 
 ***
 

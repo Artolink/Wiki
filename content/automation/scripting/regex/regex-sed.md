@@ -1,10 +1,11 @@
 ---
 title: Regex for sed (Posix)
 ---
+> [!NOTE]
+> **This is also valid for** [vim](regex-vim.md) (POSIX-like with minor extensions — behavior is nearly identical)
 
-> **Also valid for** [vim](regex-vim.md) (POSIX-like with minor extensions — behavior is nearly identical)
-
-> **Important:** sed has two modes:
+> [!INFO]
+> **sed has two modes:**
 > - **BRE** (Basic Regular Expressions) — default, `sed 'pattern'`
 > - **ERE** (Extended Regular Expressions) — activated with `-E` flag, `sed -E 'pattern'`
 >

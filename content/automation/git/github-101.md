@@ -6,7 +6,7 @@ tags:
 
 ## What is GitHub?
 
-GitHub is a hosting service for code repositories built on top of Git. Think of it as **Google Drive for code** — except instead of just storing files it tracks every change, lets multiple people work on the same codebase without overwriting each other, and serves as a public showcase of what you've built.
+GitHub (or GitLab, Bitbucket...) is a hosting service for code repositories built on top of [Git](git-basics). Think of it as **Google Drive for code**, except instead of just storing files it tracks every change, lets multiple people work on the same codebase without overwriting each other, and serves as a public showcase of what you've built.
 
 The basics worth knowing before clicking around:
 - A **repository** ("repo") is a single project: source files, history, branches, issues.
@@ -134,7 +134,7 @@ git push -u origin main
 
 The `-u` flag links the local `main` to the remote `main` — after this, `git push` and `git pull` know where to go without arguments.
 
-## Forking — using someone else's repo as a starting point
+## Forking: using someone else's repo as a starting point
 
 A **fork** is a server-side copy of a repo under your username. It keeps a link to the original ("upstream") so updates can be pulled in later.
 

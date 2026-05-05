@@ -6,7 +6,7 @@ tags:
 
 ## What is Markdown?
 
-The document you are reading right now, is in Markdown.
+The document you are reading right now, is Markdown.
 
 Every note in this Wiki is written using Markdown... and it's super easy!
 
@@ -56,10 +56,11 @@ Ordered:
 3. step three
 ```
 
-Numbers don't have to be sequential — Markdown renumbers automatically. Writing `1.` three times in a row works fine.
+Numbers don't have to be sequential: Markdown renumbers automatically. 
+
+Writing `1.` three times in a row works fine.
 
 Task list (very useful in Obsidian):
-
 ```md
 - [ ] thing to do
 - [x] thing already done
@@ -190,7 +191,7 @@ Drop another note's content into the current one:
 ![[other-note#Specific section]]
 ```
 
-Useful when a chunk of explanation belongs to several places — write it once, embed it where needed.
+Useful when a chunk of explanation belongs to several places: write it once, embed it where needed.
 
 ## A few habits that pay off
 

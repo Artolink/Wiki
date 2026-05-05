@@ -1,15 +1,15 @@
 ---
 title: How to enter the UEFI / BIOS
 ---
-# 🔎 Overview
+# Overview
 
 This guide explains how to access your system's firmware settings (UEFI or legacy BIOS) in order to change hardware-level options.
-
-> ℹ️ **UEFI vs Legacy BIOS:** UEFI is the modern firmware standard and allows direct access from within Windows. Legacy BIOS is older firmware with no OS-level entry point — the only way in is through keyboard input at boot time (POST).
+> [!NOTE]
+> **UEFI vs Legacy BIOS:** UEFI is the modern firmware standard and allows direct access from within Windows. Legacy BIOS is older firmware with no OS-level entry point — the only way in is through keyboard input at boot time (POST).
 
 ***
 
-## 0️⃣ Check if your System is UEFI or BIOS
+## Check if your System is UEFI or BIOS
 
 Before trying any method, confirm your firmware type.
 
@@ -51,10 +51,10 @@ ls /sys/firmware/efi
 
 ***
 
-## 1️⃣ UEFI: Enter from Windows
+## UEFI: Enter from Windows
 
-> ℹ️ These methods only work if your system is booted in **UEFI mode**.
-
+> [!warning]
+> These methods only work if your system is booted in **UEFI mode**.
 #### Via CMD command
 
 Open PowerShell as Administrator:
@@ -82,9 +82,10 @@ Troubleshoot → Advanced options → UEFI Firmware Settings → Restart
 
 ***
 
-## 2️⃣ Legacy BIOS: Enter at Boot
+## Legacy BIOS: Enter at Boot
 
-> ℹ️ The following methods can also work in UEFI firmwares
+> [!NOTE]
+> The following methods can also work in UEFI firmwares
 
 There is **no OS-level method** to enter a legacy BIOS. Windows has no communication channel with legacy firmware. The only option is keyboard input during POST.
 

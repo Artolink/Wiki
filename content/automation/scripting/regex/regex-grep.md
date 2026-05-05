@@ -1,7 +1,7 @@
 ---
 title: Regex for grep (Perl with Posix support)
 ---
-
+> [!INFO]
 > `grep` regex is Perl-compatible (PCRE): refer to [the VSCode regex](regex-vscode) for the core syntax.
 > Always use the `-P` flag to enable PCRE mode. Without it, `grep` falls back to BRE (like SED).
 

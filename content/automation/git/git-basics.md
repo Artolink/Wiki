@@ -3,17 +3,17 @@ title: " Get fluent with Git: the daily-use commands"
 tags:
   - Basics
 ---
+**Git** is a version-control program that runs on the local machine.
+The CLI commands below work even with no internet: Git was built that way. 
 
-## Git ≠ GitHub
-
-Easy thing to mix up: **Git** is a version-control program that runs on the local machine, **GitHub** is a website that hosts Git repositories online. The CLI commands below work even with no internet — Git was built that way. GitHub (or GitLab, Bitbucket, …) only enters the picture when sharing or backing up the repo. Pair this guide with [[github-basics|the GitHub starter]] for the online side.
+GitHub (or GitLab, Bitbucket…) only enters the picture when sharing or backing up the repo. Pair this guide with [[github-basics|the GitHub starter]] for understanding that aspect too.
 
 ## First-time setup
 
 Before the first commit, tell Git who is making the changes. The values end up baked into every commit's metadata, so use a real email (the same one used on GitHub if there's a plan to push there).
 
 ```bash
-git config --global user.name  "Andrea Farneti"
+git config --global user.name  "YOUR NAME"
 git config --global user.email "your_email@example.com"
 git config --global color.ui   auto          # colored terminal output
 git config --global init.defaultBranch main   # modern default for new repos
@@ -124,9 +124,11 @@ git restore file.txt           # discard unstaged changes (replaces `checkout fi
 
 Both styles work; `switch`/`restore` are easier to remember once used a couple of times.
 
-## Merge vs Rebase — the question every team ends up arguing about
+## Merge vs Rebase: the question every team ends up arguing about
 
-Two ways to bring the changes from one branch into another. They produce a different history but the **resulting code is the same**.
+Two ways to bring the changes from one branch into another. 
+
+They produce a different history, but the **resulting code is the same**.
 
 ### Merge
 
@@ -192,14 +194,7 @@ Sensible templates per language: https://github.com/github/gitignore.
 
 - **Commit small, commit often.** A commit per logical change. Easier to review, easier to revert, easier to bisect when something breaks.
 - **`git status` is free.** Run it before every `add`, before every `commit`, before every `push`. Catches mistakes before they become history.
-- **Write the message in the imperative, present tense.** `Fix login redirect`, not `Fixed login redirect`. Matches what every Git tool generates automatically (`Merge branch …`, `Revert …`).
+- **Write the message in the imperative, present tense.** `Fix login redirect`, not `Fixed login redirect`: this matches what every Git tool generates automatically (`Merge branch …`, `Revert …`).
 - **Branch for anything risky.** `main` stays deployable, experiments live elsewhere.
 - **Pull before you push.** A `git pull --rebase` at the start of the day keeps the local branch in sync without merge clutter.
-- **Don't commit secrets.** `.env`, API keys, passwords. If it happens, rotate the secret immediately — `git rm` doesn't erase it from history.
-
-## Where to go next
-
-- [[github-basics|Get started with GitHub]] — the online side: accounts, SSH keys, hosting repos.
-- [Pro Git](https://git-scm.com/book) — the canonical free book; chapters 2–3 cover everything in this guide in depth.
-- [Oh Shit, Git!?!](https://ohshitgit.com/) — recovery recipes for the moments when things go wrong (and they will).
-- `git help <command>` (or `man git-<command>`) — every command has solid built-in docs.
+- **Don't commit secrets.** `.env`, API keys, passwords. If it happens, **rotate the secret immediately**: `git rm` doesn't erase it from history!

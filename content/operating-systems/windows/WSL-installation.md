@@ -3,7 +3,7 @@ title: Use Linux shell in Windows! - WSL Installation (Windows Subsystem for Lin
 tags:
   - StartingTools
 ---
-# 🔎 Overview
+# Overview
 
 This guide walks you through the complete setup of Windows Subsystem for Linux (WSL) on Windows. It covers the installation of WSL2, the setup of a Linux distribution, and the essential commands to get started.
 
@@ -13,7 +13,7 @@ This allows you to have a separate environment for testing, run scripts, create 
 
 ---
 
-## 0️⃣ Prerequisites
+## 0️. Prerequisites
 
 **Requirements:**
 - Windows 10+
@@ -29,8 +29,8 @@ If it's disabled, we have to enable it by editing the firmware!
 
 If you don't know how to get there, check out [how to enter the UEFI-BIOS](enter-the-UEFI-BIOS.md).
 
-> ℹ️ Virtualization support is determined exclusively by the CPU. It is independent of whether the system firmware is legacy BIOS or UEFI.
-
+> [!NOTE]
+> Virtualization support is determined exclusively by the CPU. It is independent of whether the system firmware is legacy BIOS or UEFI.
 
 
 ### Enable Firmware CPU virtualization
@@ -50,7 +50,7 @@ Here's a list of the main manufacturers and how to enable it:
 
 ---
 
-## 1️⃣ WSL Installation
+## 1️. WSL Installation
 
 Open PowerShell as Administrator:
 
@@ -64,7 +64,7 @@ A reboot is required for the changes to take effect. After reboot, Ubuntu will s
 
 ---
 
-## 2️⃣ Verify the Installation
+## 2️. Verify the Installation
 
 Check that you are running WSL Version 2:
 
@@ -82,7 +82,7 @@ And... that's it!
 
 ---
 
-## 3️⃣ Accessing the File Systems
+## 3️. Accessing the File Systems
 
 WSL allows access to both Windows and Linux file systems. Here's how you can access them:
 
@@ -90,13 +90,13 @@ WSL allows access to both Windows and Linux file systems. Here's how you can acc
 |---|---|---|
 | WSL filesystem (from Windows) | `\\wsl$\<DISTRO_NAME>\` | The WSL FS is exposed as a virtual network share |
 | Windows filesystem (from WSL) | `/mnt/c/` | Automatic mount of Windows drives inside WSL |
-
-> ⚠️ **Best practice:**
+>[!TIP]
+> **Best practice:**
 > Avoid working directly under `/mnt/c` for I/O-intensive workloads (e.g. managing a Git repo), as performance is slower! Use `/mnt/c` mainly for Windows file access and exchange and prefer storing code and projects inside the WSL filesystem for optimal performance.
 
 ---
 
-## 4️⃣ Basic Commands
+## 4️. Basic Commands
 
 | Command | Description |
 |---|---|
@@ -111,7 +111,7 @@ WSL allows access to both Windows and Linux file systems. Here's how you can acc
 
 ---
 
-## 5️⃣ Interoperability
+## 5️. Interoperability
 
 WSL allows you to call Windows executables directly from the Linux shell. Any `.exe` in the Windows PATH is accessible from WSL.
 
@@ -124,7 +124,7 @@ WSL allows you to call Windows executables directly from the Linux shell. Any `.
 
 ---
 
-## 6️⃣ Basic Configuration
+## 6️. Basic Configuration
 
 System update:
 
@@ -140,11 +140,12 @@ sudo apt install -y curl wget git vim net-tools htop
 
 ---
 
-## 7️⃣ Advanced: Backup & Restore
+## 7️. Advanced: Backup & Restore
 
 ### Backup
 
-> ⚠️ The WSL environment must be fully stopped before exporting.
+> [!WARNING]
+> The WSL environment must be fully stopped before exporting.
 
 **Template:**
 

@@ -47,4 +47,4 @@ sudo apt install code
 
 ## Regular Expressions (Regex)
 
-To learn about Regex in VSCode, check out [the dedicated page!](regex-vscode)
+To learn how to use Regex in VSCode, check out [the dedicated page!](regex-vscode)
