@@ -32,11 +32,12 @@ const explorerSortFn = (a: FileTrieNode, b: FileTrieNode): number => {
   return a.isFolder ? -1 : 1
 }
 
-// Esclude "tags" (default Quartz) e "graph" dall'explorer —
+// Esclude "tags", "graph" e "Utilities" dall'explorer —
 // sono già accessibili via i pulsanti dedicati nella sidebar.
 const explorerFilterFn = (node: FileTrieNode): boolean =>
   node.slugSegment !== "tags" &&
-  node.slugSegment !== "graph"
+  node.slugSegment !== "graph" &&
+  node.slugSegment !== "Utilities"
 
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
@@ -82,6 +83,7 @@ const tagColors: Record<string, string> = {
   WebsiteCreation: "#3b82f6", // blu
   StartingTools: "#a16207",   // marrone caldo (ambra scuro)
   Basics: "#ec4899",          // rosa
+  Utilities: "#6b7280",       // grigio neutro
 }
 
 // Colore del nodo "tu sei qui" nel grafo: distingue la pagina aperta dagli
@@ -173,6 +175,7 @@ export const defaultContentPageLayout: PageLayout = {
     Component.SidebarLink({ label: "Graph view", icon: "🕸️", slug: "graph" }),
     Component.SidebarLink({ label: "Starting Tools", icon: "🛠️", slug: "tags/StartingTools" }),
     Component.SidebarLink({ label: "Basic Knowledge", icon: "🧠", slug: "tags/Basics" }),
+    Component.SidebarLink({ label: "Utilities", icon: "🧰", slug: "tags/Utilities" }),
     Component.Explorer({ title: "Notes", sortFn: explorerSortFn, filterFn: explorerFilterFn }),
   ],
   right: [
@@ -209,6 +212,7 @@ export const defaultListPageLayout: PageLayout = {
     Component.SidebarLink({ label: "Graph view", icon: "🕸️", slug: "graph" }),
     Component.SidebarLink({ label: "Starting Tools", icon: "🛠️", slug: "tags/StartingTools" }),
     Component.SidebarLink({ label: "Basic Knowledge", icon: "🧠", slug: "tags/Basics" }),
+    Component.SidebarLink({ label: "Utilities", icon: "🧰", slug: "tags/Utilities" }),
     Component.Explorer({ title: "Notes", sortFn: explorerSortFn, filterFn: explorerFilterFn }),
   ],
   // Solo i pulsanti utility nel drawer destro (no Graph/TOC/Backlinks per le
