@@ -28,7 +28,7 @@ You can physically see all the knowledge connections required for a topic, and n
 
 The full set of connections around a given topic gives you a realistic view of its depth and what you need to fully understand it.
 
-For example, check out [how to create a wiki like this](create-a-wiki-like-this), then look at the graph and see how each piece of the puzzle fits together. 
+For example, check out [how to create a wiki like this](create-a-wiki-like-this.md), then look at the graph and see how each piece of the puzzle fits together. 
 
 Start now!
 

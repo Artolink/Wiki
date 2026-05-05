@@ -19,7 +19,7 @@ Here is what I actually do:
 
 - I take notes with screenshots on my work latop, using OneNote
 
-- At the end of the day I finalize them by converting them in Markdown, using [Obsidian](obsidian-setup).
+- At the end of the day I finalize them by converting them in [Markdown](markdown-guide), using [Obsidian](obsidian-setup).
 
 - I push them to my VPS using a script
 
@@ -85,7 +85,7 @@ If you want to use the same setup, I recommend:
 - A non-root user with `sudo` privileges (the correct way to handle privileges in Linux)
 - A public IPv4 address (e.g. `123.456.0.100`)
 - A domain and its DNS pointed to the VPS (e.g. `wiki.yourdomain.com`--> `123.456.0.100`)
-- [Nginx](nginx-web-server-setup) + [Certbot](certbot-setup-guide) for publishing the domain via HTTPS
+- [Nginx](nginx-web-server-setup) + [Certbot](certbot-setup-guide.md) for publishing the domain via HTTPS
 
 ***
 
@@ -158,7 +158,7 @@ server {
 
 Certbot is the software that issues a certificate for your domain, so that it can run in HTTPS.
 
-You can see the [Certbot setup guide](certbot-setup-guide) to install Certbot and activate it for you website.
+You can see the [Certbot setup guide](certbot-setup-guide.md) to install Certbot and activate it for you website.
 
 **TL;DR:** it will add the following lines to your Nginx configuration:
 ```nginx
