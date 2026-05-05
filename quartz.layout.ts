@@ -171,6 +171,7 @@ export const defaultContentPageLayout: PageLayout = {
     Component.HomeLink(),
     Component.SidebarLink({ label: "Graph view", icon: "🕸️", slug: "graph" }),
     Component.SidebarLink({ label: "Starting Tools", icon: "🛠️", slug: "tags/StartingTools" }),
+    Component.SidebarLink({ label: "Basic Knowledge", icon: "🧠", slug: "tags/Basics" }),
     Component.Explorer({ title: "Notes", sortFn: explorerSortFn, filterFn: explorerFilterFn }),
   ],
   right: [
@@ -206,6 +207,7 @@ export const defaultListPageLayout: PageLayout = {
     Component.HomeLink(),
     Component.SidebarLink({ label: "Graph view", icon: "🕸️", slug: "graph" }),
     Component.SidebarLink({ label: "Starting Tools", icon: "🛠️", slug: "tags/StartingTools" }),
+    Component.SidebarLink({ label: "Basic Knowledge", icon: "🧠", slug: "tags/Basics" }),
     Component.Explorer({ title: "Notes", sortFn: explorerSortFn, filterFn: explorerFilterFn }),
   ],
   // Solo i pulsanti utility nel drawer destro (no Graph/TOC/Backlinks per le
