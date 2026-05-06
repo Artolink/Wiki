@@ -69,6 +69,7 @@ server {
     }
 }
 ```
+^basic-conf
 
 Key directives:
 

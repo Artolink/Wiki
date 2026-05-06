@@ -132,18 +132,11 @@ Nginx is the web-server that allows you to publish the site you just created wit
 You can see a detailed explanation of Nginx and the configuration I use [here](nginx-web-server-setup).
 
 **TL;DR:** you just need to point Nginx `root` at `~/wiki/public/`:
-```nginx
-server {
-    server_name wiki.<YOUR_SITE.COM>;
+![[nginx-web-server-setup#^basic-conf]]
 
-    root /home/<YOUR_USER>/wiki/public; #points nginx to /public 
-    index index.html;
+So in our case `server_name ...` will be something like `server_name wiki.<YOUR_SITE.COM>;`
+and `root /var/www/example;` will be like `root /home/<YOUR_USER>/wiki/public;`
 
-    location / {
-        try_files $uri $uri.html $uri/ =404;
-    }
-}
-```
 
 ***
 
