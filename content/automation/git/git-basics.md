@@ -4,7 +4,10 @@ tags:
   - Basics
 ---
 **Git** is a version-control program that you can run on the local machine, even with no internet.
+
 To put it simply: Git is a tool that keeps track of changes to files over time.
+
+In this guide you'll learn the basics of Git for working on solo projects: if you want to learn the best practices for working in a team, please move on [to the advanced lesson](git-advanced) when you're ready!
 
 GitHub (or GitLab, Bitbucket…) enters the picture when you need to share or back up your repo. 
 
