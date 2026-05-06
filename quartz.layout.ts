@@ -65,7 +65,7 @@ export const sharedPageComponents: SharedLayout = {
   // content pages le versioni sono in defaultContentPageLayout.afterBody
   // (lo spread sovrascrive interamente l'afterBody condiviso).
   afterBody: [Component.FontResizer(), Component.SidebarToggle()],
-  footer: Component.Footer({ links: {}, hidden: true }),
+  footer: Component.CustomFooter(),
 }
 
 const gitHubEdit = Component.GitHubEdit({

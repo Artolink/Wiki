@@ -1339,3 +1339,25 @@ html[saved-theme] body[data-slug="tags/Utilities"] {
   --tertiary:  #9ca3af;
   --highlight: rgba(107, 114, 128, 0.15);
 }
+
+// ──────────────────────────────────────────────────────────────────────────────
+// CUSTOM FOOTER — minimal copyright line, link to /license
+// ──────────────────────────────────────────────────────────────────────────────
+// Override del footer SCSS condiviso: una riga piccola, grigia, centrata.
+.custom-footer {
+  text-align: center !important;
+  margin: 3rem 0 1.5rem 0 !important;
+  font-size: 0.7rem !important;
+  opacity: 1 !important;
+
+  & a {
+    color: var(--gray) !important;
+    font-weight: 400 !important;
+    text-decoration: none !important;
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: var(--secondary) !important;
+    }
+  }
+}
