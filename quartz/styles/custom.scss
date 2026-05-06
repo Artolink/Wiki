@@ -955,6 +955,12 @@ html[focus-mode="on"] {
     display: none !important;
   }
 
+  // Footer copyright: nascosto in focus mode per togliere ogni distrazione
+  // dal contenuto del file.
+  .custom-footer {
+    display: none !important;
+  }
+
   // Centriamo il contenuto in focus mode: max-width ragionevole + margin auto
   // così il titolo e il body restano allineati al centro del viewport invece
   // di partire dal bordo sinistro.
