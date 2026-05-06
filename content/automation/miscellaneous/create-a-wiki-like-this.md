@@ -147,23 +147,8 @@ Certbot is the software that issues a certificate for your domain, so that it ca
 You can see the [Certbot setup guide](certbot-setup-guide.md) to install Certbot and activate it for you website.
 
 **TL;DR:** it will add the following lines to your Nginx configuration:
-```nginx
-server {
-    server_name wiki.<YOUR_SITE.COM>;
 
-    root /home/<YOUR_USER>/wiki/public;
-    index index.html;
-
-    location / {
-        try_files $uri $uri.html $uri/ =404;
-    }
-
-    listen 443 ssl; # managed by Certbot
-    ssl_certificate     /etc/letsencrypt/live/wiki.farnetiandrea.it/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/wiki.farnetiandrea.it/privkey.pem;
-    # …other Certbot directives…
-}
-``````
+![[certbot-setup-guide#^basic-conf]]
 
 And... we are done!
 

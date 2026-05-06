@@ -117,6 +117,7 @@ server {
     return 404;
 }
 ```
+^basic-conf
 
 The lines with `# managed by Certbot` are owned by Certbot — touch them only if you know what you're doing.
 
