@@ -2,7 +2,7 @@
 title: License
 ---
 
-## License
+# License
 
 ---
 
