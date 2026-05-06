@@ -179,7 +179,7 @@ wsl --import Ubu2 C:\WSL\Ubu2 C:\backups\Ubuntu-2026-04-30_14-00.vhdx --vhd
 
 ---
 
-## 8️⃣ Useful Links
+## 8️. Useful Links
 
 - [WSL Official Documentation](https://learn.microsoft.com/en-us/windows/wsl/) — Microsoft Learn
 - [Install WSL](https://learn.microsoft.com/en-us/windows/wsl/install) — Step-by-step official install guide

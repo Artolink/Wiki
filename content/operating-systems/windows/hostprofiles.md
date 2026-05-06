@@ -4,7 +4,7 @@ tags:
   - Utilities
 ---
 
-## Why bother managing the hosts file?
+## Why do we edit the hosts file?
 
 The hosts file (`C:\Windows\System32\drivers\etc\hosts`) is a plain-text mapping `IP → hostname` that the OS checks **before** going to DNS. 
 
@@ -16,7 +16,9 @@ Common reasons to touch it:
 - Blocking trackers or distractions at the OS level.
 - Switching between QA and production servers that share a domain.
 
-The catch: editing the file by hand is a hassle. Admin rights, no comments-aware sections, and after every change the OS DNS cache needs flushing or nothing changes.
+The catch: editing the file by hand is a hassle. 
+
+Admin rights, no comments-aware sections, and after every change the OS DNS cache needs flushing or nothing changes.
 
 ## What HostProfiles does
 
@@ -28,6 +30,7 @@ The catch: editing the file by hand is a hassle. Admin rights, no comments-aware
 - Edit a profile in a small built-in editor (no external Notepad-as-Admin dance).
 
 It works on Windows 7/8/10 (and later versions too in theory).
+![[Pasted image 20260506103556.png]]
 
 ## Install
 
@@ -44,8 +47,8 @@ The main window lists all profiles.
 
 Three actions worth knowing:
 
-- **New profile** — creates an empty profile. Give it a meaningful name (`Dev`, `Prod`, `Block-trackers`).
-- **Edit** — opens the inline editor; same syntax as a normal `hosts` file:
+- **New profile**: creates an empty profile. Give it a meaningful name (`Dev`, `Prod`, `Block-trackers`).
+- **Edit**: opens the inline editor; same syntax as a normal `hosts` file:
 
 ```hosts
 # Each line: <IP> <space> <hostname>  [comment after #]
@@ -54,24 +57,25 @@ Three actions worth knowing:
 0.0.0.0     facebook.com   # block
 ```
 
-- **Apply** (or double-click on the profile) — overwrites `hosts` with that profile's content and flushes DNS.
+- **Apply** (or double-click on the profile): overwrites `hosts` with that profile's content and flushes DNS.
 
 The currently active profile stays highlighted. Switching is **destructive against `hosts`**: anything written there manually outside the active profile gets overwritten on the next apply. 
 
 Treat the active profile as the source of truth.
 
-## A useful pattern: one profile per environment
+## How I use it
 
-Define a base profile that's always loaded (e.g. `Default`, with just the lines Windows ships by default and your permanent custom mappings), then specific profiles that **add** to it:
+![[Pasted image 20260506103435.png]]
+I keep it simple: I define a base profile that's always loaded (e.g. `PROD`, that includes the lines Windows ships by default + my permanent custom mappings), and then I have other profiles that are based on different environments (e.g. TEST).
+
+Another useful separation you can do is the following:
 
 - `Default`: empty / system defaults.
-- `Dev`: base + `127.0.0.1 myapp.local`, `127.0.0.1 api.local`.
-- `Staging`: base + `staging-server.acme.com → 192.168.1.50`.
+- `DEV`: base + `127.0.0.1 myapp.local`, `127.0.0.1 api.local`.
 - `Block`: base + a list of distracting domains pointing to `0.0.0.0`.
 
-Switching profile = switching environment in one click. 
+Switching profile = switching environment in one click + DNS flush. 
 
-No more "did I forget to comment that line?".
 
 ## Things to know
 
@@ -79,4 +83,4 @@ No more "did I forget to comment that line?".
   
   Apply one and the others are dormant, by design. If two contexts overlap you need a combined profile.
 - Running it un-elevated still lets you read/edit profiles, but applying silently fails. The status bar shows whether it has write access.
-- On Linux/macOS the equivalent tool is [hostctl](https://github.com/guumaster/hostctl) — different UX (CLI), same idea.
+- On Linux/macOS the equivalent tool is [hostctl](https://github.com/guumaster/hostctl): different UX (CLI), same idea.
