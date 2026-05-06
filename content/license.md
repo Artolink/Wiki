@@ -17,7 +17,7 @@ title: License
   Contents are protected by Copyright.
 
 > [!DANGER]
- > Copying, redistributing (even with minor modifications), or republishing these notes is prohibited and may be subject to legal action, without prior written permission.
+ > Copying, redistributing (even with minor modifications), or republishing these notes is prohibited and may be subject to **legal action**, without prior written permission.
   
   Please respect the work of others and don't steal it. Ask me first!
   
