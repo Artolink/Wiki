@@ -724,7 +724,8 @@ html, body {
 
 // Pagine speciali in cui il page-header è vuoto/nascosto: niente riga ghost.
 body[data-slug="index"],
-body[data-slug="graph"] {
+body[data-slug="graph"],
+body[data-slug="license"] {
   .page > #quartz-body > .center > .page-header > .popover-hint {
     border-bottom: none;
     padding-bottom: 0;
@@ -740,20 +741,20 @@ body[data-slug="index"] article.popover-hint > h1:first-child {
   margin-bottom: 3rem;
 }
 
-// ── Home page (slug=index): nascondi tutta la testata "vuota" ────────────────
-// Sulla home il titolo viene dall'h1 del body markdown ("# Benvenuto!"), non
-// dall'article-title del frontmatter. Nascondiamo l'INTERA .popover-hint del
-// page-header (che conteneva: flex con title+Edit, content-meta, tag-list)
-// così non resta uno spazio invisibile prima del titolo del body.
-body[data-slug="index"] {
+// ── Pagine senza testata: nascondi titolo + Edit + meta ──────────────────────
+// Su queste pagine non vogliamo la testata standard (article-title dal
+// frontmatter, GitHub Edit button, content-meta, tag list). La home prende
+// il titolo dall'h1 del body ("# Welcome!"); la license non ne ha uno e
+// parte direttamente con un h2.
+body[data-slug="index"],
+body[data-slug="license"] {
   .page > #quartz-body > .center > .page-header > .popover-hint {
     display: none !important;
   }
 
-  // Riduci il margine top dell'h1 del body — senza testata, il titolo
-  // partirebbe troppo in alto col margin: 2.25rem di base.scss; lo lasciamo
-  // un po' di respiro dalla navbar.
-  article.popover-hint > h1:first-child {
+  // Riduce il margine top del primo elemento del body — senza testata,
+  // partirebbe troppo in alto col margin: 2.25rem di base.scss.
+  article.popover-hint > :first-child {
     margin-top: 0.5rem;
   }
 }
