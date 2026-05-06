@@ -22,13 +22,13 @@ title: License
   Please respect the work of others and don't steal it. Ask me first!
   
 ---
-## Citing this wiki
+## 📝 Citing this wiki
 
 If a note here helped your work, an attribution like this is the friendliest
 way to give credit (please do!):
 
 > Farneti, A. (2026). *Andrea Farneti — Wiki*. https://wiki.farnetiandrea.it
 
-## Contacts
+## 📫 Contacts
 
 For permissions or any questions, you can find my contact details [on my personal website](https://www.farnetiandrea.it).
