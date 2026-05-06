@@ -64,7 +64,9 @@ flowchart LR
 
 ## 1. Install Obsidian on your PC
 
-Follow ![the Obsidian setup](obsidian-setup#Installation) to install Obsidian, create a vault, and learn the essentials (mainly wikilinks and tags, but also callouts and embeds).
+Follow 
+![the Obsidian setup](obsidian-setup#Installation) 
+to install Obsidian, create a vault, and learn the essentials (mainly wikilinks and tags, but also callouts and embeds).
 
 The vault is just a normal folder on disk, so just pick a path you'll remember, for example:
 
