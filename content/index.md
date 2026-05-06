@@ -52,6 +52,6 @@ Start now!
 
 ## 📫 Contacts
 
-  
+Please read the [license conditions](license) (30 seconds read) under which this Wiki is released, **especially** if you plan to replicate it (content is protected by Copyright and you may be subject to legal action).  
 
 To discuss, comment, or suggest corrections, you can find my contacts on my [personal website](https://farnetiandrea.it).

@@ -2,9 +2,8 @@
 title: License
 ---
 
-## About this site and its contents
-
 The site is released under the MIT License.
+
 Contents are protected by Copyright.
 
 ## License
