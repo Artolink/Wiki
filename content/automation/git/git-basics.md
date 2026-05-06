@@ -62,8 +62,29 @@ git push -u origin main
 ```
 ^first-push
 
+## Working with remotes
 
-## The everyday loop
+A "remote" is just a named URL pointing to another copy of the repo (typically on GitHub). The default name is `origin`.
+
+```bash
+git remote -v                                       # list configured remotes
+git remote add origin git@github.com:user/repo.git  # add one
+git remote rm  origin                               # remove if added wrong
+git remote set-url origin <new-url>                 # change the URL in place
+```
+
+Once a remote exists, push and pull move commits between local and remote:
+
+```bash
+git push -u origin main    # first push: -u links the local branch to remote main
+git push                    # subsequent pushes (after -u, no args needed)
+git pull                    # fetch + merge remote changes into the current branch
+git fetch                   # fetch only, no merge — useful to inspect first
+```
+
+`origin` is just a label: the URL behind it can be HTTPS or SSH, GitHub or anywhere else. Several remotes are allowed (e.g. `origin` for the personal fork, `upstream` for the original project).
+
+## The daily operations
 
 ```bash
 git status                  # what's tracked, what's not, what's staged, what branch
@@ -94,28 +115,6 @@ git show <commit-id>             # full details + diff of a past commit
 
 Commit IDs are SHA-1 hashes — the first 7 characters are usually enough (`git show 4e2a1f0`).
 
-## Working with remotes
-
-A "remote" is just a named URL pointing to another copy of the repo (typically on GitHub). The default name is `origin`.
-
-```bash
-git remote -v                                       # list configured remotes
-git remote add origin git@github.com:user/repo.git  # add one
-git remote rm  origin                               # remove if added wrong
-git remote set-url origin <new-url>                 # change the URL in place
-```
-
-Once a remote exists, push and pull move commits between local and remote:
-
-```bash
-git push -u origin main    # first push: -u links the local branch to remote main
-git push                    # subsequent pushes (after -u, no args needed)
-git pull                    # fetch + merge remote changes into the current branch
-git fetch                   # fetch only, no merge — useful to inspect first
-```
-
-`origin` is just a label — the URL behind it can be HTTPS or SSH, GitHub or anywhere else. Several remotes are allowed (e.g. `origin` for the personal fork, `upstream` for the original project).
-
 ## Branches
 
 A branch is a movable pointer to a commit. The default branch is usually `main` (or `master` on older repos). Creating a branch lets work happen in parallel without touching the stable line.
@@ -137,6 +136,7 @@ git restore file.txt           # discard unstaged changes (replaces `checkout fi
 ```
 
 Both styles work; `switch`/`restore` are easier to remember once used a couple of times.
+
 
 ## Merge vs Rebase: the question every team ends up arguing about
 
@@ -168,7 +168,9 @@ Replays the feature commits on top of `main`'s tip, as if they were written from
 - **On personal/local branches before sharing**: rebase liberally. Cleans up the history before the merge request.
 - **The "rebase often, merge once" pattern** works well in teams where everyone keeps their own branch up to date with `git rebase main` regularly, then opens a clean PR. Aruba-style workflows live here.
 
-Whichever path is picked, conflicts are inevitable when several people touch the same lines. Git stops the operation, marks the conflicting regions in the file, and waits for a manual fix:
+Whichever path is picked, conflicts are inevitable when several people touch the same lines. 
+
+Git stops the operation, marks the conflicting regions in the file, and waits for a manual fix:
 
 ```bash
 # edit the file, remove the <<<<<<< / ======= / >>>>>>> markers
