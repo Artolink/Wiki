@@ -19,13 +19,15 @@ This guide gets the account ready, creates a first repo, and sets up SSH keys so
 ## Create the account
 
 1. Open https://github.com and sign up.
-2. Pick a username carefully — it ends up in every URL of every repo (`github.com/<username>/<repo>`) and is hard to change later. Short, lowercase, no special chars is the safe path.
+2. Pick a username carefully: it ends up in every URL of every repo (`github.com/<username>/<repo>`) and is hard to change later.
 3. Verify the email address. The free plan is enough for everything in this guide: unlimited public **and** private repos.
 4. Optional but worth it: in *Settings → Profile* add a short bio, a profile picture, and pin a couple of repos when you have them. The profile page becomes a free portfolio.
 
 ## Create your first repository
 
 From the home page, click the green **New** button (or visit https://github.com/new).
+
+![[Pasted image 20260506111440.png]]
 
 Fields that matter:
 - **Repository name** — keep it short and descriptive. Hyphens are fine, spaces aren't.
@@ -62,23 +64,14 @@ ssh-keygen -t ed25519 -C "your_email@example.com"
 ```
 
 When prompted:
-- **File location** — accept the default (`~/.ssh/id_ed25519`) unless you already have a key there.
-- **Passphrase** — empty is fine for a personal laptop; set one for shared machines.
+- **File location**: accept the default (`~/.ssh/id_ed25519`) unless you already have a key there.
+- **Passphrase**: empty is fine for a personal laptop.
 
 Two files appear:
 - `~/.ssh/id_ed25519` — the **private** key. Never share, never push, never paste anywhere.
 - `~/.ssh/id_ed25519.pub` — the **public** key. This is the one to give to GitHub.
 
-### 2. Tell the SSH agent about it
-
-```bash
-eval "$(ssh-agent -s)"
-ssh-add ~/.ssh/id_ed25519
-```
-
-The agent caches the unlocked key in memory so subsequent Git commands don't ask for the passphrase.
-
-### 3. Add the public key to GitHub
+### 2. Add the public key to GitHub
 
 ```bash
 cat ~/.ssh/id_ed25519.pub
@@ -91,7 +84,9 @@ Copy the output (starts with `ssh-ed25519 …` and ends with the email). On GitH
 4. Key type: **Authentication Key**.
 5. Paste the content into the **Key** field, click **Add SSH key**.
 
-### 4. Verify it works
+![[Pasted image 20260506112624.png]]
+
+### 3. Verify it works
 
 ```bash
 ssh -T git@github.com
@@ -103,11 +98,13 @@ Expected response:
 Hi <username>! You've successfully authenticated, but GitHub does not provide shell access.
 ```
 
-That message is the success case — GitHub never gives a shell, the `ssh -T` is only checking the handshake.
+That message is the success case: GitHub never gives a shell, the `ssh -T` is only checking the handshake.
 
 ## First commit, the SSH way
 
-Pick the SSH URL from the repo page (the **Code** button → **SSH** tab). It looks like `git@github.com:<username>/<repo>.git`.
+Pick the SSH URL from the repo page (the **Code** button → **SSH** tab). 
+
+It looks like `git@github.com:<username>/<repo>.git`.
 
 If the repo was created **with** a README on GitHub:
 
