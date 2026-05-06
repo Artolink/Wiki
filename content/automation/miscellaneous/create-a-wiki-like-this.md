@@ -64,7 +64,7 @@ flowchart LR
 
 ## 1. Install Obsidian on your PC
 
-Follow [the Obsidian setup](obsidian-setup) to install Obsidian, create a vault, and learn the essentials (mainly wikilinks and tags, but also callouts and embeds).
+Follow ![the Obsidian setup](obsidian-setup#Installation) to install Obsidian, create a vault, and learn the essentials (mainly wikilinks and tags, but also callouts and embeds).
 
 The vault is just a normal folder on disk, so just pick a path you'll remember, for example:
 
@@ -93,7 +93,7 @@ If you want to use the same setup, I recommend:
 
 Quartz is what converts your Markdown notes into a real site.
 
-You can follow the [Quartz setup on Linux](quartz-setup-linux) for the detailed explanation. 
+You can follow the [[quartz-setup-linux#Installation (Ubuntu/Debian)|Quartz setup on Linux]] for the detailed explanation. 
 
 **TL;DR:** you want to clone Quartz in any folder that you want to use as the "container" for your site.
 In my case, I host this Wiki in the folder "wiki" of my VPS, so i'll use that as a reference throughout the guide:

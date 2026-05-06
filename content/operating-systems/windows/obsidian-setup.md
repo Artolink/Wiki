@@ -6,10 +6,11 @@ tags:
 
 ## What is Obsidian?
 
-Obsidian is a local-first Markdown note-taking app built around a **personal knowledge base** (vault).
-Notes are plain `.md` files stored on your machine... What?
+Obsidian is a local-first Markdown note-taking app built around a **personal knowledge base** (vault). Notes are plain `.md` files stored on your machine. 
 
-You don't know how to write Markdown files? It's super simple! Check my [guide](markdown-guide).
+...What? You don't know how to write Markdown files? 
+
+It's super simple! Check my [guide](markdown-guide).
 
 The real power is in **linking notes together** and visualising connections through the graph view.
 
@@ -33,15 +34,14 @@ sudo apt install ./obsidian_amd64.deb
 
 ## Core Concepts
 
-| Concept | Description |
-|---------|-------------|
-| **Vault** | The root folder where all your notes live — just a normal folder on disk |
-| **Note** | A plain `.md` file |
-| **Wikilink** | `[[note-name]]` — links one note to another |
-| **Tag** | `#tag` inline in a note — used for filtering and grouping |
-| **Graph view** | Visual map of all notes and their connections |
-| **Canvas** | Free-form board to arrange and connect notes visually |
-| **Frontmatter** | YAML metadata block at the top of a note (between `---`) |
+| Concept         | Description                                                              |
+| --------------- | ------------------------------------------------------------------------ |
+| **Vault**       | The root folder where all your notes live — just a normal folder on disk |
+| **Note**        | A plain `.md` file                                                       |
+| **Wikilink**    | `[[note-name]]` — links one note to another                              |
+| **Tag**         | `#tag` inline in a note — used for filtering and grouping                |
+| **Graph view**  | Visual map of all notes and their connections                            |
+| **Frontmatter** | YAML metadata block at the top of a note (between `---`)                 |
 
 ***
 
@@ -65,8 +65,17 @@ sudo apt install ./obsidian_amd64.deb
 ## Markdown Tips for Obsidian
 
 - **Wikilinks:** `[[note-name]]` or `[[note-name|display text]]`
-- **Embed a note:** `![[note-name]]`
-- **Embed a specific heading:** `![[note-name#Heading]]`
+  
+  Way easier compared to the standard Markdown links that use square and round brackets.
+  
+  Here's an example using a note with a heading:
+```markdown
+[[quartz-setup-linux#Installation (Ubuntu/Debian)|Quartz setup on Linux]]
+[Quartz setup on Linux](quartz-setup-linux#installation-ubuntudebian)
+```
+
+- **Embed a note:** `![[note-name]]` (you just add a "!" before the Wikilink)
+  
 - **Callout blocks:**
 
 ```markdown
