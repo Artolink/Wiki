@@ -84,7 +84,7 @@ If you want to use the same setup, I recommend:
 - A VPS with **Ubuntu 22.04+** (or any recent Debian-like distro)
 - A non-root user with `sudo` privileges (the correct way to handle privileges in Linux)
 - A public IPv4 address (e.g. `123.456.0.100`)
-- A domain and its DNS pointed to the VPS (e.g. `wiki.yourdomain.com`--> `123.456.0.100`)
+- A [domain and its DNS](DNS-domains) pointed to the VPS (e.g. `wiki.yourdomain.com`--> `123.456.0.100`)
 - [Nginx](nginx-web-server-setup) + [Certbot](certbot-setup-guide.md) for publishing the domain via HTTPS
 
 ***
@@ -95,8 +95,8 @@ Quartz is what converts your Markdown notes into a real site.
 
 You can follow the [[quartz-setup-linux#Installation (Ubuntu/Debian)|Quartz setup on Linux]] for the detailed explanation. 
 
-**TL;DR:** you want to clone Quartz in any folder that you want to use as the "container" for your site.
-In my case, I host this Wiki in the folder "wiki" of my VPS, so i'll use that as a reference throughout the guide:
+**TL;DR:** you need to clone the Quartz repository in the directory that you want to use as the "container" for your site.
+I host this Wiki in the `~/wiki` directory of my VPS, so i'll use that as a reference throughout the guide:
 ```bash
 git clone https://github.com/jackyzha0/quartz.git wiki
 cd wiki
