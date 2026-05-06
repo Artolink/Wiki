@@ -1,7 +1,6 @@
 ---
 title: " Git in a team: the workflows, the rebase rituals, the recoveries"
 tags:
-  - Basics
 ---
 
 ## Where solo Git ends, team Git begins
