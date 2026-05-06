@@ -2,7 +2,9 @@
 title: License
 ---
 
-## License
+# License
+
+---
 
 - **Site (the template, layout, scripts, styles)** — MIT License. 
   
