@@ -8,7 +8,7 @@ const CustomFooter: QuartzComponent = ({ fileData, displayClass }: QuartzCompone
   const baseDir = pathToRoot(fileData.slug!)
   return (
     <footer class={classNames(displayClass, "custom-footer")}>
-      <a href={`${baseDir}license`}>© Andrea Farneti, all rights reserved</a>
+      <a href={`${baseDir}/license`}>© Andrea Farneti, all rights reserved</a>
     </footer>
   )
 }

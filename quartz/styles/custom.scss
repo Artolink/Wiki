@@ -1343,10 +1343,12 @@ html[saved-theme] body[data-slug="tags/Utilities"] {
 // ──────────────────────────────────────────────────────────────────────────────
 // CUSTOM FOOTER — minimal copyright line, link to /license
 // ──────────────────────────────────────────────────────────────────────────────
-// Override del footer SCSS condiviso: una riga piccola, grigia, centrata.
+// Override del footer SCSS condiviso: una riga piccola, grigia, allineata a
+// destra (così non viene coperta dalla barra del FontResizer che fluttua
+// in basso al centro).
 .custom-footer {
-  text-align: center !important;
-  margin: 3rem 0 1.5rem 0 !important;
+  text-align: right !important;
+  margin: 1rem 0 0.75rem 0 !important;
   font-size: 0.7rem !important;
   opacity: 1 !important;
 
