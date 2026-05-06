@@ -2,7 +2,7 @@
 title: License
 ---
 
-# License
+## License
 
 ---
 
@@ -20,7 +20,8 @@ title: License
  > Copying, redistributing (even with minor modifications), or republishing these notes is prohibited and may be subject to legal action, without prior written permission.
   
   Please respect the work of others and don't steal it. Ask me first!
-
+  
+---
 ## Citing this wiki
 
 If a note here helped your work, an attribution like this is the friendliest
