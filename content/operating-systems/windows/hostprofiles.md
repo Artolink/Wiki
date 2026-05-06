@@ -30,6 +30,7 @@ Admin rights, no comments-aware sections, and after every change the OS DNS cach
 - Edit a profile in a small built-in editor (no external Notepad-as-Admin dance).
 
 It works on Windows 7/8/10 (and later versions too in theory).
+
 ![[Pasted image 20260506103556.png]]
 
 ## Install
