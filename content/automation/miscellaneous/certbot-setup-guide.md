@@ -119,7 +119,7 @@ server {
 ```
 ^basic-conf
 
-The lines with `# managed by Certbot` are owned by Certbot — touch them only if you know what you're doing.
+The lines with `# managed by Certbot` are owned by Certbot: touch them only if you know what you're doing.
 
 ***
 
