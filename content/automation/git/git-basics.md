@@ -43,11 +43,25 @@ Two ways to get a Git repo on the machine:
 
 ```bash
 git init                                    # turn the current folder into a repo
+
 git clone git@github.com:user/repo.git      # download an existing one (SSH)
 git clone https://github.com/user/repo.git  # …or via HTTPS
 ```
 
-`git init` creates a hidden `.git/` folder — that's the entire history and metadata. Move or delete `.git/` and the folder is no longer a Git repo.
+`git init` creates a hidden `.git/` folder: that's the entire history and metadata. 
+
+Move or delete `.git/` and the folder is no longer a Git repo.
+
+Then, if we want to connect our local repo to our [[github-basics|GitHub]] repo, we can do our first push by setting the remote origin:
+```bash
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin git@github.com:user/repo.git # this connects our local and remote repos
+git push -u origin main
+```
+^first-push
+
 
 ## The everyday loop
 

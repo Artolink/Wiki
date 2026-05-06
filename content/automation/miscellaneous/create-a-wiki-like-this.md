@@ -114,19 +114,12 @@ You can later also customize `quartz.config.ts` (title, colors, locale) and `qua
 
 ## 4. Git & GitHub setup
 
-Create a new empty repository on GitHub called `wiki` (no README, no license, leave it completely empty).
+Now, create a new empty repository on GitHub called `wiki` (no README, no license, leave it completely empty).
 
-See [how to set up your first GitHub page](github-101), if you don't know the basics.
+See [[github-101#Create your first repository|how to set up your first GitHub page]], if you don't know the basics.
 
-On your VPS, initialize `~/wiki` as a [Git repository](git-basics) and connect it to GitHub:
-```bash
-cd ~/wiki
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin git@github.com:<your-username>/wiki.git
-git push -u origin main
-```
+So after we created our dedicated GitHub page for our project, we are ready to link it with our `~/wiki` local repo, by adding the remote origin:
+![[git-basics#^first-push]]
 
 This is essential so that `deploy.sh`, the script that we'll create for automating the process, can run `git push` without issues.
 
