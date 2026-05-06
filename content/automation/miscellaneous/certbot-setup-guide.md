@@ -14,7 +14,7 @@ Certbot is the official **Let's Encrypt client**: a single command issues a free
 
 | Requirement                                                    | Why                                          |
 | -------------------------------------------------------------- | -------------------------------------------- |
-| **A public domain**                                            | DNS A/AAAA record must point to the VPS      |
+| **A public [domain](DNS-domains)**                             | DNS A/AAAA record must point to the VPS      |
 | **Port 80 reachable**                                          | Let's Encrypt validates ownership over HTTP  |
 | **[Nginx](nginx-web-server-setup) already serving the domain** | Certbot patches the existing vhost           |
 | **Root / sudo on the VPS**                                     | Writes to `/etc/nginx/`, `/etc/letsencrypt/` |
