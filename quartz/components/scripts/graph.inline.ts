@@ -454,10 +454,14 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     const sy = (cy - currentTransform.y) / currentTransform.k
 
     for (const n of nodeRenderData) {
-      const nx = n.simulationData.x ?? 0
-      const ny = n.simulationData.y ?? 0
-      const dx = sx - nx
-      const dy = sy - ny
+      // I nodi sono renderizzati a (simulationData.x + width/2, .y + height/2):
+      // l'offset width/2,height/2 centra il grafo nel canvas (vedi
+      // renderPixiFromD3). Per il hit-test confronto in coords stage usando lo
+      // stesso offset, altrimenti il check distanza è completamente sballato.
+      const nodeX = (n.simulationData.x ?? 0) + width / 2
+      const nodeY = (n.simulationData.y ?? 0) + height / 2
+      const dx = sx - nodeX
+      const dy = sy - nodeY
       // hit area generosa (radius * 1.5) per matchare la sensibilità del tap touch
       const hitRadius = n.radius * 1.5
       if (dx * dx + dy * dy < hitRadius * hitRadius) return // tap su un nodo
