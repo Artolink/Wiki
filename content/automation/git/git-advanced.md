@@ -13,7 +13,7 @@ This page is the survival guide for that next step: branching strategies, pull-r
 ## Development patterns
 
 >[!IMPORTANT]
-A team has to agree on **the development pattern to use**, otherwise main becomes a battleground. 
+>A team has to agree on **the development pattern to use**, otherwise main becomes a battleground. 
 
 The two patterns that cover 95% of teams in 2026:
 
