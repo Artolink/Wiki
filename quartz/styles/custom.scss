@@ -1575,8 +1575,12 @@ html[saved-theme] body[data-slug="tags/Utilities"] {
 // destra (così non viene coperta dalla barra del FontResizer che fluttua
 // in basso al centro).
 .custom-footer {
+  // Allineato col blocco di testo md centrale: stesso cap (860px) e stesso
+  // centering, così il copyright a destra cade alla destra dell'ultima
+  // colonna di testo invece che al bordo viewport.
+  max-width: 860px !important;
+  margin: 1rem auto 0.75rem !important;
   text-align: right !important;
-  margin: 1rem 0 0.75rem 0 !important;
   font-size: 0.7rem !important;
   opacity: 1 !important;
 
