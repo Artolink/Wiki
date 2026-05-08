@@ -72,7 +72,9 @@ html[saved-theme="dark"] {
   z-index: 200;
   margin: 0 !important;
   padding: 0 1.5rem;
-  border-bottom: 1px solid var(--lightgray);
+  // Linea sotto la topbar: più marcata della lightgray standard, ma comunque
+  // un gradino sotto al --search-border per gerarchia visiva.
+  border-bottom: 1px solid #d1d5db; // gray-300
   background: var(--light);
   box-sizing: border-box;
 
@@ -463,7 +465,7 @@ html[saved-theme="dark"] .sidebar.right .graph .graph-outer {
 }
 
 html[saved-theme="dark"] .page .page-header > header {
-  border-bottom-color: var(--soft-border);
+  border-bottom-color: #57534e; // stone-600 — più marcato del soft-border
 }
 
 html[saved-theme="dark"] .page .page-header > header .search > .search-button {
