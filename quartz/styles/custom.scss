@@ -31,8 +31,8 @@ $navH: 66px;
   // in stile syselement — un soffio di crema sopra al bianco.
   --sidebar-bg:       #faf8f3;
   --sidebar-border:   #f1ede4;
-  // Barra di ricerca: bordo presente ma soft, mid-step tra gray-400 e gray-300
-  --search-border:    #b8bcc3;
+  // Barra di ricerca: bordo soft, vicino a gray-300
+  --search-border:    #c4c8ce;
 }
 
 html[saved-theme="dark"] {
@@ -49,8 +49,8 @@ html[saved-theme="dark"] {
   // Sidebar (dark): tono stone appena più chiaro del body, stacco molto soft
   --sidebar-bg:       #221f1e;
   --sidebar-border:   #2e2a28;
-  // Barra di ricerca dark: bordo soft, mid-step tra stone-500 e stone-400
-  --search-border:    #8d8782;
+  // Barra di ricerca dark: bordo soft, vicino a stone-400
+  --search-border:    #9b958f;
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
