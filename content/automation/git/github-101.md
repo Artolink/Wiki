@@ -39,23 +39,11 @@ Fields that matter:
 
 Click **Create repository**. The repo URL is now `https://github.com/<username>/<repo>`.
 
-### Public vs Private — when to use each
+## Set up SSH access
 
-**Public** repos are visible to anyone on the internet, indexed by search engines, and can be cloned/forked freely. Pick it for:
-- open-source projects meant to be shared
-- portfolio code (interviews, personal site, learning projects)
-- documentation and wikis
+By default, Git over HTTPS asks for credentials every time. 
 
-**Private** repos are visible only to you and the collaborators explicitly invited. Pick it for:
-- work projects, client code, anything under NDA
-- experiments not ready for the world
-- notes, drafts, secrets-adjacent stuff
-
-A repo can be flipped from private to public (and vice versa) at any time from *Settings → General → Danger Zone*. Be aware that flipping a private repo to public reveals **the entire history**, including any password committed by mistake — clean up first.
-
-## Set up SSH access (the right way to authenticate)
-
-By default, Git over HTTPS asks for credentials every time. The clean alternative is SSH: generate a key pair once, drop the public key into GitHub, and never type a password again.
+The clean alternative is SSH: generate a key pair once, drop the public key into GitHub, and never type a password again.
 
 ### 1. Generate the key pair
 
@@ -100,7 +88,7 @@ Hi <username>! You've successfully authenticated, but GitHub does not provide sh
 
 That message is the success case: GitHub never gives a shell, the `ssh -T` is only checking the handshake.
 
-## First commit, the SSH way
+## Your first commit
 
 Pick the SSH URL from the repo page (the **Code** button → **SSH** tab). 
 
@@ -131,13 +119,23 @@ git push -u origin main
 
 The `-u` flag links the local `main` to the remote `main` — after this, `git push` and `git pull` know where to go without arguments.
 
-## Forking: using someone else's repo as a starting point
+> [!TIP]
+>- **Commit often, push when stable.** Small commits with clear messages make the history readable. "Fix typo" beats one giant "WIP" commit per week.
+>- **Write the message in the imperative.** `Add login form`, not `Added login form` or `Adds login form`. Matches Git's own style.
+>- **Never commit secrets.** API keys, passwords, `.env` files. If it happens, rotate the key immediately: `git rm` doesn't remove it from history.
+>- **Branches for anything risky.** Mainline stays clean, experiments live on their own branch, merge when ready.
 
-A **fork** is a server-side copy of a repo under your username. It keeps a link to the original ("upstream") so updates can be pulled in later.
+## Forking
 
-When to fork:
-- Customizing a tool/template for personal use (this is what's done with Quartz to build [[create-a-wiki-like-this|a wiki like this]]).
-- Contributing back to an open-source project — fork, change, open a *pull request*.
+A **fork** is a copy of someone else's repo under your username. 
+
+It keeps a link to the original ("upstream") so updates can be pulled in later.
+
+When to fork?
+
+When you want to:
+- Customize a tool/template for personal use (this is what's done with Quartz to build [[create-a-wiki-like-this|a wiki like this]]).
+- Contribute back to an open-source project: fork, change, open a *pull request*.
 
 How:
 1. On the source repo page, click **Fork** top-right.
@@ -157,11 +155,3 @@ git merge upstream/main
 - `README.md` — what the project does, how to install/run it, basic usage. Renders as the homepage of the repo.
 - `.gitignore` — patterns of files Git should never track (build artifacts, `node_modules/`, `.env`, IDE folders). Use the templates from https://github.com/github/gitignore.
 - `LICENSE` — only for public repos. No license = nobody legally allowed to use the code, even if it's visible.
-
-## A few habits that pay off
-
-- **Commit often, push when stable.** Small commits with clear messages make the history readable. "Fix typo" beats one giant "WIP" commit per week.
-- **Write the message in the imperative.** `Add login form`, not `Added login form` or `Adds login form`. Matches Git's own style.
-- **Never commit secrets.** API keys, passwords, `.env` files. If it happens, rotate the key immediately — `git rm` doesn't remove it from history.
-- **Branches for anything risky.** Mainline stays clean, experiments live on their own branch, merge when ready.
-- **Read the diff before pushing.** `git diff --staged` (or the IDE's diff view) catches accidents that a hasty `git add .` would otherwise ship.
