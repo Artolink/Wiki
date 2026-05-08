@@ -134,6 +134,7 @@ git commit -m "Add login form validation"
 
 >[!TIP]
 >Run `git status` constantly: it answers "what's the state?" and tells you what to do next. There's no shame in running it 30 times an hour.
+>
 >Also, a good commit message is short, in the imperative, and explains the *why* if it isn't obvious from the diff.
 
 ## History
