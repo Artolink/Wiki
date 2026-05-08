@@ -109,6 +109,7 @@ const fullPageGraph = Component.Graph({
     enableRadial: true,
     tagColors,
     currentNodeColor,
+    showFilters: true,
   },
 })
 

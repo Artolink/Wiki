@@ -93,6 +93,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     enableRadial,
     tagColors,
     currentNodeColor,
+    showFilters,
   } = JSON.parse(graph.dataset["cfg"]!) as D3Config
   const tagColorMap: Record<string, string> = tagColors ?? {}
 
@@ -560,6 +561,128 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     }
 
     linkRenderData.push(linkRenderDatum)
+  }
+
+  // ── FILTRI (solo se showFilters: true nel D3Config) ─────────────────────
+  // Multi-select tag + checkbox "hide orphan nodes" sopra al canvas. Filtraggio
+  // "soft": nasconde nodi/link via gfx.visible senza ricostruire la simulation
+  // (i nodi nascosti continuano a contribuire al layout d3-force).
+  if (showFilters) {
+    const graphRoot = graph.closest(".graph") as HTMLElement | null
+    const filtersEl = graphRoot?.querySelector(".graph-filters") as HTMLElement | null
+    if (filtersEl) {
+      const tagsListEl = filtersEl.querySelector(
+        ".graph-filter-tags-list",
+      ) as HTMLElement | null
+      const tagsCountEl = filtersEl.querySelector(
+        ".graph-filter-tags-count",
+      ) as HTMLElement | null
+      const orphanInput = filtersEl.querySelector(
+        ".graph-filter-orphans input",
+      ) as HTMLInputElement | null
+      const resetBtn = filtersEl.querySelector(
+        ".graph-filter-reset",
+      ) as HTMLButtonElement | null
+
+      const availableTags = graphData.nodes
+        .filter((n) => n.id.startsWith("tags/"))
+        .map((n) => ({ id: n.id, name: n.id.substring("tags/".length) }))
+        .sort((a, b) => a.name.localeCompare(b.name))
+
+      if (tagsListEl) {
+        tagsListEl.innerHTML = availableTags
+          .map(
+            (t) =>
+              `<label><input type="checkbox" value="${t.id}"><span>#${t.name}</span></label>`,
+          )
+          .join("")
+      }
+
+      const linkSourceId = (s: NodeData["id"] | NodeData) =>
+        typeof s === "string" ? s : s.id
+
+      function applyFilters() {
+        const selectedTags = tagsListEl
+          ? Array.from(
+              tagsListEl.querySelectorAll<HTMLInputElement>("input:checked"),
+            ).map((i) => i.value)
+          : []
+        const hideOrphans = orphanInput?.checked ?? false
+
+        const visible = new Map<string, boolean>()
+
+        if (selectedTags.length === 0) {
+          for (const n of graphData.nodes) visible.set(n.id, true)
+        } else {
+          const allowed = new Set<string>(selectedTags)
+          for (const l of graphData.links) {
+            const sId = linkSourceId(l.source as NodeData["id"] | NodeData)
+            const tId = linkSourceId(l.target as NodeData["id"] | NodeData)
+            if (selectedTags.includes(sId) || selectedTags.includes(tId)) {
+              allowed.add(sId)
+              allowed.add(tId)
+            }
+          }
+          for (const n of graphData.nodes) visible.set(n.id, allowed.has(n.id))
+        }
+
+        if (hideOrphans) {
+          const linked = new Set<string>()
+          for (const l of graphData.links) {
+            const sId = linkSourceId(l.source as NodeData["id"] | NodeData)
+            const tId = linkSourceId(l.target as NodeData["id"] | NodeData)
+            if (visible.get(sId) && visible.get(tId)) {
+              linked.add(sId)
+              linked.add(tId)
+            }
+          }
+          for (const n of graphData.nodes) {
+            if (!linked.has(n.id)) visible.set(n.id, false)
+          }
+        }
+
+        for (const n of nodeRenderData) {
+          const v = visible.get(n.simulationData.id) ?? true
+          n.gfx.visible = v
+          n.label.visible = v
+          n.gfx.eventMode = v ? "static" : "none"
+        }
+        for (const l of linkRenderData) {
+          const sId = linkSourceId(
+            l.simulationData.source as NodeData["id"] | NodeData,
+          )
+          const tId = linkSourceId(
+            l.simulationData.target as NodeData["id"] | NodeData,
+          )
+          l.gfx.visible = (visible.get(sId) ?? true) && (visible.get(tId) ?? true)
+        }
+      }
+
+      function updateTagCount() {
+        if (!tagsCountEl || !tagsListEl) return
+        const n = tagsListEl.querySelectorAll<HTMLInputElement>(
+          "input:checked",
+        ).length
+        tagsCountEl.textContent = n === 0 ? "All" : `${n} selected`
+        tagsCountEl.dataset.empty = n === 0 ? "true" : "false"
+      }
+
+      tagsListEl?.addEventListener("change", () => {
+        updateTagCount()
+        applyFilters()
+      })
+      orphanInput?.addEventListener("change", applyFilters)
+      resetBtn?.addEventListener("click", () => {
+        tagsListEl
+          ?.querySelectorAll<HTMLInputElement>("input")
+          .forEach((i) => (i.checked = false))
+        if (orphanInput) orphanInput.checked = false
+        updateTagCount()
+        applyFilters()
+      })
+
+      updateTagCount()
+    }
   }
 
   let currentTransform = zoomIdentity
