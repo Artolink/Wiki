@@ -72,9 +72,10 @@ html[saved-theme="dark"] {
   z-index: 200;
   margin: 0 !important;
   padding: 0 1.5rem;
-  // Linea sotto la topbar: più marcata della lightgray standard, ma comunque
-  // un gradino sotto al --search-border per gerarchia visiva.
-  border-bottom: 1px solid #d1d5db; // gray-300
+  // Linea sotto la topbar: più sbiadita della lightgray standard, quasi
+  // impercettibile — la topbar deve "fluttuare" sul contenuto senza che
+  // il bordo distragga.
+  border-bottom: 1px solid #f3f4f6; // gray-100
   background: var(--light);
   box-sizing: border-box;
 
@@ -465,7 +466,9 @@ html[saved-theme="dark"] .sidebar.right .graph .graph-outer {
 }
 
 html[saved-theme="dark"] .page .page-header > header {
-  border-bottom-color: #57534e; // stone-600 — più marcato del soft-border
+  // Più chiaro/sbiadito del soft-border: tono molto vicino al body bg, così
+  // la linea è solo un soffio di stacco invece di un bordo definito.
+  border-bottom-color: #2e2a28;
 }
 
 html[saved-theme="dark"] .page .page-header > header .search > .search-button {
