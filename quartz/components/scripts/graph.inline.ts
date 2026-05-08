@@ -14,7 +14,7 @@ import {
   drag,
   zoom,
 } from "d3"
-import { Text, Graphics, Application, Container, Circle, Rectangle } from "pixi.js"
+import { Text, Graphics, Application, Container, Circle } from "pixi.js"
 import { Group as TweenGroup, Tween as Tweened } from "@tweenjs/tween.js"
 import { registerEscapeHandler, removeAllChildren } from "./util"
 import { FullSlug, SimpleSlug, getFullSlug, resolveRelative, simplifySlug } from "../../util/path"
@@ -431,23 +431,27 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   const labelsContainer = new Container<Text>({ zIndex: 3, isRenderGroup: true })
   const nodesContainer = new Container<Graphics>({ zIndex: 2, isRenderGroup: true })
   const linkContainer = new Container<Graphics>({ zIndex: 1, isRenderGroup: true })
+  stage.addChild(nodesContainer, labelsContainer, linkContainer)
 
-  // Catcher per i tap su zone vuote del canvas: deseleziona l'highlight quando
-  // l'utente tocca/clicca dove non ci sono nodi. Pixi fa hit-test top-down e si
-  // ferma al primo hit, quindi i nodi (eventMode static) vengono catturati prima
-  // del catcher. Solo i tap "vuoti" arrivano qui. pointertap scatta solo per tap
-  // brevi senza drag — i pan/zoom continuano a funzionare normalmente.
-  const bgCatcher = new Container()
-  bgCatcher.eventMode = "static"
-  bgCatcher.hitArea = new Rectangle(-100000, -100000, 200000, 200000)
-  bgCatcher.on("pointertap", () => {
+  // Tap su zona vuota = deseleziona l'highlight. Strategia: flag `tappedOnNode`
+  // settato nel pointerdown handler dei nodi (più sotto). Al pointerup sul canvas
+  // DOM, se il flag NON è settato → tap era su zona vuota → reset highlight.
+  // Usiamo l'event DOM (non Pixi) perché su touch micro-movimenti del dito
+  // sopprimono il `pointertap` di Pixi, mentre il pointerup del browser arriva
+  // sempre.
+  let tappedOnNode = false
+  const handleCanvasPointerUp = () => {
+    if (tappedOnNode) {
+      tappedOnNode = false
+      return
+    }
     if (longPressActive || hoveredNodeId !== null) {
       longPressActive = false
       updateHoverInfo(null)
       renderPixiFromD3()
     }
-  })
-  stage.addChild(bgCatcher, nodesContainer, labelsContainer, linkContainer)
+  }
+  app.canvas.addEventListener("pointerup", handleCanvasPointerUp)
 
   for (const n of graphData.nodes) {
     const nodeId = n.id
@@ -504,6 +508,9 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
         // saltiamo la navigazione al rilascio.
         // Settiamo anche subito hoveredNodeId, altrimenti il drag d3 non
         // trova il subject e la navigazione non parte nemmeno con tap rapido.
+        // Flag per il listener pointerup sul canvas: questo tap è su un nodo,
+        // non deve deselezionare l'highlight.
+        tappedOnNode = true
         const targetId = e.target.label as string
         if (hoveredNodeId !== targetId) {
           updateHoverInfo(targetId)
@@ -692,6 +699,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   requestAnimationFrame(animate)
   return () => {
     stopAnimation = true
+    app.canvas.removeEventListener("pointerup", handleCanvasPointerUp)
     app.destroy()
   }
 }
