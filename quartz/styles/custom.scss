@@ -131,7 +131,7 @@ html[saved-theme="dark"] {
     // Bordo marcato per dare presenza alla barra (stile syselement).
     // Vedi --search-border: gray-400 light / stone-500 dark.
     border: 1px solid var(--search-border);
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 0 0.4rem 0 0.7rem;
     background: var(--light);
     // Ombra di base appena percepibile, dà profondità senza distrarre.
