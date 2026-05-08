@@ -72,10 +72,8 @@ html[saved-theme="dark"] {
   z-index: 200;
   margin: 0 !important;
   padding: 0 1.5rem;
-  // Linea sotto la topbar: più sbiadita della lightgray standard, quasi
-  // impercettibile — la topbar deve "fluttuare" sul contenuto senza che
-  // il bordo distragga.
-  border-bottom: 1px solid #f3f4f6; // gray-100
+  // Linea sotto la topbar: appena percepibile, tra gray-100 e gray-200.
+  border-bottom: 1px solid #ecedef;
   background: var(--light);
   box-sizing: border-box;
 
@@ -481,9 +479,8 @@ html[saved-theme="dark"] .sidebar.right .graph .graph-outer {
 }
 
 html[saved-theme="dark"] .page .page-header > header {
-  // Più chiaro/sbiadito del soft-border: tono molto vicino al body bg, così
-  // la linea è solo un soffio di stacco invece di un bordo definito.
-  border-bottom-color: #2e2a28;
+  // Linea dark: un soffio più visibile del body bg, ma sempre molto soft.
+  border-bottom-color: #36322f;
 }
 
 html[saved-theme="dark"] .page .page-header > header .search > .search-button {
