@@ -777,11 +777,29 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
           // — ma se il long press è scattato (touch) non navighiamo: l'utente
           // voleva vedere l'highlight, non aprire la pagina.
           const isClick = Date.now() - dragStartTime < 500
-          if (isClick && !longPressActive) {
+          const wasLongPress = longPressActive
+          if (isClick && !wasLongPress) {
             const node = graphData.nodes.find((n) => n.id === event.subject.id) as NodeData
             const targ = resolveRelative(fullSlug, node.id)
             window.spaNavigate(new URL(targ, window.location.toString()))
+          } else if (!wasLongPress) {
+            // Drag genuino terminato: durante il movimento abbiamo skippato
+            // pointerleave (così la label restava visibile mentre l'utente
+            // trascinava). Ora che il rilascio è avvenuto e non c'è long press
+            // attivo, ripuliamo: hover off + label del subject torna alla
+            // sua opacity "deselezionata" (decay basato sul livello di zoom,
+            // identico a quanto fa la zoom callback).
+            const subjectRender = nodeRenderData.find(
+              (n) => n.simulationData.id === event.subject.id,
+            )
+            if (subjectRender) {
+              const scale = currentTransform.k * opacityScale
+              subjectRender.label.alpha = Math.max((scale - 1) / 3.75, 0)
+            }
+            updateHoverInfo(null)
+            renderPixiFromD3()
           }
+          // Caso wasLongPress: lasciamo l'highlight visibile (feature long press).
         }),
     )
   } else {
