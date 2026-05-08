@@ -134,14 +134,16 @@ html[saved-theme="dark"] {
     border-radius: 8px;
     padding: 0 0.4rem 0 0.7rem;
     background: var(--light);
+    // Ombra di base appena percepibile, dà profondità senza distrarre.
+    box-shadow: 0 1px 2px rgba(17, 24, 39, 0.04);
     transition:
       background 0.15s ease,
       box-shadow 0.15s ease,
       border-color 0.15s ease;
     & > p { flex: 1; }
 
-    // Hover: riempimento molto leggero + ombra soft per effetto "rialzato"
-    // (in stile syselement). I colori specifici per dark mode sono più sotto.
+    // Hover: riempimento molto leggero + ombra più marcata per effetto
+    // "rialzato" (in stile syselement). Colori dark mode più sotto.
     &:hover {
       background: #f9fafb; // gray-50, appena percepibile sopra al bianco
       box-shadow:
@@ -487,6 +489,8 @@ html[saved-theme="dark"] .page .page-header > header {
 html[saved-theme="dark"] .page .page-header > header .search > .search-button {
   border-color: var(--soft-border);
   background: var(--light);
+  // Ombra di base dark: appena visibile sul body scuro.
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 
   // Hover dark: tono stone leggermente più chiaro del body + ombra più marcata
   // per emergere sul bg scuro (dark mode richiede shadow più nere).
