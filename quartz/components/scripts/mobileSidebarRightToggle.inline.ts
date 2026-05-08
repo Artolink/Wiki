@@ -44,6 +44,10 @@ document.addEventListener("nav", () => {
     const next = !isOpen()
     if (next) closeOther()
     setOpen(next)
+    // Componenti come il graph (canvas Pixi) hanno bisogno di re-misurarsi
+    // quando il drawer cambia stato — alla prima apertura il container ha
+    // dimensioni 0 perché era nascosto. Riusiamo l'evento del sidebar toggle.
+    window.dispatchEvent(new CustomEvent("sidebartoggled"))
   }
   function close() {
     setOpen(false)
