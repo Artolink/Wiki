@@ -63,7 +63,30 @@ Your laptop now opens a TCP connection to `1.2.3.4` on port 443. Done.
 
 The resolver caches every answer for the duration of its **TTL**, so the next visitor in the same office doesn't have to re-walk the whole chain.
 
+## Skipping the chain: the local `hosts` file
+
+Before step 1 (stub resolver) actually goes out, the OS checks a plain-text override: `/etc/hosts` on Linux/macOS, `C:\Windows\System32\drivers\etc\hosts` on Windows. 
+
+Any `IP → hostname` line there resolves DNS entirely for that name:
+
+```
+127.0.0.1     myapp.local
+192.168.1.50  staging.example.com
+0.0.0.0       facebook.com   # block
+```
+
+Common uses:
+
+- Point a hostname at a staging/dev IP without touching real DNS.
+- Reproduce prod issues against a different server while keeping the URL identical.
+- Block trackers or distracting domains at the OS level.
+
+Editing it by hand is fine for one-off changes, but switching between environments gets old fast.
+
+On Windows, [[hostprofiles|HostProfiles]] turns it into a one-click profile switcher with automatic DNS-flush; on Linux/macOS, [hostctl](https://github.com/guumaster/hostctl) is the CLI equivalent.
+
 ## The records types you'll meet
+
 
 A domain is a *bag of records*. 
 
