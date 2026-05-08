@@ -93,6 +93,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     enableRadial,
     tagColors,
     currentNodeColor,
+    showFilters,
   } = JSON.parse(graph.dataset["cfg"]!) as D3Config
   const tagColorMap: Record<string, string> = tagColors ?? {}
 
@@ -433,25 +434,41 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   const linkContainer = new Container<Graphics>({ zIndex: 1, isRenderGroup: true })
   stage.addChild(nodesContainer, labelsContainer, linkContainer)
 
-  // Tap su zona vuota = deseleziona l'highlight. Strategia: flag `tappedOnNode`
-  // settato nel pointerdown handler dei nodi (più sotto). Al pointerup sul canvas
-  // DOM, se il flag NON è settato → tap era su zona vuota → reset highlight.
-  // Usiamo l'event DOM (non Pixi) perché su touch micro-movimenti del dito
-  // sopprimono il `pointertap` di Pixi, mentre il pointerup del browser arriva
-  // sempre.
-  let tappedOnNode = false
-  const handleCanvasPointerUp = () => {
-    if (tappedOnNode) {
-      tappedOnNode = false
-      return
+  // currentTransform è altrimenti dichiarato dopo (nel blocco zoom) — lo
+  // anticipiamo qui per usarlo nell'hit-test del listener click sotto.
+  let currentTransform = zoomIdentity
+
+  // Tap su zona vuota = deseleziona l'highlight. Strategia: ascolto il `click`
+  // DOM nativo (scatta solo per tap senza drag, niente conflitti con d3-zoom)
+  // e faccio hit-test manuale sui nodi. Se il punto cliccato non cade su
+  // alcun nodo, deseleziono. Più affidabile del flag-based approach perché
+  // non dipende dal sequencing di pointer events Pixi vs DOM.
+  const handleCanvasClick = (e: MouseEvent) => {
+    if (!longPressActive && hoveredNodeId === null) return
+
+    const rect = app.canvas.getBoundingClientRect()
+    const cx = e.clientX - rect.left
+    const cy = e.clientY - rect.top
+    // Trasformazione inversa zoom/pan: porto coords schermo → coords stage.
+    const sx = (cx - currentTransform.x) / currentTransform.k
+    const sy = (cy - currentTransform.y) / currentTransform.k
+
+    for (const n of nodeRenderData) {
+      const nx = n.simulationData.x ?? 0
+      const ny = n.simulationData.y ?? 0
+      const dx = sx - nx
+      const dy = sy - ny
+      // hit area generosa (radius * 1.5) per matchare la sensibilità del tap touch
+      const hitRadius = n.radius * 1.5
+      if (dx * dx + dy * dy < hitRadius * hitRadius) return // tap su un nodo
     }
-    if (longPressActive || hoveredNodeId !== null) {
-      longPressActive = false
-      updateHoverInfo(null)
-      renderPixiFromD3()
-    }
+
+    // Tap fuori da qualunque nodo → deseleziona
+    longPressActive = false
+    updateHoverInfo(null)
+    renderPixiFromD3()
   }
-  app.canvas.addEventListener("pointerup", handleCanvasPointerUp)
+  app.canvas.addEventListener("click", handleCanvasClick)
 
   for (const n of graphData.nodes) {
     const nodeId = n.id
@@ -508,9 +525,6 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
         // saltiamo la navigazione al rilascio.
         // Settiamo anche subito hoveredNodeId, altrimenti il drag d3 non
         // trova il subject e la navigazione non parte nemmeno con tap rapido.
-        // Flag per il listener pointerup sul canvas: questo tap è su un nodo,
-        // non deve deselezionare l'highlight.
-        tappedOnNode = true
         const targetId = e.target.label as string
         if (hoveredNodeId !== targetId) {
           updateHoverInfo(targetId)
@@ -585,7 +599,138 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     linkRenderData.push(linkRenderDatum)
   }
 
-  let currentTransform = zoomIdentity
+  // ── FILTRI (solo se attivi via showFilters nel D3Config) ─────────────────
+  // Popoliamo il <select multiple> dei tag e una checkbox "hide orphans" sopra
+  // al canvas. Il filtraggio è "soft": nasconde i nodi/link via gfx.visible
+  // senza ricostruire la simulation. Il layout d3-force resta invariato (i
+  // nodi nascosti continuano a contribuire al layout); è il trade-off MVP.
+  if (showFilters) {
+    const graphRoot = graph.closest(".graph") as HTMLElement | null
+    const filtersEl = graphRoot?.querySelector(".graph-filters") as HTMLElement | null
+    if (filtersEl) {
+      const tagsListEl = filtersEl.querySelector(
+        ".graph-filter-tags-list",
+      ) as HTMLElement | null
+      const tagsCountEl = filtersEl.querySelector(
+        ".graph-filter-tags-count",
+      ) as HTMLElement | null
+      const orphanInput = filtersEl.querySelector(
+        ".graph-filter-orphans input",
+      ) as HTMLInputElement | null
+      const resetBtn = filtersEl.querySelector(
+        ".graph-filter-reset",
+      ) as HTMLButtonElement | null
+
+      // Lista ordinata dei tag presenti nel grafo
+      const availableTags = graphData.nodes
+        .filter((n) => n.id.startsWith("tags/"))
+        .map((n) => ({ id: n.id, name: n.id.substring("tags/".length) }))
+        .sort((a, b) => a.name.localeCompare(b.name))
+
+      if (tagsListEl) {
+        tagsListEl.innerHTML = availableTags
+          .map(
+            (t) =>
+              `<label><input type="checkbox" value="${t.id}"><span>#${t.name}</span></label>`,
+          )
+          .join("")
+      }
+
+      const linkSourceId = (s: NodeData["id"] | NodeData) =>
+        typeof s === "string" ? s : s.id
+
+      function applyFilters() {
+        const selectedTags = tagsListEl
+          ? Array.from(
+              tagsListEl.querySelectorAll<HTMLInputElement>("input:checked"),
+            ).map((i) => i.value)
+          : []
+        const hideOrphans = orphanInput?.checked ?? false
+
+        // Visibilità per id
+        const visible = new Map<string, boolean>()
+
+        if (selectedTags.length === 0) {
+          for (const n of graphData.nodes) visible.set(n.id, true)
+        } else {
+          // Includo: i tag node selezionati + tutti i nodi che hanno un link
+          // a quei tag (sia note che altri tag, raro ma possibile).
+          const allowed = new Set<string>(selectedTags)
+          for (const l of graphData.links) {
+            const sId = linkSourceId(l.source as NodeData["id"] | NodeData)
+            const tId = linkSourceId(l.target as NodeData["id"] | NodeData)
+            if (selectedTags.includes(sId) || selectedTags.includes(tId)) {
+              allowed.add(sId)
+              allowed.add(tId)
+            }
+          }
+          for (const n of graphData.nodes) visible.set(n.id, allowed.has(n.id))
+        }
+
+        if (hideOrphans) {
+          // Orphan = nodo senza link verso un altro nodo VISIBILE. I tag node
+          // sono di solito molto connessi quindi sopravvivono; gli orphan
+          // sono note solo-frontmatter senza outgoing/incoming links.
+          const linked = new Set<string>()
+          for (const l of graphData.links) {
+            const sId = linkSourceId(l.source as NodeData["id"] | NodeData)
+            const tId = linkSourceId(l.target as NodeData["id"] | NodeData)
+            if (visible.get(sId) && visible.get(tId)) {
+              linked.add(sId)
+              linked.add(tId)
+            }
+          }
+          for (const n of graphData.nodes) {
+            if (!linked.has(n.id)) visible.set(n.id, false)
+          }
+        }
+
+        for (const n of nodeRenderData) {
+          const v = visible.get(n.simulationData.id) ?? true
+          n.gfx.visible = v
+          n.label.visible = v
+          n.gfx.eventMode = v ? "static" : "none"
+        }
+        for (const l of linkRenderData) {
+          const sId = linkSourceId(
+            l.simulationData.source as NodeData["id"] | NodeData,
+          )
+          const tId = linkSourceId(
+            l.simulationData.target as NodeData["id"] | NodeData,
+          )
+          l.gfx.visible = (visible.get(sId) ?? true) && (visible.get(tId) ?? true)
+        }
+
+        renderPixiFromD3()
+      }
+
+      function updateTagCount() {
+        if (!tagsCountEl || !tagsListEl) return
+        const n = tagsListEl.querySelectorAll<HTMLInputElement>(
+          "input:checked",
+        ).length
+        tagsCountEl.textContent = n === 0 ? "All" : `${n} selected`
+        tagsCountEl.dataset.empty = n === 0 ? "true" : "false"
+      }
+
+      tagsListEl?.addEventListener("change", () => {
+        updateTagCount()
+        applyFilters()
+      })
+      orphanInput?.addEventListener("change", applyFilters)
+      resetBtn?.addEventListener("click", () => {
+        tagsListEl
+          ?.querySelectorAll<HTMLInputElement>("input")
+          .forEach((i) => (i.checked = false))
+        if (orphanInput) orphanInput.checked = false
+        updateTagCount()
+        applyFilters()
+      })
+
+      updateTagCount()
+    }
+  }
+
   if (enableDrag) {
     select<HTMLCanvasElement, NodeData | undefined>(app.canvas).call(
       drag<HTMLCanvasElement, NodeData | undefined>()
@@ -699,7 +844,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   requestAnimationFrame(animate)
   return () => {
     stopAnimation = true
-    app.canvas.removeEventListener("pointerup", handleCanvasPointerUp)
+    app.canvas.removeEventListener("click", handleCanvasClick)
     app.destroy()
   }
 }
