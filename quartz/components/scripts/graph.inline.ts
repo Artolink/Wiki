@@ -14,7 +14,7 @@ import {
   drag,
   zoom,
 } from "d3"
-import { Text, Graphics, Application, Container, Circle } from "pixi.js"
+import { Text, Graphics, Application, Container, Circle, Rectangle } from "pixi.js"
 import { Group as TweenGroup, Tween as Tweened } from "@tweenjs/tween.js"
 import { registerEscapeHandler, removeAllChildren } from "./util"
 import { FullSlug, SimpleSlug, getFullSlug, resolveRelative, simplifySlug } from "../../util/path"
@@ -431,7 +431,23 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   const labelsContainer = new Container<Text>({ zIndex: 3, isRenderGroup: true })
   const nodesContainer = new Container<Graphics>({ zIndex: 2, isRenderGroup: true })
   const linkContainer = new Container<Graphics>({ zIndex: 1, isRenderGroup: true })
-  stage.addChild(nodesContainer, labelsContainer, linkContainer)
+
+  // Catcher per i tap su zone vuote del canvas: deseleziona l'highlight quando
+  // l'utente tocca/clicca dove non ci sono nodi. Pixi fa hit-test top-down e si
+  // ferma al primo hit, quindi i nodi (eventMode static) vengono catturati prima
+  // del catcher. Solo i tap "vuoti" arrivano qui. pointertap scatta solo per tap
+  // brevi senza drag — i pan/zoom continuano a funzionare normalmente.
+  const bgCatcher = new Container()
+  bgCatcher.eventMode = "static"
+  bgCatcher.hitArea = new Rectangle(-100000, -100000, 200000, 200000)
+  bgCatcher.on("pointertap", () => {
+    if (longPressActive || hoveredNodeId !== null) {
+      longPressActive = false
+      updateHoverInfo(null)
+      renderPixiFromD3()
+    }
+  })
+  stage.addChild(bgCatcher, nodesContainer, labelsContainer, linkContainer)
 
   for (const n of graphData.nodes) {
     const nodeId = n.id
