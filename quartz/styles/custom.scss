@@ -682,6 +682,13 @@ html[saved-theme="dark"] .graph .graph-outer {
   margin-right: auto;
 }
 
+// Rimuovi la riga separatrice tra Content e page-footer (inserita da
+// renderPage.tsx come <hr />): il footer minimal non ha bisogno di un
+// divisore, il copyright a destra basta.
+.page > #quartz-body > .center > hr {
+  display: none;
+}
+
 // ── Font scaling dinamico (FontResizer) ─────────────────────────────────────
 // Lo slider applica una CSS variable --font-scale su <html>. I calc() qui
 // sotto la usano per ridimensionare in tempo reale tutto il blocco di testo
