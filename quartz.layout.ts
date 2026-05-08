@@ -32,13 +32,15 @@ const explorerSortFn = (a: FileTrieNode, b: FileTrieNode): number => {
   return a.isFolder ? -1 : 1
 }
 
-// Esclude "tags", "graph", "Utilities" e "license" dall'explorer —
-// alcuni hanno pulsanti dedicati nella sidebar, "license" è linkata dal footer.
+// Esclude "tags", "graph", "Utilities", "license" e "privacy" dall'explorer —
+// alcuni hanno pulsanti dedicati nella sidebar; "license" e "privacy" sono
+// linkate dal footer e non devono apparire tra le note.
 const explorerFilterFn = (node: FileTrieNode): boolean =>
   node.slugSegment !== "tags" &&
   node.slugSegment !== "graph" &&
   node.slugSegment !== "Utilities" &&
-  node.slugSegment !== "license"
+  node.slugSegment !== "license" &&
+  node.slugSegment !== "privacy"
 
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
