@@ -556,16 +556,17 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
       .on("pointerupoutside", clearLongPressTimer)
       .on("pointerleave", () => {
         clearLongPressTimer()
-        // Se il long press è attivo (utente ha tenuto premuto e poi rilasciato),
-        // manteniamo l'highlight visibile finché un altro nodo non viene
-        // selezionato — così il colore dei vicini resta osservabile dopo il
-        // rilascio del dito su mobile.
-        if (longPressActive) return
+        // Skip deselezione in due casi:
+        // - long press attivo: l'highlight resta finché un altro nodo viene
+        //   selezionato (così su mobile dopo il rilascio del dito si vede il
+        //   colore dei vicini).
+        // - drag in corso: durante il drag il nodo si sposta sotto il pointer,
+        //   il che scatena pointerleave anche se l'utente sta ancora trascinando
+        //   — ma vogliamo che la label resti visibile durante il movimento.
+        if (longPressActive || dragging) return
         updateHoverInfo(null)
         label.alpha = oldLabelOpacity
-        if (!dragging) {
-          renderPixiFromD3()
-        }
+        renderPixiFromD3()
       })
     drawNode(gfx, radius, defaultFill, defaultStroke)
 

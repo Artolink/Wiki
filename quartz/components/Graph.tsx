@@ -98,7 +98,7 @@ export default ((opts?: Partial<GraphOptions>) => {
             </details>
             <label class="graph-filter-orphans">
               <input type="checkbox" />
-              <span>Hide orphan notes</span>
+              <span>Hide orphan nodes</span>
             </label>
             <button type="button" class="graph-filter-reset" title="Reset filtri">
               Reset
