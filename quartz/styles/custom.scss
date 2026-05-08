@@ -522,19 +522,22 @@ html[saved-theme="dark"] .page .page-header > header .search > .search-button {
   margin-bottom: 1.25rem;
 }
 
+// Effetto interattivo "rialzato" applicato a TUTTI i .graph-outer:
+// sidebar destra (mini graph) + page /graph (graph view full-page).
+// Stesso pattern della search bar (vedi & .search > .search-button).
 .sidebar.right .graph .graph-outer {
   border: 1px solid var(--lightgray);
   border-radius: 8px;
   background: transparent;
-  // Ombra di base appena percepibile (stesso pattern della search bar).
+}
+
+.graph .graph-outer {
   box-shadow: 0 1px 2px rgba(17, 24, 39, 0.04);
   transition:
     background 0.15s ease,
     box-shadow 0.15s ease,
     border-color 0.15s ease;
 
-  // Hover: riempimento molto leggero + ombra più marcata, effetto "rialzato"
-  // come la search bar.
   &:hover {
     background: #f9fafb;
     box-shadow:
@@ -544,7 +547,7 @@ html[saved-theme="dark"] .page .page-header > header .search > .search-button {
 }
 
 // Hover dark: bg stone leggermente sopra al body + shadow più marcata.
-html[saved-theme="dark"] .sidebar.right .graph .graph-outer {
+html[saved-theme="dark"] .graph .graph-outer {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 
   &:hover {
