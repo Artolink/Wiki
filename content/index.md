@@ -1,5 +1,4 @@
-# Welcome!
-
+# 🏠 Welcome!
 ![[Pasted image 20260508155621.png]]
 
 Welcome to my Wiki! Here you can find [who I am](https://www.linkedin.com/in/andreafarneti/).
