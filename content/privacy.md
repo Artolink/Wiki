@@ -63,7 +63,3 @@ Since the site does not collect any personal data, there is nothing to access, r
 You are in full control of your local browser data via the standard browser settings (clear cache / site data).
 
 If you believe data processing related to this site is unlawful, you may file a complaint with the Italian Data Protection Authority (Garante per la protezione dei dati personali, [garanteprivacy.it](https://www.garanteprivacy.it)).
-
-## Changes
-
-Last update: **May 2026**. Any changes to this page will be reflected here.
