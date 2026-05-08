@@ -580,6 +580,13 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
           }
           dragStartTime = Date.now()
           dragging = true
+          // Drag su touch = sposta nodo, non long-press-per-highlight. Invalidiamo
+          // il long press: timer cancellato + flag a false. Senza questo reset,
+          // se il timer scattava durante il drag (>400ms premuto in movimento),
+          // longPressActive restava true e l'highlight rimaneva incollato anche
+          // dopo il rilascio del dito.
+          clearLongPressTimer()
+          longPressActive = false
         })
         .on("drag", function dragged(event) {
           const initPos = event.subject.__initialDragPos
