@@ -30,10 +30,6 @@ export interface D3Config {
   // pieni di questo colore; i tag che coincidono con la pagina aperta hanno
   // bordo di questo colore.
   currentNodeColor?: string
-  // Quando true, sopra al canvas appare una barra di filtri (multi-select tag
-  // + checkbox "hide orphan notes"). Pensato per il graph full-page: la
-  // sidebar ha solo il mini-graph, niente filtri.
-  showFilters?: boolean
 }
 
 interface GraphOptions {
@@ -83,28 +79,6 @@ export default ((opts?: Partial<GraphOptions>) => {
     return (
       <div class={classNames(displayClass, "graph")}>
         <h3>{i18n(cfg.locale).components.graph.title}</h3>
-        {localGraph.showFilters && (
-          <div class="graph-filters">
-            <details class="graph-filter-tags">
-              <summary>
-                <span class="graph-filter-tags-label">Tag</span>
-                <span class="graph-filter-tags-count" data-empty="true">
-                  All
-                </span>
-              </summary>
-              <div class="graph-filter-tags-list">
-                {/* opzioni popolate da graph.inline.ts dai dati graphData */}
-              </div>
-            </details>
-            <label class="graph-filter-orphans">
-              <input type="checkbox" />
-              <span>Hide orphan nodes</span>
-            </label>
-            <button type="button" class="graph-filter-reset" title="Reset filtri">
-              Reset
-            </button>
-          </div>
-        )}
         <div class="graph-outer">
           <div class="graph-container" data-cfg={JSON.stringify(localGraph)}></div>
           <button class="global-graph-icon" aria-label="Global Graph">
