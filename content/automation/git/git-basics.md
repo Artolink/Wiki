@@ -13,7 +13,7 @@ GitHub (or GitLab, Bitbucket…) enters the picture when you need to share or ba
 
 Pair this guide with [[github-basics|the GitHub starter]] for understanding that aspect too!
 
-## First-time setup
+## Initial setup
 
 Before the first commit, tell Git who is making the changes. 
 
@@ -29,7 +29,7 @@ git config --list                              # check everything stuck
 
 The `--global` flag writes into `~/.gitconfig`. Inside a single repo, the same commands without `--global` create a per-repo override (handy if one project needs a different email).
 
-## The three states (the mental model that makes Git click)
+## The three states
 
 Every tracked file lives in one of three places:
 
@@ -68,7 +68,7 @@ git push -u origin main
 ```
 ^first-push
 
-## Working with remotes
+## Remotes
 
 A "remote" is just a named URL pointing to another copy of the repo (typically on GitHub). 
 
@@ -96,7 +96,6 @@ git fetch                   # fetch only, no merge — useful to inspect first
 >**Don't commit secrets.** `.env`, API keys, passwords. 
 >
 >If it happens, **rotate the secret immediately**: `git rm` doesn't erase it from history!
-
 
 ## Branches
 
@@ -138,7 +137,7 @@ Run `git status` constantly: it answers "what's the state?" and tells you what t
 >
 >Also, a good commit message is short, in the imperative, and explains the *why* if it isn't obvious from the diff.
 
-## Inspecting history
+## History
 
 ```bash
 git log                          # full commit history, newest first
