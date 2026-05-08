@@ -1577,10 +1577,15 @@ html[saved-theme] body[data-slug="tags/Utilities"] {
 .custom-footer {
   // Allineato col blocco di testo md centrale: stesso cap (860px) e stesso
   // centering, così il copyright a destra cade alla destra dell'ultima
-  // colonna di testo invece che al bordo viewport. Il `min-width: 0` annulla
-  // il `min-width: 100%` impostato da base.scss su `footer`, che altrimenti
-  // forza la larghezza all'intera cella grid (vincendo sul max-width).
+  // colonna di testo invece che al bordo viewport.
+  // - `min-width: 0` annulla il `min-width: 100%` di base.scss che forzava
+  //   l'intera cella grid (battendo sul max-width).
+  // - `width: 100%` riempie la cell fino a max-width 860, così il footer
+  //   ha un'area di 860px in cui text-align:right può spingere il copyright
+  //   sul bordo destro. Senza questo, il footer si stringerebbe al testo
+  //   e l'allineamento right non avrebbe alcun effetto visibile.
   min-width: 0 !important;
+  width: 100% !important;
   max-width: 860px !important;
   margin: 1rem auto 0.75rem !important;
   text-align: right !important;
