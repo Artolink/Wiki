@@ -9,6 +9,8 @@ const CustomFooter: QuartzComponent = ({ fileData, displayClass }: QuartzCompone
   return (
     <footer class={classNames(displayClass, "custom-footer")}>
       <a href={`${baseDir}/license`}>© Andrea Farneti, all rights reserved</a>
+      <span class="footer-sep"> · </span>
+      <a href={`${baseDir}/privacy`}>Privacy</a>
     </footer>
   )
 }

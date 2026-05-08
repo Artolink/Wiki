@@ -20,7 +20,10 @@ const config: QuartzConfig = {
     generateSocialImages: false,
     theme: {
       fontOrigin: "googleFonts",
-      cdnCaching: true,
+      // false = al build Quartz scarica i CSS e i file font da Google e li serve
+      // dal proprio dominio. Niente call runtime a fonts.googleapis.com /
+      // fonts.gstatic.com → niente trasferimento IP utente a Google (GDPR-clean).
+      cdnCaching: false,
       typography: {
         header: "Inter",
         body: "Inter",
