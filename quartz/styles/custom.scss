@@ -1577,7 +1577,10 @@ html[saved-theme] body[data-slug="tags/Utilities"] {
 .custom-footer {
   // Allineato col blocco di testo md centrale: stesso cap (860px) e stesso
   // centering, così il copyright a destra cade alla destra dell'ultima
-  // colonna di testo invece che al bordo viewport.
+  // colonna di testo invece che al bordo viewport. Il `min-width: 0` annulla
+  // il `min-width: 100%` impostato da base.scss su `footer`, che altrimenti
+  // forza la larghezza all'intera cella grid (vincendo sul max-width).
+  min-width: 0 !important;
   max-width: 860px !important;
   margin: 1rem auto 0.75rem !important;
   text-align: right !important;
