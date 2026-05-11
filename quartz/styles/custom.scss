@@ -1537,6 +1537,37 @@ html[saved-theme="dark"] {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
+// TASK LIST CHECKBOXES — cliccabili, stile Obsidian (strikethrough on check)
+// ──────────────────────────────────────────────────────────────────────────────
+// L'opzione `enableCheckbox: true` (Plugin.ObsidianFlavoredMarkdown in
+// quartz.config.ts) toglie `disabled` dagli <input type=checkbox> renderizzati
+// dalle task list `- [ ]` / `- [x]` e gli mette class="checkbox-toggle".
+// Lo script checkbox.inline.ts già persiste lo stato in localStorage.
+// Qui aggiungiamo solo il feedback visivo: cursor pointer + line-through
+// sulla riga quando la checkbox è spuntata, replicando l'UX di Obsidian.
+
+input.checkbox-toggle {
+  cursor: pointer;
+  margin-right: 0.35rem;
+  // Accent color quando spuntata = accent del sito (arancione/tag color)
+  accent-color: var(--secondary);
+}
+
+li:has(> input.checkbox-toggle:checked) {
+  color: var(--gray);
+  text-decoration: line-through;
+  text-decoration-color: var(--gray);
+  text-decoration-thickness: 1px;
+  transition: color 0.15s ease;
+
+  // Eventuali link nella riga: ereditano il colore muted invece di
+  // restare arancione brillanti — coerente con "questa cosa è done".
+  & a {
+    color: var(--gray);
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
 // TAG PAGES — accent color allineato al colore del tag nel grafo
 // ──────────────────────────────────────────────────────────────────────────────
 // Quando si visita /tags/<NomeTag>, override delle CSS vars di accent
