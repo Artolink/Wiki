@@ -284,7 +284,7 @@ We'll check this again even in the upgrade phase, before rebooting the server.
 >[!DANGER]
 >A machine still on the old kernel but reachable, is a much better problem than a machine that booted cleanly but with a broken sshd: in the latter, you have to access the Hypervisor's console (if the system is a VM) or the KVM console directly via BMC/IPMI (if the host is physical), then manually reset the root password to access again! 
 
-## <input type="checkbox"> 5. Extra steps
+##  <input type="checkbox"> 5. Extra steps
 
 Do you have a monitoring tool (e.g. Nagios, CheckMK, PRTG...)?
 
