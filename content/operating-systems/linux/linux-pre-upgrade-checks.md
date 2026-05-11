@@ -189,9 +189,6 @@ A disk-only snapshot is faster, but if you ever need to restore it, the VM will 
 
 A disk + RAM snapshot, on the other hand, is slower, but it can fully restore the machine’s state. The VM will resume exactly from the point in time when the snapshot was taken, as if nothing had happened.
 
-> [!IMPORTANT]
-> Delete the snapshot once the upgraded system has been stable for 24-48h.
-
 ### FileSystem snapshot
 
 If the system isn't a VM (bare metal) or you don't have hypervisor access, the next best safety net is a **snapshot at the filesystem layer**. 
