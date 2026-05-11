@@ -1553,7 +1553,18 @@ input.checkbox-toggle {
   accent-color: var(--secondary);
 }
 
-li:has(> input.checkbox-toggle:checked) {
+// Strikethrough on-check applicato sia alle voci di task list `- [ ]` che
+// agli heading con checkbox inline (`## <input type="checkbox"> Title`).
+// Includere gli h1-h6 permette di marcare uno step di una guida come "done"
+// senza spezzare la struttura semantica del documento (TOC, anchor, styling
+// da heading continuano a funzionare normalmente).
+li:has(> input.checkbox-toggle:checked),
+h1:has(> input.checkbox-toggle:checked),
+h2:has(> input.checkbox-toggle:checked),
+h3:has(> input.checkbox-toggle:checked),
+h4:has(> input.checkbox-toggle:checked),
+h5:has(> input.checkbox-toggle:checked),
+h6:has(> input.checkbox-toggle:checked) {
   color: var(--gray);
   text-decoration: line-through;
   text-decoration-color: var(--gray);
