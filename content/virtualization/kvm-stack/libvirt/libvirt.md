@@ -3,7 +3,7 @@ title: "Libvirt: the universal VM manager"
 tags:
 ---
 
-## What excactly is Libvirt
+## What excactly is Libvirt?
 
 Libvirt **is not** the program that runs the VMs.
 
