@@ -19,7 +19,7 @@ This is the general approach I follow:
 4. **Run pre-flight checks**: basically confirm if the system is in a sane and healthy state _before_ starting the upgrade, this way you can abort early if something is wrong.
 
 
-## 1. Understand the server's role
+##  <input type="checkbox"> 1. Understand the server's role
 
 The docs are missing, the only thing the ticket says is *"please upgrade it"*. 
 
@@ -174,7 +174,7 @@ Read the output carefully.
 Anything you don't recognise is something to investigate before you start.
 
 
-## 2. Create a snapshot
+##  <input type="checkbox"> 2. Create a snapshot
 
 This is probably the most important step in the list, because it lets you instantly roll back in case anything goes wrong.
 
@@ -215,7 +215,7 @@ For learning how to actually take, monitor, merge, and remove an LVM snapshot, s
 > 
 > **Don't keep them as long-term backups.**
 
-## 3. Save the current system state
+##  <input type="checkbox"> 3. Save the current system state
 
 As I mentioned earlier, besides the actual snapshot, we want to manually backup the current system state**: this way we know how it looks like _before_ the upgrade, and we can compare it later with the _after_ state and have a diff status.
 
@@ -232,7 +232,7 @@ During `apt upgrade`, dpkg may prompt to overwrite a config file (`Y/I/N/O/D/Z`)
 A pristine `/etc` archive saves you in these scenarios (even tho we'll also see how to prevent that configuration overwrites happen in the first place).
 
 
-## 4. Run pre-flight checks
+##  <input type="checkbox"> 4. Run pre-flight checks
 
 These are the final things to check before starting the actual upgrade procedure, and they answer the question "is it safe to run apt right now?".
 
@@ -284,7 +284,8 @@ We'll check this again even in the upgrade phase, before rebooting the server.
 >[!DANGER]
 >A machine still on the old kernel but reachable, is a much better problem than a machine that booted cleanly but with a broken sshd: in the latter, you have to access the Hypervisor's console (if the system is a VM) or the KVM console directly via BMC/IPMI (if the host is physical), then manually reset the root password to access again! 
 
-## 5. Extra steps
+## <input type="checkbox"> 5. Extra steps
 
-- [ ] Do you have a monitoring tool (e.g. Nagios, CheckMK, PRTG...)?
-   If so, remember to put the host in downtime before starting the actual upgrade.
+Do you have a monitoring tool (e.g. Nagios, CheckMK, PRTG...)?
+
+If so, remember to put the host in downtime before starting the actual upgrade.
