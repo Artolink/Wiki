@@ -194,8 +194,6 @@ A disk + RAM snapshot, on the other hand, is slower, but it can fully restore th
 
 ### FileSystem snapshot
 
-### FileSystem snapshot
-
 If the system isn't a VM (bare metal) or you don't have hypervisor access, the next best safety net is a **snapshot at the filesystem layer**. 
 
 Three popular options on Linux:
