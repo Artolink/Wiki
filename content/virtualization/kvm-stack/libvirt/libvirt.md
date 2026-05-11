@@ -175,21 +175,3 @@ virsh snapshot-list <dom>
 virsh snapshot-revert <dom> <snap>
 virsh snapshot-delete <dom> <snap>
 ```
-
-### Creating a VM from scratch
-
-`virsh` works on existing definitions; for the initial install, `virt-install` is the friendly wrapper:
-
-```bash
-virt-install \
-  --name mymachine \
-  --memory 4096 \
-  --vcpus 2 \
-  --disk size=20,pool=default \
-  --cdrom /isos/ubuntu.iso \
-  --osinfo ubuntu22.04 \
-  --network network=default \
-  --graphics spice
-```
-
-It generates the XML and runs `virsh define` + `virsh start` for you.
