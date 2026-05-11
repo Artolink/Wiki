@@ -1,5 +1,5 @@
 ---
-title: "Libvirt: the universal VM control plane"
+title: "Libvirt: the universal VM manager"
 tags:
 ---
 
