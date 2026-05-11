@@ -40,7 +40,13 @@ export const TableOfContents: QuartzTransformerPlugin<Partial<Options>> = (userO
               let highestDepth: number = opts.maxDepth
               visit(tree, "heading", (node) => {
                 if (node.depth <= opts.maxDepth) {
-                  const text = toString(node)
+                  // includeHtml: false → esclude i nodi `html` inline (es.
+                  // `<input type="checkbox">` messo all'inizio di un titolo
+                  // per renderlo spuntabile). Senza questo flag il TOC mostra
+                  // letteralmente la stringa HTML; il rendering della pagina
+                  // resta invariato (il transformer rehype rende l'input
+                  // come elemento DOM normale).
+                  const text = toString(node, { includeHtml: false })
                   highestDepth = Math.min(highestDepth, node.depth)
                   toc.push({
                     depth: node.depth,
