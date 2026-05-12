@@ -294,6 +294,35 @@ html[saved-theme="dark"] .page .page-header > header .flex-component button:hove
   }
 }
 
+// ── Drag handle per ridimensionare la sidebar sinistra ────────────────────
+// Strip sottile sul bordo destro della sidebar. Il drag aggiorna la CSS var
+// --sidebar-left-width (vedi sidebarToggle.inline.ts). Cap min/max applicati
+// in JS: min = larghezza default del breakpoint corrente (l'utente può solo
+// allargare, non restringere sotto), max = 540px (non invade il content).
+// Nascosto sotto i 1100px, dove la sidebar diventa drawer hamburger.
+.sidebar.left > .sidebar-resize-handle {
+  position: absolute;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  right: -3px;
+  width: 6px;
+  cursor: col-resize;
+  z-index: 50;
+  border-radius: 3px;
+  background-color: transparent;
+  transition: background-color 0.15s ease;
+
+  &:hover,
+  &.dragging {
+    background-color: var(--secondary);
+    opacity: 0.4;
+  }
+
+  @media (max-width: 1100px) {
+    display: none;
+  }
+}
+
 // ── HomeLink: stile "pillola" come syselement (pulsante big in alto) ──────────
 
 .sidebar.left > .home-link {
@@ -966,9 +995,11 @@ html[data-sidebar-collapsed="true"] body[data-slug="graph"] .page > #quartz-body
 // quello che causava l'overlap con la barra destra.
 
 // Layout 3-col (desktop largo)
+// La var --sidebar-left-width è settata dal drag-resize handle (vedi
+// sidebarToggle.inline.ts). Se non settata, fallback al default minmax.
 @media (min-width: 1500px) {
   .page > #quartz-body {
-    grid-template-columns: minmax(260px, 340px) minmax(0, 1fr) minmax(260px, 340px) !important;
+    grid-template-columns: var(--sidebar-left-width, minmax(260px, 340px)) minmax(0, 1fr) minmax(260px, 340px) !important;
     column-gap: 1.5rem !important;
   }
 }
@@ -976,7 +1007,7 @@ html[data-sidebar-collapsed="true"] body[data-slug="graph"] .page > #quartz-body
 // Layout 2-col (desktop stretto): nascondi sidebar destra
 @media (min-width: 1101px) and (max-width: 1499.98px) {
   .page > #quartz-body {
-    grid-template-columns: minmax(240px, 320px) minmax(0, 1fr) !important;
+    grid-template-columns: var(--sidebar-left-width, minmax(240px, 320px)) minmax(0, 1fr) !important;
     grid-template-areas:
       "grid-sidebar-left grid-header"
       "grid-sidebar-left grid-center"
