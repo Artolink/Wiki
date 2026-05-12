@@ -166,11 +166,15 @@ html[saved-theme="dark"] {
 // ── Toast di completamento ───────────────────────────────────────────────
 // Inserito dinamicamente in <body> da JS (NON figlio del .page-progress
 // così non eredita l'opacity del parent quando il widget è nascosto).
+// Toast: posizionato subito sopra alla pillola (la pillola è a bottom:4.5rem
+// con padding 0.6rem→ altezza ~2.5rem, quindi top del pill è a ~7rem; il
+// toast siede a 8rem con 1rem di gap visibile). Slide-up dal basso per
+// effetto coerente con il widget sottostante.
 .page-progress-toast {
   position: fixed;
-  top: calc(#{$navH} + 1.5rem);
+  bottom: 8rem;
   left: 50%;
-  transform: translateX(-50%) translateY(-25px);
+  transform: translateX(-50%) translateY(15px);
   z-index: 200;
   padding: 0.95rem 1.8rem;
   background: #16a34a;
