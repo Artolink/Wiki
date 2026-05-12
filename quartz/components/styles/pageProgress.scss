@@ -19,13 +19,11 @@ $navH: 66px;
   pointer-events: none;
   transition: opacity 0.25s ease, transform 0.25s ease;
 
-  // Visibilità combinata: il JS abilita `.visible` solo quando il mouse è
-  // nella metà bassa della viewport (stesso comportamento del FontResizer).
-  // `data-progress-visible` resta come "abilitato a comparire" (false sulle
-  // pagine senza checkbox → il widget non si rivela mai).
-  &[data-progress-visible="true"].visible,
-  &[data-progress-visible="true"]:hover,
-  &[data-progress-visible="true"]:focus-within {
+  // Visibilità on-demand: il JS aggiunge `.visible` solo quando l'utente
+  // clicca una checkbox, e la rimuove dopo ~3s. Nessun mouse-tracking.
+  // `data-progress-visible="false"` (pagine senza checkbox) blocca a monte:
+  // l'AND con `.visible` non scatta mai.
+  &[data-progress-visible="true"].visible {
     opacity: 1;
     pointer-events: auto;
     transform: translateX(-50%) translateY(0);
@@ -111,13 +109,15 @@ $navH: 66px;
 }
 
 // Completed state: green border + fill, tick visible, percent in green.
+// Background SOLIDO (var --light, non rgba) così non si vede il contenuto
+// sotto attraverso la pillola.
 .page-progress.completed {
   .page-progress-pill {
     border-color: #16a34a;
-    background: rgba(22, 163, 74, 0.06);
+    background: var(--light);
     box-shadow:
-      0 2px 10px rgba(22, 163, 74, 0.15),
-      0 1px 2px rgba(22, 163, 74, 0.08);
+      0 4px 14px rgba(22, 163, 74, 0.28),
+      0 1px 3px rgba(22, 163, 74, 0.15);
   }
 
   .page-progress-bar-fill {
@@ -146,10 +146,10 @@ html[saved-theme="dark"] {
   .page-progress.completed {
     .page-progress-pill {
       border-color: #22c55e;
-      background: rgba(34, 197, 94, 0.08);
+      background: var(--light); // solido, var --light dark = stone-900
       box-shadow:
-        0 2px 10px rgba(34, 197, 94, 0.25),
-        0 1px 2px rgba(34, 197, 94, 0.12);
+        0 4px 14px rgba(34, 197, 94, 0.4),
+        0 1px 3px rgba(34, 197, 94, 0.2);
     }
 
     .page-progress-bar-fill {
