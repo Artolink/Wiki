@@ -5,6 +5,10 @@
 
 const TOAST_DURATION_MS = 3000
 const TOAST_CLASS = "page-progress-toast"
+// Stessa soglia del FontResizer: il widget si rivela quando il cursore
+// scende sotto il 50% dell'altezza viewport. Sotto la soglia rimane
+// invisibile (opacity 0 + pointer-events none).
+const VISIBLE_THRESHOLD_FRACTION = 0.5
 
 // Track wether we've already showed the "complete!" toast for the *current*
 // page. Reset on every nav event. Without this the toast fires every time
@@ -41,6 +45,28 @@ document.addEventListener("nav", () => {
   if (!root) return
 
   toastShownForThisPage = false
+
+  // ── Auto-hide on mouse position (stesso pattern del FontResizer) ──────
+  // Il widget si vede SOLO quando il mouse è nella metà bassa della
+  // viewport. La classe `.visible` (toggled da JS) abilita opacity 1 +
+  // pointer-events auto via CSS. Throttle con requestAnimationFrame per
+  // non saturare il main thread durante mouse veloci.
+  let mouseTracking = false
+  function updateVisibility(y: number) {
+    const threshold = window.innerHeight * VISIBLE_THRESHOLD_FRACTION
+    root!.classList.toggle("visible", y > threshold)
+  }
+  function onMouseMove(e: MouseEvent) {
+    if (mouseTracking) return
+    mouseTracking = true
+    const y = e.clientY
+    requestAnimationFrame(() => {
+      updateVisibility(y)
+      mouseTracking = false
+    })
+  }
+  document.addEventListener("mousemove", onMouseMove, { passive: true })
+  window.addCleanup(() => document.removeEventListener("mousemove", onMouseMove))
 
   const counterEl = root.querySelector(".page-progress-counter") as HTMLElement
   const percentEl = root.querySelector(".page-progress-percent") as HTMLElement
