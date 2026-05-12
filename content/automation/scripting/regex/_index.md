@@ -6,7 +6,10 @@ tags:
 ## What Are Regex?
 
 Regular expressions (regex) are patterns used to match, search, and manipulate text.
-Different tools implement slightly different flavors — knowing which one you're using is essential.
+
+They are extremely helpful to edit multiple lines of text at the same time, by selecting only specific occurrences that match the criteria defined by the regular expression itself.
+
+Different tools implement slightly different flavors, so knowing which one you're using is essential.
 
 ## Flavors & Tools
 
@@ -17,9 +20,10 @@ Different tools implement slightly different flavors — knowing which one you'r
 | `grep -P` | Perl / PCRE                  | [grep Regex](regex-grep)     |
 | VSCode    | JavaScript (similar to Perl) | [VSCode Regex](regex-vscode) |
 
-> **In practice: learn SED and VSCode — the others follow naturally.**
-> - `vim` is similar to `sed` → refer to the SED page
-> - `grep -P` supports most POSIX + Perl extensions → refer to the VSCode page for complex patterns
+**In practice: learn SED and VSCode, and the others will follow naturally**:
+
+ - `vim` is similar to `sed`, so refer to the SED page
+ - `grep -P` supports most POSIX + Perl extensions, so refer to the VSCode page for complex patterns
 
 ---
 

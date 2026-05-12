@@ -63,7 +63,9 @@ sed 's/$/;/' file.txt       # append ; to every line
 | 0 or more | `*` | `*` |
 | Between n and m | `\{n,m\}` | `{n,m}` |
 
-> **Key rule:** in BRE, quantifiers need a backslash: `\+`, `\?`, `\{n,m\}`. In ERE (`-E`), they work without: `+`, `?`, `{n,m}`.
+**Key rule:** in BRE, quantifiers need a backslash: `\+`, `\?`, `\{n,m\}`. 
+
+In ERE (`-E`), they work without: `+`, `?`, `{n,m}`.
 
 **Example:**
 
@@ -156,4 +158,4 @@ sed -E 's/[0-9]{3}-[0-9]{2}-[0-9]{4}/PHONE/g' file.txt
 sed -E 's/(([0-9]{1,3}\.){3}[0-9]{1,3})/IP/g' file.txt
 ```
 
-> **Note:** Use `\<` / `\>` instead of `\b` for strict POSIX compliance.
+**Note:** Use `\<` / `\>` instead of `\b` for strict POSIX compliance.

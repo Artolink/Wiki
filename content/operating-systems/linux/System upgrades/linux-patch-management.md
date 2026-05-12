@@ -62,6 +62,48 @@ Finally:
 
 Here is the actual [patch upgrade script](02-patch-upgrade.sh), just save it as `02-patch-upgrade.sh`, `chmod +x` and run it as root.
 
+But if you don't feel confident and prefer to do the actual procedure manually, here are the steps:
+
+```bash
+# Safety backup of iptables
+iptables-save  > /root/rules.v4.bak
+ip6tables-save > /root/rules.v6.bak 2>/dev/null
+cp -a /etc/iptables /root/etc-iptables-bak 2>/dev/null
+
+# Refresh index and see what's coming
+apt update
+apt list --upgradable
+
+# Pre-upgrade cleanup
+apt autoremove --purge
+apt clean
+
+# Upgrade
+apt upgrade
+apt full-upgrade
+
+# Repair any interrupted state (idempotent)
+dpkg --configure -a
+apt -f install
+
+# SSH validation before any reboot
+sshd -t
+systemctl restart ssh
+systemctl is-active ssh
+systemctl is-enabled ssh
+
+# Kernel diagnostics
+uname -r
+ls -l /boot | grep vmlinuz
+
+# netfilter-persistent check
+command -v netfilter-persistent && systemctl status netfilter-persistent.service --no-pager # if missing: apt install --reinstall iptables-persistent
+
+# Reboot only if required
+[ -f /var/run/reboot-required ] && cat /var/run/reboot-required.pkgs
+reboot
+```
+
 ##  <input type="checkbox"> Monitoring the run
 
 The script returns control to the prompt **immediately** because it runs inside a detached `screen`. 

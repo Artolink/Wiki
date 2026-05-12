@@ -5,13 +5,17 @@ tags:
   - WebsiteCreation
 ---
 
-## Why this matters
+That's it, you bought a domain, your personal space on the Internet... but you have no idea how it works nor how to actually use it.
 
-Every URL typed in a browser starts with a name (`google.com`, `wiki.farnetiandrea.it`) but the network only routes packets to **numbers** (IP addresses). The whole machinery in between (buying a name, pointing it somewhere, watching the change "propagate"...), is one of those things that feels mysterious until the underlying steps click into place. Once they do, every "why isn't my site reachable?" issue stops being magic.
+Well, a domain is just a name, but to start using it you need to edit its DNS zone.
 
-This page walks through what a domain *is*, how the world resolves it to an IP, and the moving parts you'll touch any time you set one up.
+you can see the DNS zone like a public *bag of records* that you can use to implement different functionalities for your domain. 
 
-## The hierarchy: a tree read right-to-left
+The main functionality that DNS accomplishes is translating the domain name into IP an addresses: this way everybody can reach your domain by typing its URL into a browser. 
+
+Now let's start seeing how everything actually works.
+
+## The DNS hierarchy
 
 Domain names look flat (`mail.google.com`) but they're actually a tree that reads from **right-to-left**, with each dot being a branch:
 
@@ -34,9 +38,12 @@ Domain names look flat (`mail.google.com`) but they're actually a tree that read
 
 So `wiki.farnetiandrea.it` parses as: subdomain `wiki` of `farnetiandrea`, registered under TLD `it`.
 
-## From `wiki.farnetiandrea.it` to `1.2.3.4`: what actually happens
 
-Type `wiki.farnetiandrea.it` and press Enter. Behind the scenes, four actors talk to each other:
+## From `wiki.farnetiandrea.it` to `1.2.3.4`
+
+Type `wiki.farnetiandrea.it` and press Enter. 
+
+Behind the scenes, four actors talk to each other:
 
 1. **Stub resolver** (your laptop / phone) asks the question. 
    "What's the IP of `wiki.farnetiandrea.it`?"
@@ -46,7 +53,7 @@ Type `wiki.farnetiandrea.it` and press Enter. Behind the scenes, four actors tal
     - **TLD servers** (the ones for `.it`, in this case) know who's authoritative for each second-level domain under them.
     - **Authoritative servers** for `farnetiandrea.it` itself hold the actual records.
 
-The conversation, simplified:
+The conversation, simplified, is the following:
 
 ```
 You      → Resolver:  "What's the A record for wiki.farnetiandrea.it?"
@@ -63,7 +70,7 @@ Your laptop now opens a TCP connection to `1.2.3.4` on port 443. Done.
 
 The resolver caches every answer for the duration of its **TTL**, so the next visitor in the same office doesn't have to re-walk the whole chain.
 
-## Skipping the chain: the local `hosts` file
+## The local `hosts` file
 
 Before step 1 (stub resolver) actually goes out, the OS checks a plain-text override: `/etc/hosts` on Linux/macOS, `C:\Windows\System32\drivers\etc\hosts` on Windows. 
 
@@ -85,21 +92,20 @@ Editing it by hand is fine for one-off changes, but switching between environmen
 
 On Windows, [[hostprofiles|HostProfiles]] turns it into a one-click profile switcher with automatic DNS-flush; on Linux/macOS, [hostctl](https://github.com/guumaster/hostctl) is the CLI equivalent.
 
-## The records types you'll meet
+## The DNS records types
 
-
-A domain is a *bag of records*. 
+As we said, a DNS zone is a *bag of records*. 
 
 Each record has a name, a type, a TTL, and a value. 
 
 The types worth knowing:
 
-- **A** — name to IPv4 address. `wiki.farnetiandrea.it. A 1.2.3.4`
-- **AAAA** — name to IPv6 address. Same idea, different protocol. `wiki.farnetiandrea.it. AAAA 2001:db8::1`
-- **CNAME** — alias of one name to another. "When asked about `www.example.com`, treat it as `example.com`."
-- **MX** — mail exchanger. Where mail for the domain should go. `example.com. MX 10 mail.example.com.` (the `10` is a priority — lower wins).
-- **TXT** — arbitrary text. Used for ownership verification (Google Search Console asks you to add one), SPF/DKIM email auth, ACME challenges (Let's Encrypt) and so on.
-- **NS** — nameserver delegation. Tells the parent zone *which* servers are authoritative for this domain. The records you set at the registrar.
+- **A**: name to IPv4 address. `wiki.farnetiandrea.it. A 1.2.3.4`
+- **AAAA**: name to IPv6 address. Same idea, different protocol. `wiki.farnetiandrea.it. AAAA 2001:db8::1`
+- **CNAME**: alias of one name to another. "When asked about `www.example.com`, treat it as `example.com`."
+- **MX**:  mail exchanger. Where mail for the domain should go. `example.com. MX 10 mail.example.com.` (the `10` is a priority: lower wins).
+- **TXT**:  arbitrary text. Used for ownership verification (Google Search Console asks you to add one), SPF/DKIM email auth, ACME challenges (Let's Encrypt) and so on.
+- **NS**: nameserver delegation. Tells the parent zone *which* servers are authoritative for this domain. The records you set at the registrar.
 
 A typical small zone looks like:
 
@@ -111,7 +117,7 @@ example.com.        MX    10 mail.example.com.
 example.com.        TXT   "v=spf1 ip4:1.2.3.5 -all"
 ```
 
-## The three confusing roles: registrar / DNS provider / host
+## The main roles
 
 - **Registrar**: the company that *sells* you the right to use the name. 
   They register it with the TLD's official registry. Examples: Namecheap, Cloudflare Registrar, Aruba. You pay them a yearly fee (~10€/year for `.it`, more for trendy TLDs).
@@ -120,9 +126,9 @@ example.com.        TXT   "v=spf1 ip4:1.2.3.5 -all"
 - **Host (hosting provider)**: the machine that actually serves your website / mail. 
   The IP you put in the A record. Could be a VPS, a static-site host, or a server in your basement.
 
-You can mix-and-match: register at Namecheap, host DNS at Cloudflare, run the site on Aruba. Or all three at the same provider. The protocol is the same.
+You can mix-and-match: register at Namecheap, host DNS at Cloudflare, run the site on Aruba... Or all three at the same provider.
 
-## TTL and "propagation"
+## TTL and DNS propagation
 
 Every DNS record has a **TTL** (time-to-live, in seconds), which tells resolvers how long they can cache the answer.
 
@@ -142,25 +148,25 @@ dig @8.8.8.8 example.com            # ask Google's resolver specifically
 
 `dig` shipped with most Linux/macOS systems; on Windows use `nslookup` or `Resolve-DnsName` in PowerShell.
 
-## A worked example
+## Let's use this wiki as an example
 
 Setting up `wiki.farnetiandrea.it` to point at a VPS:
 
 1. **Register** `farnetiandrea.it` with a registrar (one-time + yearly).
-2. **Choose DNS provider**: say the registrar's default. They give you a control panel for adding records.
+2. **Choose DNS provider**: I use the registrar's default. They give you a control panel for adding records and it's very handy.
 3. **Add an A record**:
     - Name: `wiki`
     - Type: `A`
     - Value: `1.2.3.4` (your VPS public IP)
-    - TTL: 3600 (1 hour) — fine for steady state
-4. **Wait** a few minutes (or up to TTL). `dig wiki.farnetiandrea.it` from your laptop should now answer with `1.2.3.4`.
-5. On the VPS, your web server (Nginx, Apache, …) is configured for `server_name wiki.farnetiandrea.it`. The OS-level firewall lets in 80 and 443.
-6. The browser visits `https://wiki.farnetiandrea.it`, the OS resolves the name, opens the connection, you get TLS + content.
+    - TTL: 3600 (1 hour)
+4. **Wait** a few minutes (or up to TTL): now `dig wiki.farnetiandrea.it` from your laptop and it should answer with `1.2.3.4`.
+5. On my VPS, my web server (Nginx) is configured for `server_name wiki.farnetiandrea.it`, and my firewall lets in 80 and 443.
+6. When someone from the browser visits `https://wiki.farnetiandrea.it`, their OS resolves the name and opens the connection.
 
-This is exactly the chain at work behind [[create-a-wiki-like-this|the wiki you're reading]].
+This is pretty much the chain at work behind [[create-a-wiki-like-this|the wiki you're reading]].
 
-## Where to go next
+## What I highly suggest checking
 
-- [Cloudflare's DNS learning hub](https://www.cloudflare.com/learning/dns/) — visual, well-written introduction to every DNS topic in detail.
-- [How DNS works (comic)](https://howdns.works/) — same concepts told as a story, for when you want the picture in your head before the spec.
-- [dnschecker](https://dnschecker.org/) — see live DNS changes for your domain!
+- [Cloudflare's DNS learning hub](https://www.cloudflare.com/learning/dns/) : visual, well-written introduction to every DNS topic in detail.
+- [How DNS works (comic)](https://howdns.works/): same concepts told as a story, for when you want the picture in your head before the spec.
+- [dnschecker](https://dnschecker.org/): see live DNS changes for your domain!

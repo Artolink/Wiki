@@ -19,7 +19,7 @@ title: Regex in VSCode (JavaScript / Perl-like)
 | `\n` | Newline |
 | `\t` | Tab |
 
-> **Uppercase = opposite**: `\D` matches anything that is NOT a digit, `\W` not a word character, `\S` not whitespace.
+**Uppercase = opposite**: `\D` matches anything that is NOT a digit, `\W` not a word character, `\S` not whitespace.
 
 ---
 
@@ -51,7 +51,7 @@ title: Regex in VSCode (JavaScript / Perl-like)
 * = {0,}
 ```
 
-> **Lazy qualifiers:** out of scope for now.
+**Lazy qualifiers:** out of scope for now.
 
 ---
 

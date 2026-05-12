@@ -124,4 +124,5 @@ If you cannot access the firmware in any way:
 - **Jumper method:** locate the CMOS reset jumper on the motherboard and short it for a few seconds with the system powered off
 - **Battery method:** remove the CMOS coin cell battery (CR2032) for ~30 seconds, then reinsert it
 
-> ⚠️ Both methods reset **all** BIOS/UEFI settings to factory defaults, including boot order, SATA mode, and any custom configuration!
+> [!WARNING]
+> Both methods reset **all** BIOS/UEFI settings to factory defaults, including boot order, SATA mode, and any custom configuration!

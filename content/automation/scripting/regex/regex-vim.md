@@ -18,7 +18,7 @@ VIM introduces a few additions on top of standard POSIX:
 | `\u` | Uppercase letter — shorthand for `[[:upper:]]` |
 | `\l` | Lowercase letter — shorthand for `[[:lower:]]` |
 
-> **Uppercase = opposite**, same rule as VSCode: `\D`, `\W`, `\S` match the negation.
+**Uppercase = opposite**, same rule as VSCode: `\D`, `\W`, `\S` match the negation.
 
 ---
 
@@ -33,7 +33,7 @@ VIM controls how special characters are interpreted via **magic modes**, set at 
 | `\v` | very magic | All special chars work without `\` — closest to ERE/VSCode |
 | `\V` | very nomagic | Everything is literal except `\` |
 
-> **Tip:** Use `\v` at the start of your pattern to write regex in a VSCode/Perl-like style without escaping everything.
+**Tip:** Use `\v` at the start of your pattern to write regex in a VSCode/Perl-like style without escaping everything.
 
 **Example:**
 
