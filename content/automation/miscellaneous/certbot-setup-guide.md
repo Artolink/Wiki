@@ -2,6 +2,7 @@
 title: Stop thinking about certificate renewals! - Certbot guide
 tags:
   - WebsiteCreation
+  - Maintenance
 ---
 
 ## What is Certbot?

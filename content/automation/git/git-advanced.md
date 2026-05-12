@@ -1,6 +1,7 @@
 ---
 title: " Git in a team: the workflows, the rebase rituals, the recoveries"
 tags:
+  - Advanced
 ---
 [[git-basics|The basics]] cover the local loop: stage, commit, push, branch, pull. 
 

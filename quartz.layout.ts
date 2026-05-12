@@ -87,6 +87,8 @@ const tagColors: Record<string, string> = {
   StartingTools: "#a16207",   // marrone caldo (ambra scuro)
   Basics: "#ec4899",          // rosa
   Utilities: "#6b7280",       // grigio neutro
+  Advanced: "#ef4444",        // rosso (red-500) — distinto dal currentNodeColor (#dc2626, red-600)
+  Maintenance: "#ca8a04",     // giallo scuro (yellow-600) — leggibile su bianco, distinto dall'amber di StartingTools
 }
 
 // Colore del nodo "tu sei qui" nel grafo: distingue la pagina aperta dagli
