@@ -1,5 +1,5 @@
 ---
-title: "Pre-upgrade checks: prepare a Linux system before apt upgrade"
+title: "0. Pre-upgrade checks: prepare a Linux system before apt upgrade"
 tags:
   - Maintenance
 ---
