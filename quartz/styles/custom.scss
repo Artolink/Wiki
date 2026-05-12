@@ -36,12 +36,6 @@ $navH: 66px;
 }
 
 html[saved-theme="dark"] {
-  // Istruisce il browser a renderizzare i widget native (checkbox, scrollbar,
-  // input nativi) con il tema dark di sistema. In particolare le checkbox
-  // delle task list risultano molto più visibili — bordo chiaro su bg scuro
-  // invece di scomparire.
-  color-scheme: dark;
-
   // Dark mode — palette warm stone, complementare al tema syntax gruvbox-dark-hard.
   // Toni marroncini caldi invece del blu-slate freddo.
   --code-bg:          #292524;     // stone-800 (caldo, 1 step sopra body #1c1917)
