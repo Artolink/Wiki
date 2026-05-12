@@ -1,13 +1,31 @@
 ---
 title: "Pre-upgrade checks: prepare a Linux system before apt upgrade"
 tags:
+  - Maintenance
 ---
 
-Updating a Linux system is usually boring: `apt update && apt upgrade -y`, ten minutes, done. 
+[Updating a Linux system](linux-patch-management) is usually boring: `apt update && apt upgrade -y`, ten minutes, done. 
 
 Until the time it isn't: kernel that won't boot, `sshd_config` rewritten, domain lost, iptables rules vanished, a service that comes up failed and you can't tell whether it was failed *before* the upgrade or because of it... and so on.
 
-The trick isn't trying to make upgrades "safe" (you can't, fully), but to lower the risk as much as possible, while making them **reversible** and **diagnosable**.
+[Release upgrades](linux-release-upgrade) are even worse: high risk for production systems and no downgrade path.
+
+There are different approaches for handling them correctly, but they need extra care.
+
+Here's a comparison of the two:
+
+| Aspect       | Patch management                                             | Release upgrade                                               |
+| ------------ | ------------------------------------------------------------ | ------------------------------------------------------------- |
+| Frequency    | weekly / monthly                                             | every 2 years (LTS → LTS)                                     |
+| Core command | `apt upgrade`                                                | `do-release-upgrade`                                          |
+| Duration     | 10-20 min                                                    | 1-3 hours                                                     |
+| Risk         | low                                                          | high                                                          |
+| What changes | package versions only, same distro                           | kernel / libc / init / sources.list, many configs rewritten   |
+| Procedure    | scriptable                                                   | manual, supervised                                            |
+| Rollback     | boot on the previous kernel, `apt install pkg=<old-version>` | snapshot rollback or full rebuild: no official downgrade path |
+| Mindset      | "keep it alive"                                              | "migrate it to the next generation"                           |
+
+Here the trick isn't trying to make upgrades "safe" (you can't, fully), but to lower the risk as much as possible while making them **reversible** and **diagnosable**, and that's where we'll focus today with these pre-upgrade checks.
 
 If you have Uyuni or Ansible for managing your systems, these steps can definitely become the *pre-task* checks of your upgrade playbook.
 
