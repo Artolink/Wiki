@@ -10,7 +10,7 @@ Obsidian is a local-first Markdown note-taking app built around a **personal kno
 
 ...What? You don't know how to write Markdown files? 
 
-It's super simple! Check my [guide](markdown-guide).
+It's super easy! Check out my [guide](markdown-guide).
 
 The real power is in **linking notes together** and visualising connections through the graph view.
 

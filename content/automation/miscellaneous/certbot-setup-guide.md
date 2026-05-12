@@ -11,7 +11,7 @@ Certbot is the official **Let's Encrypt client**: a single command issues a free
 
 ***
 
-## Prerequisites
+## <input type="checkbox"> 0. Prerequisites
 
 | Requirement                                                    | Why                                          |
 | -------------------------------------------------------------- | -------------------------------------------- |
@@ -22,7 +22,7 @@ Certbot is the official **Let's Encrypt client**: a single command issues a free
 
 ***
 
-## Installation (Ubuntu/Debian)
+## <input type="checkbox"> 1. Installation (Ubuntu/Debian)
 
 ```bash
 sudo apt update
@@ -34,7 +34,7 @@ The `python3-certbot-nginx` package is what enables the `--nginx` plugin used be
 
 ***
 
-## Obtain a certificate
+## <input type="checkbox"> 2. Obtain a certificate
 
 For a single domain served by Nginx:
 
@@ -57,7 +57,7 @@ Certbot will:
 
 ***
 
-## ⚠️ Wildcard certificates
+### Wildcard certificates
 
 > [!WARNING]
 > **`certbot --nginx` cannot issue wildcard certificates** (e.g. `*.example.com`).
@@ -87,7 +87,7 @@ If your DNS provider isn't in the official plugin list, the alternatives are `--
 
 ***
 
-## What Certbot adds to the vhost
+### What Certbot adds to the vhost
 
 After `certbot --nginx`, your vhost looks roughly like this:
 
@@ -124,7 +124,7 @@ The lines with `# managed by Certbot` are owned by Certbot: touch them only if y
 
 ***
 
-## Auto-renewal
+## <input type="checkbox"> 3. Auto-renewal
 
 On systemd-based distros (Ubuntu 16.04+, Debian 9+) the package installs a `certbot.timer` that runs **twice a day** and renews any cert within 30 days of expiry. Verify with:
 
@@ -152,20 +152,21 @@ server = https://acme-v02.api.letsencrypt.org/directory
 
 ***
 
-## Useful commands
+## 4. Extra 
+### Useful commands
 
-| Command | What it does |
-|---|---|
-| `sudo certbot certificates` | List installed certs + expiry dates |
-| `sudo certbot renew` | Force a renewal pass (only if within 30 days) |
-| `sudo certbot renew --force-renewal` | Renew even if not yet due (dev/debug only) |
-| `sudo certbot delete --cert-name <domain>` | Remove a cert |
-| `sudo certbot --nginx -d new.example.com` | Add HTTPS to a new domain |
-| `sudo certbot --nginx --expand -d a.com -d b.com` | Add another domain to an existing cert |
+| Command                                           | What it does                                  |
+| ------------------------------------------------- | --------------------------------------------- |
+| `sudo certbot certificates`                       | List installed certs + expiry dates           |
+| `sudo certbot renew`                              | Force a renewal pass (only if within 30 days) |
+| `sudo certbot renew --force-renewal`              | Renew even if not yet due (dev/debug only)    |
+| `sudo certbot delete --cert-name <domain>`        | Remove a cert                                 |
+| `sudo certbot --nginx -d new.example.com`         | Add HTTPS to a new domain                     |
+| `sudo certbot --nginx --expand -d a.com -d b.com` | Add another domain to an existing cert        |
 
 ***
 
-## Real-world example: this wiki
+### Real-world example: this wiki
 
 The wiki you're reading runs the exact setup described above. The vhost lives in `/etc/nginx/conf.d/wiki.farnetiandrea.it.conf`:
 

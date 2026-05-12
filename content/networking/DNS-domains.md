@@ -5,6 +5,8 @@ tags:
   - WebsiteCreation
 ---
 
+## 0. Introduction
+
 That's it, you bought a domain, your personal space on the Internet... but you have no idea how it works nor how to actually use it.
 
 Well, a domain is just a name, but to start using it you need to edit its DNS zone.
@@ -15,7 +17,17 @@ The main functionality that DNS accomplishes is translating the domain name into
 
 Now let's start seeing how everything actually works.
 
-## The DNS hierarchy
+## 1. The main actors
+
+- **Registrar**: the company that *sells* you the right to use the name. 
+- **DNS provider**: the company running the **authoritative nameservers** for your zone. 
+  Most registrars include free DNS hosting. you can also delegate to a third party (Cloudflare DNS is popular and free). The registrar's job here is just to publish the *NS records* pointing at your DNS provider.
+- **Host (hosting provider)**: the machine that actually serves your website. 
+  The IP you put in the A record. Could be a VPS, a static-site host, or a server in your basement.
+
+You can mix-and-match: register at Namecheap, host DNS at Cloudflare, run the site on Aruba... Or all three at the same provider.
+
+## 2. The DNS hierarchy
 
 Domain names look flat (`mail.google.com`) but they're actually a tree that reads from **right-to-left**, with each dot being a branch:
 
@@ -39,7 +51,7 @@ Domain names look flat (`mail.google.com`) but they're actually a tree that read
 So `wiki.farnetiandrea.it` parses as: subdomain `wiki` of `farnetiandrea`, registered under TLD `it`.
 
 
-## From `wiki.farnetiandrea.it` to `1.2.3.4`
+### From `wiki.farnetiandrea.it` to `1.2.3.4`
 
 Type `wiki.farnetiandrea.it` and press Enter. 
 
@@ -70,7 +82,7 @@ Your laptop now opens a TCP connection to `1.2.3.4` on port 443. Done.
 
 The resolver caches every answer for the duration of its **TTL**, so the next visitor in the same office doesn't have to re-walk the whole chain.
 
-## The local `hosts` file
+### The local `hosts` file
 
 Before step 1 (stub resolver) actually goes out, the OS checks a plain-text override: `/etc/hosts` on Linux/macOS, `C:\Windows\System32\drivers\etc\hosts` on Windows. 
 
@@ -92,7 +104,7 @@ Editing it by hand is fine for one-off changes, but switching between environmen
 
 On Windows, [[hostprofiles|HostProfiles]] turns it into a one-click profile switcher with automatic DNS-flush; on Linux/macOS, [hostctl](https://github.com/guumaster/hostctl) is the CLI equivalent.
 
-## The DNS records types
+## 3. The DNS records types
 
 As we said, a DNS zone is a *bag of records*. 
 
@@ -117,18 +129,8 @@ example.com.        MX    10 mail.example.com.
 example.com.        TXT   "v=spf1 ip4:1.2.3.5 -all"
 ```
 
-## The main roles
 
-- **Registrar**: the company that *sells* you the right to use the name. 
-  They register it with the TLD's official registry. Examples: Namecheap, Cloudflare Registrar, Aruba. You pay them a yearly fee (~10€/year for `.it`, more for trendy TLDs).
-- **DNS provider**: the company running the **authoritative nameservers** for your zone. 
-  Most registrars include free DNS hosting. you can also delegate to a third party (Cloudflare DNS is popular and free). The registrar's job here is just to publish the *NS records* pointing at your DNS provider.
-- **Host (hosting provider)**: the machine that actually serves your website / mail. 
-  The IP you put in the A record. Could be a VPS, a static-site host, or a server in your basement.
-
-You can mix-and-match: register at Namecheap, host DNS at Cloudflare, run the site on Aruba... Or all three at the same provider.
-
-## TTL and DNS propagation
+### TTL and DNS propagation
 
 Every DNS record has a **TTL** (time-to-live, in seconds), which tells resolvers how long they can cache the answer.
 
@@ -148,7 +150,9 @@ dig @8.8.8.8 example.com            # ask Google's resolver specifically
 
 `dig` shipped with most Linux/macOS systems; on Windows use `nslookup` or `Resolve-DnsName` in PowerShell.
 
-## Let's use this wiki as an example
+## 4. Extras
+
+### Let's use this wiki as an example
 
 Setting up `wiki.farnetiandrea.it` to point at a VPS:
 
@@ -165,7 +169,7 @@ Setting up `wiki.farnetiandrea.it` to point at a VPS:
 
 This is pretty much the chain at work behind [[create-a-wiki-like-this|the wiki you're reading]].
 
-## What I highly suggest checking
+### What I highly suggest checking
 
 - [Cloudflare's DNS learning hub](https://www.cloudflare.com/learning/dns/) : visual, well-written introduction to every DNS topic in detail.
 - [How DNS works (comic)](https://howdns.works/): same concepts told as a story, for when you want the picture in your head before the spec.

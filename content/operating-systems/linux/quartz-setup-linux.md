@@ -14,12 +14,12 @@ The site is built once with `npx quartz build`, the output is plain HTML/CSS/JS 
 
 ## Prerequisites
 
-| Requirement | Why |
-|---|---|
-| **Node.js 22+** | Quartz uses modern ES modules and APIs |
-| **npm 10.9+** | Bundled with Node 22 |
-| **Git** | Quartz versions content + you typically push to GitHub |
-| **An Obsidian vault** | The Markdown source for the site |
+| Requirement             | Why                                    |
+| ----------------------- | -------------------------------------- |
+| **Node.js 22+**         | Quartz uses modern ES modules and APIs |
+| **npm 10.9+**           | Bundled with Node 22                   |
+| **Git** (not mandatory) | you typically want to push to GitHub   |
+| **An Obsidian vault**   | The Markdown source for the site       |
 
 ***
 

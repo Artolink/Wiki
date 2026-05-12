@@ -16,14 +16,14 @@ The basics worth knowing before clicking around:
 
 This guide gets the account ready, creates a first repo, and sets up SSH keys so you don't have to type a password every time you push.
 
-## Create the account
+## 1. Create the account
 
 1. Open https://github.com and sign up.
 2. Pick a username carefully: it ends up in every URL of every repo (`github.com/<username>/<repo>`) and is hard to change later.
 3. Verify the email address. The free plan is enough for everything in this guide: unlimited public **and** private repos.
 4. Optional but worth it: in *Settings → Profile* add a short bio, a profile picture, and pin a couple of repos when you have them. The profile page becomes a free portfolio.
 
-## Create your first repository
+## 2. Create your first repository
 
 From the home page, click the green **New** button (or visit https://github.com/new).
 
@@ -39,7 +39,35 @@ Fields that matter:
 
 Click **Create repository**. The repo URL is now `https://github.com/<username>/<repo>`.
 
-## Set up SSH access
+### Forking
+
+You can also start by forking a repository, instead of creating one.
+
+A **fork** is a copy of someone else's repo under your username. It keeps a link to the original ("upstream") so updates can be pulled in later.
+
+When to fork, you ask?
+
+When you want to:
+
+- Customize a tool/template for personal use (this is what's done with Quartz to build [[create-a-wiki-like-this|a wiki like this]]).
+- Contribute back to an open-source project: fork, change, open a *pull request*.
+
+You just need to:
+
+1. Click **Fork** top-right on the source repo page.
+2. Pick the destination (your username), optionally rename, **Create fork**.
+3. Clone the fork as usual: `git clone git@github.com:<username>/<repo>.git`.
+
+To pull updates from the original repo, later:
+
+```bash
+git remote add upstream git@github.com:<original-owner>/<repo>.git
+git fetch upstream
+git merge upstream/main
+```
+
+
+## 3. Set up SSH access
 
 By default, Git over HTTPS asks for credentials every time. 
 
@@ -88,7 +116,7 @@ Hi <username>! You've successfully authenticated, but GitHub does not provide sh
 
 That message is the success case: GitHub never gives a shell, the `ssh -T` is only checking the handshake.
 
-## Your first commit
+## 4. Your first commit
 
 Pick the SSH URL from the repo page (the **Code** button → **SSH** tab). 
 
@@ -125,30 +153,6 @@ The `-u` flag links the local `main` to the remote `main` — after this, `git p
 >- **Never commit secrets.** API keys, passwords, `.env` files. If it happens, rotate the key immediately: `git rm` doesn't remove it from history.
 >- **Branches for anything risky.** Mainline stays clean, experiments live on their own branch, merge when ready.
 
-## Forking
-
-A **fork** is a copy of someone else's repo under your username. 
-
-It keeps a link to the original ("upstream") so updates can be pulled in later.
-
-When to fork?
-
-When you want to:
-- Customize a tool/template for personal use (this is what's done with Quartz to build [[create-a-wiki-like-this|a wiki like this]]).
-- Contribute back to an open-source project: fork, change, open a *pull request*.
-
-How:
-1. On the source repo page, click **Fork** top-right.
-2. Pick the destination (your username), optionally rename, **Create fork**.
-3. Clone the fork as usual: `git clone git@github.com:<username>/<repo>.git`.
-
-To pull updates from the original later:
-
-```bash
-git remote add upstream git@github.com:<original-owner>/<repo>.git
-git fetch upstream
-git merge upstream/main
-```
 
 ## Files every repo should have
 

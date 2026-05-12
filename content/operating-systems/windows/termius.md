@@ -4,15 +4,17 @@ tags:
   - Utilities
 ---
 
-## Why a "real" SSH client matters
+## Why a real SSH client matters
 
-The default options on most desktops are either bare-bones (`ssh` from PowerShell or Terminal) or aged (PuTTY on Windows). They work, but they leave a lot on the table:
+The default options on most desktops are either bare-bones (`ssh` from PowerShell or Terminal) or aged (PuTTY on Windows). 
+
+They work, but they leave a lot on the table:
 
 - No central place to **store hosts** with their own keys, ports, jump hosts etc.
 - No **sync** between machines
-- File transfer (SFTP) needs a separate tool.
+- File transfer (**SFTP**) needs a separate tool.
 
-A modern SSH client folds all of this into one window. [Termius](https://termius.com/) is the cleanest free option around.
+A modern SSH client folds all of this into one window, and [Termius](https://termius.com/) is the cleanest free option around.
 
 ## What Termius is
 
@@ -20,13 +22,13 @@ A cross-platform SSH client (Windows, macOS, Linux, iOS, Android) with a polishe
 
 - **Host library** with tags, search, and folders.
 - **Built-in key manager** (generate, import, attach to hosts).
-- **SFTP browser** in the same window — drag files in and out.
+- **SFTP browser** in the same window: drag files directly in and out.
 - **Port forwarding** with a UI instead of memorizing `-L` / `-R` syntax.
 - Optional **account sync**: register and everything follows you on every device.
 
 It's also the only mainstream SSH client whose mobile apps are genuinely usable: handy when something breaks at 11pm and the laptop is not around ;)
 
-## Install
+## Installation
 
 Pick the platform from https://termius.com/download.
 
@@ -38,7 +40,7 @@ The first launch asks for an account. You can **skip** and use it offline, but m
 
 The free tier is fine for that — see the section below.
 
-## Quality-of-life features worth knowing
+## Features
 
 ### SFTP
 

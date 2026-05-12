@@ -8,7 +8,7 @@ tags:
 
 Nginx is a high-performance **web server** and **reverse proxy** that powers a huge slice of the internet. It excels at three things:
 
-1. Serving static files (HTML, images, generated sites) extremely fast.
+1. **Serving static files** (HTML, images, generated sites) extremely fast.
 2. **Reverse-proxying** requests to application servers (Node, Python, Go, Java) listening on local ports.
 3. **TLS termination**: handle HTTPS once, talk plain HTTP to your backends behind the scenes.
 
@@ -35,7 +35,7 @@ curl -I http://localhost
 
 ***
 
-## Directory layout (Debian/Ubuntu)
+## Directory layout
 
 | Path | Purpose |
 |---|---|

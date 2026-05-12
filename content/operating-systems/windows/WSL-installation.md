@@ -13,7 +13,7 @@ This allows you to have a separate environment for testing, run scripts, create 
 
 ---
 
-## 0️. Prerequisites
+##  <input type="checkbox"> 0️. Prerequisites
 
 **Requirements:**
 - Windows 10+
@@ -50,7 +50,7 @@ Here's a list of the main manufacturers and how to enable it:
 
 ---
 
-## 1️. WSL Installation
+##  <input type="checkbox"> 1️. WSL Installation
 
 Open PowerShell as Administrator:
 
@@ -64,7 +64,7 @@ A reboot is required for the changes to take effect. After reboot, Ubuntu will s
 
 ---
 
-## 2️. Verify the Installation
+##  <input type="checkbox"> 2️. Verify the Installation
 
 Check that you are running WSL Version 2:
 
@@ -124,7 +124,7 @@ WSL allows you to call Windows executables directly from the Linux shell. Any `.
 
 ---
 
-## 6️. Basic Configuration
+##  <input type="checkbox"> 6️. Basic Configuration
 
 System update:
 
