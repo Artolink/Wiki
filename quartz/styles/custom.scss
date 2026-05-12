@@ -1612,6 +1612,18 @@ html[saved-theme] body[data-slug="tags/Utilities"] {
   --highlight: rgba(107, 114, 128, 0.15);
 }
 
+html[saved-theme] body[data-slug="tags/Advanced"] {
+  --secondary: #ef4444;
+  --tertiary:  #f87171;
+  --highlight: rgba(239, 68, 68, 0.15);
+}
+
+html[saved-theme] body[data-slug="tags/Maintenance"] {
+  --secondary: #ca8a04;
+  --tertiary:  #eab308;
+  --highlight: rgba(202, 138, 4, 0.15);
+}
+
 // ──────────────────────────────────────────────────────────────────────────────
 // CUSTOM FOOTER — minimal copyright line, link to /license
 // ──────────────────────────────────────────────────────────────────────────────
