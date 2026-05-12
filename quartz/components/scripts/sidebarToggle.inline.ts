@@ -8,7 +8,7 @@
 
 const STORAGE_KEY = "sidebarCollapsed"
 const WIDTH_KEY = "sidebarWidth"
-const MAX_WIDTH = 540 // px — oltre questo cap la sidebar invade il content
+const MAX_WIDTH = 600 // px — oltre questo cap la sidebar invade il content
 const HANDLE_CLASS = "sidebar-resize-handle"
 
 // Min width = larghezza di default del breakpoint corrente. L'utente può
