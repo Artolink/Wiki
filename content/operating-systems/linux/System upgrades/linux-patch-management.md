@@ -31,7 +31,7 @@ A patch upgrade should be:
 
 The full procedure below is a single shell script that does exactly this. Read it once and you'll know what to expect every time you run it.
 
-##  The scripted procedure
+##  <input type="checkbox"> The scripted procedure
 
 ### What it does
 
@@ -62,8 +62,7 @@ Finally:
 
 Here is the actual [patch upgrade script](02-patch-upgrade.sh), just save it as `02-patch-upgrade.sh`, `chmod +x` and run it as root.
 
-
-##  Monitoring the run
+##  <input type="checkbox"> Monitoring the run
 
 The script returns control to the prompt **immediately** because it runs inside a detached `screen`. 
 
