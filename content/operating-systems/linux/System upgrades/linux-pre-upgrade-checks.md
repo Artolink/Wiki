@@ -306,4 +306,9 @@ We'll check this again even in the upgrade phase, before rebooting the server.
 
 Do you have a monitoring tool (e.g. Nagios, CheckMK, PRTG...)?
 
-If so, remember to put the host in downtime before starting the actual upgrade.
+If so, remember to schedule a downtime window for your host before starting the actual upgrade.
+
+
+Do have a clear **rollback plan** ready before you start?
+
+See [Linux upgrade rollback](linux-upgrade-rollback) (coming soon) for all the possible recovery procedures: hypervisor snapshot restore, filesystem snapshot merge, kernel pinning from GRUB, per-package downgrades...
