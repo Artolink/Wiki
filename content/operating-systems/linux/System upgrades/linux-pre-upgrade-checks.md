@@ -183,7 +183,7 @@ A service that has been logging errors for 6 hours straight probably is not a se
 > [!TIP]
 >Journalctl is very powerful, these are only examples but you may want to check out the detailed explanation as soon as I release it.
 
-### Final script: 00-server-recon.sh
+### Script: 00-server-recon.sh
 
 If you want a single script that does everything that I mentioned, [here you have it](00-server-recon.sh). 
 
@@ -237,7 +237,7 @@ For learning how to actually take, monitor, merge, and remove an LVM snapshot, s
 
 As I mentioned earlier, besides the actual snapshot, we want to manually backup the current system state**: this way we know how it looks like _before_ the upgrade, and we can compare it later with the _after_ state and have a diff status.
 
-### 01-system-snapshot.sh
+### Script: 01-system-snapshot.sh
 
 To do that I created a script that you can use, you can find it [here](01-system-snapshot.sh).
 
