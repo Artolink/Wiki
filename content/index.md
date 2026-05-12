@@ -23,7 +23,7 @@ What sets these notes apart from simply asking an AI for advice is that here you
 
 - useful integrations: links to theory, tools, and software to simplify work and improve its quality
 
-The notes are **truly** interconnected: each one is a node in a graph, so they contain only what is strictly necessary.<br>
+The notes are **truly** interconnected: each one is a node in a [graph](graph), so they contain only what is strictly necessary.<br>
 
 You can physically see all the knowledge connections required for a topic, and navigate through them without ever encountering repetitions.
 
