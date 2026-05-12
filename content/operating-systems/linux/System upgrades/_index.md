@@ -1,3 +1,3 @@
 ---
-title: System upgrades
+title: ⬆️ System upgrades
 ---
