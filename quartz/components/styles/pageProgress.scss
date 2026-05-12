@@ -1,0 +1,196 @@
+@use "../../styles/variables.scss" as *;
+
+// $navH è definito in custom.scss (file utente), non in variables.scss (Quartz).
+// Lo ridichiariamo qui per indipendenza del componente — se l'altezza navbar
+// cambia, va aggiornato in entrambi i posti.
+$navH: 66px;
+
+// Pillola di progress completamento pagina. Floating bottom-center, posizionata
+// sopra al FontResizer (che vive a bottom: 1rem). Si mostra solo se la pagina
+// contiene almeno una checkbox (data-progress-visible="true" da JS).
+
+.page-progress {
+  position: fixed;
+  bottom: 4.5rem; // sopra il FontResizer (bottom: 1rem + altezza ~3rem)
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  z-index: 140; // sotto al toast (200) e al search dropdown (1100), sopra al graph
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+
+  &[data-progress-visible="true"] {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  // Su mobile/tablet stretto il FontResizer si sposta in altro modo; per ora
+  // alziamo solo un po' la pillola così non sbatte sulla tastiera virtuale.
+  @media (max-width: 800px) {
+    bottom: 5rem;
+  }
+}
+
+.page-progress-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.4rem 0.85rem;
+  background: var(--light);
+  border: 1px solid var(--search-border);
+  border-radius: 999px;
+  box-shadow:
+    0 2px 8px rgba(17, 24, 39, 0.08),
+    0 1px 2px rgba(17, 24, 39, 0.04);
+  font-family: var(--bodyFont);
+  font-size: 0.82rem;
+  color: var(--darkgray);
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+
+  &.pulse {
+    animation: page-progress-pulse 0.3s ease;
+  }
+}
+
+@keyframes page-progress-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+.page-progress-counter {
+  font-weight: 600;
+  color: var(--dark);
+  font-variant-numeric: tabular-nums;
+}
+
+.page-progress-bar {
+  position: relative;
+  display: inline-block;
+  width: 4.5rem;
+  height: 4px;
+  background: var(--lightgray);
+  border-radius: 2px;
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.page-progress-bar-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--secondary);
+  border-radius: 2px;
+  transition: width 0.25s ease, background-color 0.3s ease;
+}
+
+.page-progress-percent {
+  color: var(--gray);
+  font-variant-numeric: tabular-nums;
+  min-width: 2.5rem;
+  text-align: right;
+}
+
+.page-progress-tick {
+  display: none;
+  color: #16a34a;
+  font-weight: bold;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+// Completed state: green border + fill, tick visible, percent in green.
+.page-progress.completed {
+  .page-progress-pill {
+    border-color: #16a34a;
+    background: rgba(22, 163, 74, 0.06);
+    box-shadow:
+      0 2px 10px rgba(22, 163, 74, 0.15),
+      0 1px 2px rgba(22, 163, 74, 0.08);
+  }
+
+  .page-progress-bar-fill {
+    background: #16a34a;
+  }
+
+  .page-progress-percent {
+    color: #16a34a;
+    font-weight: 600;
+  }
+
+  .page-progress-tick {
+    display: inline;
+  }
+}
+
+// Dark mode: shadow più marcate, tono di verde leggermente più chiaro (#22c55e)
+// per migliore contrasto sul body stone-900 scuro.
+html[saved-theme="dark"] {
+  .page-progress-pill {
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.4),
+      0 1px 2px rgba(0, 0, 0, 0.25);
+  }
+
+  .page-progress.completed {
+    .page-progress-pill {
+      border-color: #22c55e;
+      background: rgba(34, 197, 94, 0.08);
+      box-shadow:
+        0 2px 10px rgba(34, 197, 94, 0.25),
+        0 1px 2px rgba(34, 197, 94, 0.12);
+    }
+
+    .page-progress-bar-fill {
+      background: #22c55e;
+    }
+
+    .page-progress-percent,
+    .page-progress-tick {
+      color: #22c55e;
+    }
+  }
+}
+
+// ── Toast di completamento ───────────────────────────────────────────────
+// Inserito dinamicamente in <body> da JS (NON figlio del .page-progress
+// così non eredita l'opacity del parent quando il widget è nascosto).
+.page-progress-toast {
+  position: fixed;
+  top: calc(#{$navH} + 1rem);
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  z-index: 200;
+  padding: 0.6rem 1.2rem;
+  background: #16a34a;
+  color: #ffffff;
+  font-weight: 600;
+  font-family: var(--bodyFont);
+  font-size: 0.9rem;
+  border-radius: 999px;
+  box-shadow:
+    0 6px 16px rgba(22, 163, 74, 0.35),
+    0 2px 4px rgba(22, 163, 74, 0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+
+  &.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+html[saved-theme="dark"] .page-progress-toast {
+  background: #22c55e;
+  box-shadow:
+    0 6px 16px rgba(34, 197, 94, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.4);
+}

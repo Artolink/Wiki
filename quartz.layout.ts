@@ -156,6 +156,10 @@ export const defaultContentPageLayout: PageLayout = {
     // FontResizer floating: posizionato con position: fixed, appare in basso al
     // centro quando il mouse si avvicina al fondo dello schermo.
     Component.FontResizer(),
+    // Page progress: pillola floating in basso, sopra al FontResizer. Mostra
+    // quante checkbox sono spuntate sulla pagina. Auto-hidden se la pagina
+    // non contiene checkbox. Toast verde + tick al 100%.
+    Component.PageProgress(),
     // Pulsante per nascondere/mostrare il menu di sinistra
     Component.SidebarToggle(),
     // Indicatore percentuale di scorrimento del file (solo content pages):

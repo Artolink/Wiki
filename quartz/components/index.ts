@@ -36,6 +36,7 @@ import SidebarToggle from "./SidebarToggle"
 import MobileSidebarToggle from "./MobileSidebarToggle"
 import MobileSidebarRightToggle from "./MobileSidebarRightToggle"
 import ScrollProgress from "./ScrollProgress"
+import PageProgress from "./PageProgress"
 
 export {
   ArticleTitle,
@@ -76,4 +77,5 @@ export {
   MobileSidebarToggle,
   MobileSidebarRightToggle,
   ScrollProgress,
+  PageProgress,
 }
