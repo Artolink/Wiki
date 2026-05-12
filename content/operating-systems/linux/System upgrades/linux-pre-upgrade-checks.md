@@ -226,7 +226,7 @@ Important notes:
 - **No RAM is captured**: filesystem snapshots are disk-only, always. So in-memory state (open DB connections, dirty pages not yet flushed) is *not* part of the snapshot.
 - **A snapshot is not a backup**: here even more! If the underlying disk dies, the snapshot dies with it. You still need real off-host backups.
 
-For learning how to actually take, monitor, merge, and remove an LVM snapshot, see the dedicated [LVM guide]() (coming soon!).
+For learning how to actually take, monitor, merge, and remove an LVM snapshot, see the dedicated [[LVM guide]] (coming soon!).
 
 > [!IMPORTANT]
 > Delete the snapshot once the upgraded system has been stable for 24-48h: snapshots get progressively heavier as the live system diverges from the snapshot. 
