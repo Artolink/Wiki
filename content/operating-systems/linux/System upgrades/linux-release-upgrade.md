@@ -8,3 +8,4 @@ tags:
 >
 >- [Ubuntu Server upgrade guide](https://ubuntu.com/server/docs/upgrade) — official version-specific notes.
 >- [Debian release notes](https://www.debian.org/releases/) — same idea, more important for Debian major upgrades.
+^check
