@@ -195,7 +195,7 @@ find /etc -name "*.dpkg-old" -o -name "*.dpkg-dist" -o -name "*.ucf-old" 2>/dev/
 A few non-technical things easy to forget:
 
 - **Remove the host from monitoring downtime**: Nagios, CheckMK, PRTG...
-- **Remove Hypervisor snapshots**: if all checks above pass, schedule the deletion of the [hypervisor / filesystem snapshot](linux-pre-upgrade-checks) after 24-48h of stability. Keeping them longer is a bad idea (snapshots grow heavier the more the live system diverges).
+- **Remove Hypervisor/FS snapshots**: if all checks above pass, schedule the deletion of the hypervisor / filesystem snapshots after 24-48h of stability. Keeping them longer is a bad idea (snapshots grow heavier the more the live system diverges).
 - **Archive the logs**: `/root/pre-upgrade-<date>/` and the upgrade logs.
 - **Note what changed**: kernel version, distro release, surprise config files in `.dpkg-dist`. 
   Future-you will thank present-you.
