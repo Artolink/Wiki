@@ -1,5 +1,5 @@
 ---
-title: "Patch management: a safe apt upgrade procedure"
+title: "1. Patch management: a safe apt upgrade procedure"
 tags:
   - Maintenance
 ---
@@ -139,13 +139,12 @@ ss -tn state established '( sport = :22 )'     # active SSH sessions
 dmesg -w                                       # kernel events in real time
 ```
 
+> [!TIPS]
+> - **Always have two SSH sessions open**, never just one. If the upgrade restarts `sshd` aggressively and kills your session, the second one is your lifeline.
+>- **Keep the hypervisor / cloud panel open in a browser tab**: if the safety gate triggers and SSH is gone anyway (extremely rare with this script, but possible), the snapshot rollback is one click away.
+>- **Always keep an eye to your monitoring tool** (Nagios, CheckMK, Zabbix, PRTG) for alerts.
+>- **Don't reboot manually**: the script decides whether to reboot based on `/var/run/reboot-required`. If you reboot first, you skip the SSH safety gate.
 
-### Tips for the smoothest monitoring
-
-- **Always have two SSH sessions open**, never just one. If the upgrade restarts `sshd` aggressively and kills your session, the second one is your lifeline.
-- **Keep the hypervisor / cloud panel open in a browser tab**. If the safety gate triggers and SSH is gone anyway (extremely rare with this script, but possible), the snapshot rollback is one click away.
-- **Watch your monitoring tool** (Nagios, CheckMK, Zabbix, PRTG): the host should *not* go red — you put it in downtime in step 5 of the pre-upgrade checks, didn't you? If something *does* alert, that's a real symptom worth checking even before the upgrade ends.
-- **Don't reboot manually**. The script decides whether to reboot based on `/var/run/reboot-required`. If you reboot first, you skip the SSH safety gate.
 
 ##  After the upgrade
 

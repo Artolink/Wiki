@@ -147,6 +147,26 @@ git diff --staged                # staged changes (staging vs last commit)
 git show <commit-id>             # full details + diff of a past commit
 ```
 
+> [!TIP]
+> To improve git diff readability, install **delta**:
+>
+> curl -s https://api.github.com/repos/dandavison/delta/releases/latest \
+> | grep browser_download_url \
+> | grep amd64.deb \
+> | cut -d '"' -f 4 \
+> | wget -qi - -O /tmp/git-delta.deb \
+> && dpkg -i /tmp/git-delta.deb \
+> && apt -f install -y \
+> && delta --version
+>
+> Then configure git accordingly:
+>
+> git config --global core.pager delta
+> git config --global pager.diff delta
+> git config --global pager.show delta
+> git config --global pager.log delta
+> git config --global interactive.diffFilter "delta --color-only"
+^delta
 ## .gitignore
 
 A plain-text file listing patterns of files Git should never track. 

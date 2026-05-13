@@ -1,5 +1,5 @@
 ---
-title:
+title: "1. Release upgrade: bring your distro to the next release"
 tags:
   - Maintenance
 ---
