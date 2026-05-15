@@ -4,6 +4,7 @@ tags:
   - WebsiteCreation
 ---
 ![[Pasted image 20260515145323.png]]
+https://farnetiandrea.it/metrics
 ##  What is the Grafana Stack?
 
 The **Grafana Stack** is the open-source ecosystem of tools maintained by Grafana Labs (and adjacent communities).
