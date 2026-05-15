@@ -9,17 +9,16 @@ https://farnetiandrea.it/metrics
 
 The **Grafana Stack** is the open-source ecosystem of tools maintained by Grafana Labs (and adjacent communities).
 
-It can cover every pillar for observability:
+Each component in the stack is replaceable: you can put Prometheus where I have VictoriaMetrics, and Grafana will still visualize everything via *datasources*: the stack is famously modular, so pick what you need specifically.
+
+Actually, the Grafana stack can cover every pillar for observability:
 
 - **Metrics**: node-exporter + VMAgent
 - **Logs**: Loki + Promtail
 - **Traces**: Tempo + OpenTelemetry
 
-But in this wiki, I’ll show you how to use the Grafana stack only for metrics, while using the ELK stack only for logs. The goal is to showcase different technologies commonly used in production environments, including setups where observability responsibilities are split exactly this way.
-
-Also, each component in the stack is replaceable: you can put Prometheus where I have VictoriaMetrics, and Grafana will still visualize everything via *datasources*. 
-
-The stack is famously modular: pick what you need specifically.
+But in this wiki, I’ll show you how to use the Grafana stack only for metrics, while using the ELK stack only for logs. The goal is to showcase different technologies commonly used in production environments, including setups where responsibilities are split exactly this way.
+ 
 
 ##  The architecture
 
@@ -56,13 +55,13 @@ flowchart LR
     Nginx -- "proxy_pass :3001" --> Graf
 ```
 
-###  The four roles
+###  The stack I use
 
 | Role                                                                    | Tool                                                          | Where it runs                      | What it does                                                                                                                                                              |
 | ----------------------------------------------------------------------- | ------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **[Exporter](observability/metrics/node-exporters/_index)**             | [node-exporter](node-exporter.md)                             | on the VPS                         | Sits on `:9100/metrics` and **exposes** numbers about the host (CPU, RAM, disk, net). It doesn't push anywhere — it just makes the data available.                        |
 | **[Storage + query](observability/metrics/TSDB/_index)**                | [VictoriaMetrics](observability/metrics/TSDB/victoriametrics) | on the VPS (as a Docker container) | The time-series database. Stores metrics on disk and answers PromQL queries. API-compatible with Prometheus, more efficient in storage and RAM.                           |
-| **[Scraper](observability/metrics/scrapers/_index)**                    | [VMAgent](vmagent.md)                                         | on vmagent                         | Periodically **pulls** the `/metrics` page from each target (here: just the VPS node-exporter for now), then forwards the data to the storage backend via `remote_write`. |
+| **[Scraper](observability/metrics/scrapers/_index)**                    | [VMAgent](vmagent.md)<br>(VictoriaMetrics Agent)              | on vmagent                         | Periodically **pulls** the `/metrics` page from each target (here: just the VPS node-exporter for now), then forwards the data to the storage backend via `remote_write`. |
 | **[Visualization (dashboard)](observability/metrics/dashboard/_index)** | [Grafana](observability/metrics/dashboard/grafana)            | on the VPS (as a Docker container) | The dashboard frontend. Queries VictoriaMetrics, plots graphs, organizes dashboards. Exposed publicly via nginx reverse-proxy at `farnetiandrea.it/metrics`.              |
 
 For deploying your Grafana Stack, we'll follow this order:
@@ -80,8 +79,9 @@ A single VPS with node-exporter + VMAgent + VictoriaMetrics + Grafana is totally
 - Any other machine just needs to expose metrics, so that the scraper can harvest them.
 
 Of course, the VictoriaMetrics database and the Grafana dashboard could also have been separated onto different machines, but that part is relatively trivial to understand.
+Actually, if your company uses Kubernetes, there's a dedicated **VictoriaMetrics Operator** that can be used to easily scale the infrastructure, especially the VMAgent scrapers (and much more).
 
-The scraper layer, however, becomes essential once you start dealing with infrastructures of 2000+ machines: you **need** multiple dedicated scraper nodes to distribute the workload properly. That’s why I wanted to separate it here as well, to better distinguish its role and to show you how a scalable infrastructure is typically designed.
+The scraper layer, in fact, becomes essential once you start dealing with infrastructures of 2000+ machines: you **need** multiple dedicated scraper nodes to distribute the workload properly. That’s why I wanted to separate it here as well, to better distinguish its role and to show you how a scalable infrastructure is typically designed.
 
 
 ##  1. Node-exporter setup
