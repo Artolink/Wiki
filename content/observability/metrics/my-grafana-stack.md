@@ -90,17 +90,18 @@ Here we are, ready to configure our node-exporter in any VM where we need metric
 
 Super simple. 
 
-First thing first, we bind the service to our private LAN, then we restrict access even more by configuring our firewall accordingly:
-
-![[node-exporter#0. Hardening]]
-
-And here's the actual setup:
+First thing first, we insall it:
 
 ![[node-exporter#1. Installation (Ubuntu/Debian)]]
 
-After installation, we just need to verify:
+After the installation, we need to verify everything works:
 
-![[node-exporter#2. Verification]]
+![[node-exporter#2. Validation]]
+
+
+And to conclude, we harden everything by binding the service to our private LAN, then we restrict access even more by configuring our firewall accordingly:
+
+![[node-exporter#3. Hardening]]
 
 
 ##  2. VictoriaMetrics setup
