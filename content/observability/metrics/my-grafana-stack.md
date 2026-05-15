@@ -105,3 +105,19 @@ And to conclude, we harden everything by binding the service to our private LAN,
 
 
 ##  2. VictoriaMetrics setup
+
+Ok so now we are ready to install our TSDB: VictoriaMetrics, the place where we store metrics, and where we do queries via the Grafana GUI dashboard.
+
+For the setup, we follow the very same principles of the node-exporter.
+
+First we insall it:
+![[victoriametrics#1. Installation]]
+
+Then we verify the installation:
+![[victoriametrics#2. Validation]]
+
+And to conclude, we can do some iptables hardening for Docker (pretty interesting to see):
+![[victoriametrics#3. Hardening]]
+
+
+##  3. VMAgent setup
