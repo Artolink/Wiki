@@ -1,3 +1,3 @@
 ---
-title: 🔍 ELK Stack
+title: 🔍 Logs (ELK Stack)
 ---
