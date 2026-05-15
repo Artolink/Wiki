@@ -55,7 +55,7 @@ flowchart LR
     Nginx -- "proxy_pass :3001" --> Graf
 ```
 
-###  The stack I use
+##  The stack I use
 
 | Role                                                                    | Tool                                                          | Where it runs                      | What it does                                                                                                                                                              |
 | ----------------------------------------------------------------------- | ------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -71,7 +71,7 @@ For deploying your Grafana Stack, we'll follow this order:
 3. **[VMAgent](vmagent.md)** setup (on the vmagent VM): it scrapes the metrics from the machines where we installed our node-exporter, and writes them to VictoriaMetrics.
 4. **[Grafana](visualization/grafana)** dashboard setup only in one dedicated machine (in my case on my VPS as a Docker container), exposed at `/metrics`.
 
-###  Why this instead of "all in one"?
+Why using two machines instead of "all in one"?
 
 A single VPS with node-exporter + VMAgent + VictoriaMetrics + Grafana is totally doable and would work for a homelab, but **separating the scraper onto a different host is the realistic pattern** you'll find in any company with more than a couple of servers:
 
