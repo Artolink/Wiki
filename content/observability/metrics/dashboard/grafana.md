@@ -16,7 +16,7 @@ For us:
 - Reaches VictoriaMetrics via the Docker network using the service name `victoriametrics:8428` (no port exposure needed on the host).
 - Exposed publicly at `https://farnetiandrea.it/metrics/` via my existing nginx + certbot stack as a reverse-proxy. 
 
-##  Setup:
+## 1. Setup:
 
 ### 1. Create the directory
 
@@ -203,7 +203,7 @@ And click **Run query**. It should answer.
 
 Great! we've finished! Time to build real dashboards now! 
 
-If you want learn the basics, check out [[create-dashboards-views|the dedicated page]].
+If you want to take your first steps, check out [[create-dashboards-views|the dedicated page]].
 
 ### EXTRA: Anonymous viewer mode
 

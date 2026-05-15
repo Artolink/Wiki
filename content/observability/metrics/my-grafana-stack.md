@@ -142,3 +142,26 @@ The data now lives inside the DB, we just need a dashboard to make queries and v
 
 
 ##  4. Grafana setup
+
+Here we are, last step of this guide, let's do it!
+
+First of all, the Grafana setup:
+![[grafana#1. Setup]]
+
+And after the installation, we just need to expose it with our web server, in my case Nginx:
+
+![[grafana#2. Nginx configuration]]
+
+Now we should be able to visit it!
+
+If so, the only thing left to do is the initial configuration:
+
+![[grafana#3. Grafana configuration]]
+
+And that's it!
+
+We have successfully deployed a complete, simple yet solid Grafana stack, congratulations!
+
+The only thing left to do now is personalize it with your dashboards. If you don't know how to do that, I wrote a [[create-dashboards-views|guide]] to help you take your first steps with Grafana. 
+
+Check it out and start monitoring!
