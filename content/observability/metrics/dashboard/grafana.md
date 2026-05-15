@@ -5,27 +5,27 @@ tags:
 
 ##  What it is
 
-**Grafana** is the visualization frontend of the stack. You log into a web UI, configure one or more **datasources** (in our case, VictoriaMetrics), and build **dashboards** made of panels (graphs, gauges, tables) — each panel runs a PromQL query against the datasource and plots the result.
+**Grafana** is the visualization frontend of the stack. 
+
+You log into a web UI, configure one or more **datasources** and build **dashboards** made of graphs, gauges, tables and much more.
+Each of them runs a PromQL query against the datasource and plots the result.
 
 For us:
 
 - Runs as a **Docker container on the VPS** (in the same compose file as VictoriaMetrics).
-- Reaches VictoriaMetrics via the Docker network using the service name `victoriametrics:8428` — no port exposure needed on host.
-- Exposed publicly at `https://farnetiandrea.it/metrics/` via the existing nginx + certbot stack as a reverse-proxy. No new certificate, no new DNS record.
+- Reaches VictoriaMetrics via the Docker network using the service name `victoriametrics:8428` (no port exposure needed on the host).
+- Exposed publicly at `https://farnetiandrea.it/metrics/` via my existing nginx + certbot stack as a reverse-proxy. 
 
-##  Prepare the persistent storage
+##  Setup:
 
-> [!IMPORTANT]
-> Run this on the **VPS**, inside `~/observability/`. Grafana needs a UID-matched bind-mount or the container crashes at startup with `permission denied`.
-
-### Step 1 — Create the directory
+### 1. Create the directory
 
 ```bash
 mkdir -p ~/observability/grafana-data
 cd ~/observability
 ```
 
-### Step 2 — Set ownership to UID 472
+### 2. Set ownership to UID 472
 
 > [!WARNING]
 > **Not optional.** Grafana inside the container runs as **UID 472** (a Grafana-specific user, *not* 1000 like VictoriaMetrics). Without this chown, the container crashes with messages like `mkdir: cannot create directory '/var/lib/grafana/plugins': Permission denied`.
@@ -34,14 +34,7 @@ cd ~/observability
 sudo chown -R 472:472 grafana-data
 ```
 
-### Step 3 — Verify
-
-```bash
-ls -ld grafana-data
-# Expected: drwxr-xr-x ... 472 472 ...
-```
-
-##  Pick a free host port
+###  3. Pick a free host port
 
 Grafana inside the container listens on `3000`, but on the host you can map it to any port you want. **First check that the chosen host port is free**, because `3000` is one of the most common defaults on Linux servers (Node.js apps, other dashboards, ...):
 
@@ -52,11 +45,13 @@ ss -tlnp | grep -E ':(3000|3001)\s'
 - If you get **no output**, port `3000` is free → use `3000` in the compose file.
 - If something is listening on `3000`, pick the next free one (`3001`, `3030`, whatever). Make sure you adjust **both** the compose `ports:` line **and** the nginx `proxy_pass` accordingly.
 
-For the rest of this page I'll use **`3001`** because in my setup `3000` is taken by another app. Replace with what you picked.
+For the rest of this page I'll use **`3001`** because in my setup `3000` is taken by another app.
 
-##  Add Grafana to the existing `docker-compose.yml`
+### 4. Add Grafana to the existing `docker-compose.yml`
 
-Edit `~/observability/docker-compose.yml` and **add the `grafana:` service** to the existing `services:` block. Your full compose file should look like this:
+Edit `~/observability/docker-compose.yml` and **add the `grafana:` service** to the existing `services:` block. 
+
+Your full compose file should look like this:
 
 ```yaml
 services:
@@ -100,12 +95,11 @@ networks:
 
 The points to notice:
 
-- **`127.0.0.1:3001:3000`** — Grafana listens *only* on the VPS's loopback interface. Nginx will proxy to it. No public port, no Tailscale port, nothing to firewall.
+- **`127.0.0.1:3001:3000`** — Grafana listens *only* on the VPS's loopback interface. Nginx will proxy to it.
 - **`GF_SERVER_ROOT_URL`** and **`GF_SERVER_SERVE_FROM_SUB_PATH=true`** — together, they tell Grafana "you live at the path `/metrics`, generate all internal URLs and redirects accordingly". Without these, the login form, API calls and static assets all break.
-- **`GF_SECURITY_ADMIN_PASSWORD`** — a placeholder. Change it before starting, or change it via web UI on first login (Grafana *forces* a password change at first login regardless).
-- **No `healthcheck:`** on `victoriametrics`. The official VM image is `scratch`-based and contains *only* the Go binary — no `wget`, no `curl`, no shell. Any healthcheck command would fail. Grafana's `depends_on: - victoriametrics` (without `condition: service_healthy`) is enough: Grafana waits for VM to be created, then retries the datasource at first connection. If the VM image you use has its own embedded HEALTHCHECK that's getting in the way, add `healthcheck: { disable: true }` under `victoriametrics:` to override it.
+- **`GF_SECURITY_ADMIN_PASSWORD`** is a placeholder. Change it before starting, or change it via web UI on first login.
 
-##  Start Grafana
+### 5. Start Grafana
 
 ```bash
 docker compose up -d
@@ -114,13 +108,11 @@ docker compose ps
 
 Expected: both `victoriametrics` and `grafana` in `running` state.
 
-Check logs:
+If not, you can check logs as always:
 
 ```bash
 docker compose logs grafana --tail=30
 ```
-
-You should see lines like `Grafana migrations started`, then `HTTP Server Listen ... address=:3000`. No errors about permissions or missing files.
 
 Quick test from the **VPS itself** (Grafana is on localhost:3001):
 
@@ -129,15 +121,15 @@ curl -s http://localhost:3001/api/health
 # Expected: {"commit":"...","database":"ok","version":"11.3.0"}
 ```
 
-##  Expose via nginx reverse-proxy at `/metrics`
+##  2. Nginx configuration
 
-Edit the existing nginx server block for `farnetiandrea.it`:
+I'm editing the existing nginx server block for `farnetiandrea.it`:
 
 ```bash
 sudo nano /etc/nginx/sites-available/farnetiandrea.it
 ```
 
-Inside the existing `server { ... }` block for HTTPS, **add this `location` directive** (alongside the other locations you have):
+And I **add this `location` directive** (alongside the other locations I have):
 
 ```nginx
 location /metrics/ {
@@ -155,7 +147,7 @@ location /metrics/ {
 ```
 
 > [!IMPORTANT]
-> **No trailing slash** on `proxy_pass http://localhost:3001`. This is *the* detail that determines whether Grafana works or gets stuck in a redirect loop. See [proxy_pass and the trailing slash](#proxypass-and-the-trailing-slash) below.
+> **No trailing slash** on `proxy_pass http://localhost:3001`. This is *the* detail that determines whether Grafana works or gets stuck in a redirect loop.
 
 Test the config and reload nginx:
 
@@ -164,39 +156,38 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-##  First contact via browser
+### Verification
 
 Open: `https://farnetiandrea.it/metrics/`
 
 Expected: Grafana login screen.
 
-Log in with `admin` / the password from `GF_SECURITY_ADMIN_PASSWORD`. Grafana will *force* you to change the admin password at first login — use a real one, save it in your password manager.
+If so, log in with `admin` / the password from `GF_SECURITY_ADMIN_PASSWORD`.
 
-##  Configure the VictoriaMetrics datasource
+##  3. Configuration
+### Configure the VictoriaMetrics datasource
 
 In the Grafana UI:
 
 1. Left sidebar → **Connections** → **Data sources** → **Add data source**.
-2. Search and pick **Prometheus** (yes, Prometheus — VictoriaMetrics is API-compatible, this is how Grafana talks to it).
+2. Search and pick **Prometheus** (yes, Prometheus: I'll explain why in a minute).
 3. Fill in:
-   - **Name**: `prometheus` (or `VictoriaMetrics`, whatever you prefer — it's just a label).
-   - **URL**: `http://victoriametrics:8428` (Docker DNS — both containers are on the `observability` network, they resolve each other by service name).
+   - **Name**: `prometheus` (or `VictoriaMetrics`, whatever you prefer, it's just a label).
+   - **URL**: `http://victoriametrics:8428` (Docker DNS: both containers are on the `observability` network, they resolve each other by service name).
    - **Access**: leave as `Server (default)`.
    - Everything else: defaults.
 4. Click **Save & test** at the bottom.
 
 Expected: green banner *"Successfully queried the Prometheus API"*.
 
->  [!TIP]
+>  [!INFO]
 > **Why "Prometheus" and not the dedicated "VictoriaMetrics" datasource plugin?**
 > 
-> VictoriaMetrics is **API-compatible** with Prometheus — Grafana's built-in Prometheus connector speaks to it natively, no plugin needed. There exists a separate **VictoriaMetrics datasource plugin** that adds VM-specific features (MetricsQL — a superset of PromQL with extra functions like `histogram_quantiles()` and `keep_last_value()`, server-side query limits, deep-links to VMUI from queries). It's useful **only if** you actively want those features. For standard observability with PromQL, the built-in Prometheus datasource is:
+> VictoriaMetrics is **API-compatible** with Prometheus: Grafana's built-in Prometheus connector speaks to it natively, no plugin needed. There exists a separate **VictoriaMetrics datasource plugin** that adds VM-specific features, but for standard observability with PromQL, the built-in Prometheus datasource is:
 > 
-> - **More portable**: dashboards written against it work unchanged on Prometheus, Mimir, Thanos, or any other PromQL-compatible backend. If you swap the backend tomorrow, dashboards keep working.
+> - **More portable**: if you swap DB tomorrow, dashboards probably will keep working.
 > - **The community standard**: every pre-made dashboard on `grafana.com/dashboards` expects the `Prometheus` datasource type as a parameter.
-> - **One less moving piece**: no plugin install, no version compatibility to track.
-> 
-> Choose the dedicated VM plugin only when you have a specific use case that needs MetricsQL.
+>   
 
 ##  First query
 
