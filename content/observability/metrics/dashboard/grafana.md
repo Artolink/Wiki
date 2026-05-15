@@ -164,7 +164,7 @@ Expected: Grafana login screen.
 
 If so, log in with `admin` / the password from `GF_SECURITY_ADMIN_PASSWORD`.
 
-##  3. Configuration
+##  3. Grafana configuration
 ### Configure the VictoriaMetrics datasource
 
 In the Grafana UI:
@@ -189,7 +189,7 @@ Expected: green banner *"Successfully queried the Prometheus API"*.
 > - **The community standard**: every pre-made dashboard on `grafana.com/dashboards` expects the `Prometheus` datasource type as a parameter.
 >   
 
-##  First query
+### Our first query
 
 Left sidebar → **Explore** → make sure the datasource at the top is the one you configured.
 
@@ -199,19 +199,23 @@ Type:
 up
 ```
 
-Click **Run query**. Expected: a row with labels `host=vps-personaldomain`, `instance=100.114.84.48:9100`, `job=node`, `cluster=home`, value `1`.
+And click **Run query**. It should answer.
 
-Time to build real dashboards — see [Dashboards](create-dashboards-views.md).
+Great! we've finished! Time to build real dashboards now! 
 
-##  Anonymous viewer mode (public read-only access)
+If you want learn the basics, check out [[create-dashboards-views|the dedicated page]].
 
-By default Grafana requires a login. If you want to **share your dashboards publicly** as a read-only showcase (so anyone visiting `https://farnetiandrea.it/metrics/` can see them without an account), Grafana has a native **anonymous viewer** mode.
+### EXTRA: Anonymous viewer mode
 
-The anonymous user gets the **Viewer** role: can browse and zoom into any panel, but cannot edit, delete, change datasources, or access admin pages. You (the real admin) can still log in via the "Sign in" button in the top-right corner.
+By default Grafana requires a login. 
 
-### Configuration
+If you want to **share your dashboards publicly** as a read-only showcase (just like my `https://farnetiandrea.it/metrics/`, anybody can see them without an account), Grafana has a native **anonymous viewer** mode.
 
-Add these four env vars to the `grafana:` service in your `docker-compose.yml`:
+The anonymous user gets the **Viewer** role: can browse and zoom into any panel, but cannot edit, delete, change datasources, or access admin pages. 
+
+You (the real admin) can still log in via the "Sign in" button in the top-right corner.
+
+You just need to add these four env vars to the `grafana:` service in your `docker-compose.yml`:
 
 ```yaml
     environment:
@@ -222,17 +226,10 @@ Add these four env vars to the `grafana:` service in your `docker-compose.yml`:
       - GF_AUTH_ANONYMOUS_HIDE_VERSION=true
 ```
 
-| Variable | Effect |
-|---|---|
-| `GF_AUTH_ANONYMOUS_ENABLED=true` | Grants Viewer access to anonymous visitors. |
-| `GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.` | Which Grafana organization the anonymous user belongs to. `Main Org.` is the default. |
-| `GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer` | Role assigned. **Always Viewer** — never `Editor` or `Admin` for public access. |
-| `GF_AUTH_ANONYMOUS_HIDE_VERSION=true` | Hides the Grafana version in the UI for anonymous users (anti-fingerprinting hygiene). |
-
-Restart Grafana:
+And to restart Grafana:
 
 ```bash
 docker compose up -d grafana
 ```
 
-Test in an **incognito browser window** (no cookies): `https://farnetiandrea.it/metrics/` should land you directly on the home dashboard, no login prompt.
+You can test in an **incognito browser window** (no cookies), and you should land directly on the Grafana home dashboard without login prompt.
