@@ -121,3 +121,24 @@ And to conclude, we can do some iptables hardening for Docker (pretty interestin
 
 
 ##  3. VMAgent setup
+
+We are almost there!
+
+VMAgent setup... this is probably the most important piece to look for if you want to scale your setup from a "homelab hobby" to real production.
+
+Why? I suggest to read the full [[vmagent|vmagent page]] if you want to dig just a little bit deeper!
+
+Now, let's start with the installation:
+
+![[vmagent#1. Installation]]
+
+And now it the last thing to do is verify that we did everything right:
+
+![[vmagent#2. Validation]]
+
+If we did... our infrastructure is ready and we can move to the last step!
+
+The data now lives inside the DB, we just need a dashboard to make queries and visualize the results: that GUI is [[grafana|Grafana]].
+
+
+##  4. Grafana setup
