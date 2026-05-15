@@ -61,15 +61,22 @@ flowchart LR
 | Role                                                                    | Tool                                                          | Where it runs                      | What it does                                                                                                                                                              |
 | ----------------------------------------------------------------------- | ------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **[Exporter](observability/metrics/node-exporters/_index)**             | [node-exporter](node-exporter.md)                             | on the VPS                         | Sits on `:9100/metrics` and **exposes** numbers about the host (CPU, RAM, disk, net). It doesn't push anywhere — it just makes the data available.                        |
-| **[Scraper](observability/metrics/scrapers/_index)**                    | [VMAgent](vmagent.md)                                         | on vmagent                         | Periodically **pulls** the `/metrics` page from each target (here: just the VPS node-exporter for now), then forwards the data to the storage backend via `remote_write`. |
 | **[Storage + query](observability/metrics/TSDB/_index)**                | [VictoriaMetrics](observability/metrics/TSDB/victoriametrics) | on the VPS (as a Docker container) | The time-series database. Stores metrics on disk and answers PromQL queries. API-compatible with Prometheus, more efficient in storage and RAM.                           |
+| **[Scraper](observability/metrics/scrapers/_index)**                    | [VMAgent](vmagent.md)                                         | on vmagent                         | Periodically **pulls** the `/metrics` page from each target (here: just the VPS node-exporter for now), then forwards the data to the storage backend via `remote_write`. |
 | **[Visualization (dashboard)](observability/metrics/dashboard/_index)** | [Grafana](observability/metrics/dashboard/grafana)            | on the VPS (as a Docker container) | The dashboard frontend. Queries VictoriaMetrics, plots graphs, organizes dashboards. Exposed publicly via nginx reverse-proxy at `farnetiandrea.it/metrics`.              |
+
+For deploying your Grafana Stack, we'll follow this order:
+
+1. **[node-exporter](node-exporter.md)** setup on every machine where you need metrics (in my case only my VPS): we have to `curl localhost:9100/metrics` and see the metrics.
+2. **[VictoriaMetrics](storage/victoriametrics)** setup only in one dedicated machine (in my case on my VPS as a Docker container): we need to have a empty DB ready to receive data.
+3. **[VMAgent](vmagent.md)** setup (on the vmagent VM): it scrapes the metrics from the machines where we installed our node-exporter, and writes them to VictoriaMetrics.
+4. **[Grafana](visualization/grafana)** dashboard setup only in one dedicated machine (in my case on my VPS as a Docker container), exposed at `/metrics`.
 
 ###  Why this instead of "all in one"?
 
-A single VPS with node-exporter + VMAgent + VictoriaMetrics + Grafana is totally doable, and that would work for a homelab, but **separating the scraper onto a different host is the realistic pattern** you'll find in any company with more than a couple of servers:
+A single VPS with node-exporter + VMAgent + VictoriaMetrics + Grafana is totally doable and would work for a homelab, but **separating the scraper onto a different host is the realistic pattern** you'll find in any company with more than a couple of servers:
 
-- The scraper (VMAgent) is the only piece that needs network access to every monitored target. Putting it on a *dedicated, minimal* VM makes the security perimeter small and clear.
+- The scraper (VMAgent) is the only piece that needs network access to every monitored target, so putting it on a *dedicated, minimal* VM makes the security perimeter small and clear.
 - Any other machine just needs to expose metrics, so that the scraper can harvest them.
 
 Of course, the VictoriaMetrics database and the Grafana dashboard could also have been separated onto different machines, but that part is relatively trivial to understand.
@@ -79,12 +86,21 @@ The scraper layer, however, becomes essential once you start dealing with infras
 
 ##  1. Node-exporter setup
 
+Here we are, ready to configure our node-exporter in any VM where we need metrics.
+
+Super simple. 
+
+First thing first, we bind the service to our private LAN, then we restrict access even more by configuring our firewall accordingly:
+
+![[node-exporter#0. Hardening]]
+
+And here's the actual setup:
+
+![[node-exporter#1. Installation (Ubuntu/Debian)]]
+
+After installation, we just need to verify:
+
+![[node-exporter#2. Verification]]
 
 
-Follow this order — each step is testable on its own before moving to the next:
-
-1. **[node-exporter](node-exporter.md)** on the VPS → first `curl localhost:9100/metrics` and you see metrics.
-2. **[VictoriaMetrics](storage/victoriametrics)** in Docker on the VPS → empty DB ready to receive.
-3. **[VMAgent](vmagent.md)** on `vmagent01` → scrapes the VPS node-exporter, writes to VictoriaMetrics. First end-to-end test.
-4. **[Grafana](visualization/grafana)** in Docker on the VPS, exposed at `/metrics` → first dashboard.
-5. **[Dashboards](visualization/dashboards)** — import *Node Exporter Full* and walk through a couple of PromQL queries.
+##  2. VictoriaMetrics setup
