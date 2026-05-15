@@ -234,7 +234,6 @@ sudo netfilter-persistent save
 ```
 
 
-##  The next steps
+##  The next step
 
-- The storage backend is ready and listening on the LAN.
-- Now we need someone to *fill it with data* → [VMAgent on vmagent](../scrapers/vmagent).
+Our DB is ready and listening on the LAN, now we need someone to *fill it with data*: [[vmagent|VMAgent]].

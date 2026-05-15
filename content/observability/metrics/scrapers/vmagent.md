@@ -368,8 +368,6 @@ You just declare "I want 5 replicas", nothing else.
 
 VMAgent is now collecting data from node-exporter and pushing it to VictoriaMetrics. 
 
-The pipeline is alive end-to-end.
+The pipeline is alive end-to-end. What's missing? **A way to look at the data** with proper graphs. 
 
-What's missing? **A way to look at the data** with proper graphs. 
-
-Time for [Grafana](../visualization/grafana).
+Time for [[grafana|Grafana]].
