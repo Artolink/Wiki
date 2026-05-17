@@ -289,7 +289,7 @@ The new PC is now ready to use exactly like the first one.
 
 ### 3. Daily workflow
 
-> ![IMPORTANT]
+> [!IMPORTANT]
 > From now on, you have to manually handle the sync state in every local Obsidian vault!
 >
 > This means that, whenever you start working on a PC after editing from another one, the first thing you must do **before making any changes** is to pull the latest state from GitHub, so your local vault reflects whatever was last pushed from the other PC.
