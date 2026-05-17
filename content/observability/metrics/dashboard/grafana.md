@@ -180,7 +180,7 @@ In the Grafana UI:
 
 Expected: green banner *"Successfully queried the Prometheus API"*.
 
->  [!INFO]
+> [!INFO]
 > **Why "Prometheus" and not the dedicated "VictoriaMetrics" datasource plugin?**
 > 
 > VictoriaMetrics is **API-compatible** with Prometheus: Grafana's built-in Prometheus connector speaks to it natively, no plugin needed. There exists a separate **VictoriaMetrics datasource plugin** that adds VM-specific features, but for standard observability with PromQL, the built-in Prometheus datasource is:

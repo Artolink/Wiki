@@ -7,7 +7,7 @@ This is just a "101 getting started" guide, but it should be enough for a homela
 There are two ways to get a dashboard up:
 
 1. **Import** a community-made dashboard from [grafana.com/dashboards](https://grafana.com/dashboards): the fastest way to a beautiful, comprehensive dashboard. Used by ~80% of teams.
-2. **Build from scratch**: slower, but the only way to learn **PromQL** and produce dashboards that actually match *your* needs.
+2. **Build from scratch**: slower, but the only way to learn **PromQL** (Prometheus Query Language) and produce dashboards that actually match *your* needs.
 
 This page walks through both: a quick import of *Node Exporter Full* (the standard, gives you 200+ panels for free) followed by building a leaner, custom dashboard that you can use as a public landing page.
 
