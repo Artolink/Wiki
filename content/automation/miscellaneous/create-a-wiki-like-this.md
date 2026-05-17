@@ -158,7 +158,7 @@ Now I'll show you a couple scripts to automate the pipeline process, so that you
 
 ***
 
-##  <input type="checkbox"> EXTRA. Automating the process
+##  <input type="checkbox"> 7. Automating the process
 
 For automating the entire pipeline, we are going to need two scripts:
 
@@ -210,7 +210,7 @@ ssh "$VPS_ALIAS" "cd ~/wiki && ./deploy.sh"
 echo "==> Done. Site live at https://wiki.yourdomain.com"
 ```
 
-To correctly run this script, you also need to configure an SSH alias for your VPS.
+To correctly run this script, you also need to configure an SSH alias for your VPS (its not mandatory of course, you can just edit `ssh "$VPS_ALIAS"` with the full `ssh -i <PATH_TO_YOUR_SSHKEY> <NAME>@<IP>` command).
 
 Basically, an SSH alias let's you do:
 ```bash
@@ -244,3 +244,71 @@ From now on, your daily workflow is the following:
 1. Edit the final notes in Obsidian (fully offline).
 2. When you want to publish them: `./sync-wiki.sh`.
 3. Refresh your wiki: changes are live in a few seconds.
+
+
+##  <input type="checkbox"> EXTRA. Work from another PC
+
+If you want to edit the wiki from more than one machine (e.g. work laptop + your home desktop), you don't need a fancy sync setup. 
+
+Since you're the only writer, the simplest rule is: **always run `sync-wiki.sh` before switching machines**. As long as the active PC has pushed its work to GitHub, the second one can just pull the latest `content/` and resume.
+
+Here's a recap of what you need to do for bootstrapping a new PC.
+### 1. Prerequisites
+
+1. **WSL** installed and working.
+2. **SSH key for connecting to the VPS**: the same key works for both, but you can generate a second one if you prefer. If you do, copy its public key to the VPS with `ssh-copy-id username@your-vps-ip` (or paste it manually into `~/.ssh/authorized_keys` on the VPS).
+3. **SSH alias** for the VPS in `~/.ssh/config` (inside WSL):
+   ```
+   Host my-vps
+       HostName <YOUR_VPS_IP>
+       User <YOUR_VPS_USER>
+       IdentityFile ~/.ssh/id_ed25519
+   ```
+4. **Git** installed in WSL (`sudo apt install git`).
+5. **Obsidian** installed on Windows.
+
+### 2. Setup
+
+Once the prerequisites are in place:
+
+1. **Clone the wiki repo** somewhere convenient in WSL:
+   ```bash
+   git clone git@github.com:<YOUR_USER>/wiki.git ~/wiki-local
+   ```
+2. **Copy `content/` into your Obsidian Vault folder**:
+   ```bash
+   mkdir -p "/mnt/c/Users/<YOUR_USER>/Documents/Obsidian Vault"
+   
+   rsync -av --exclude='.obsidian/' ~/wiki-source/content/ \
+   "/mnt/c/Users/<WIN_USER>/Documents/Obsidian Vault/"
+   ```
+3. **Copy `sync-wiki.sh`** from the first PC (or rewrite it from scratch — it's only ~20 lines, see the section above). The only things that change between PCs are the local paths and possibly the SSH alias.
+4. **Open Obsidian** → *Open another vault* → select the `Obsidian Vault` folder you just populated.
+
+The new PC is now ready to use exactly like the first one.
+
+### 3. Daily workflow
+
+> ![IMPORTANT]
+> From now on, you have to manually handle the sync state in every local Obsidian vault!
+>
+> This means that, whenever you start working on a PC after editing from another one, the first thing you must do **before making any changes** is to pull the latest state from GitHub, so your local vault reflects whatever was last pushed from the other PC.
+>
+> Also, you should **always push your changes to GitHub before leaving a PC** (`./sync-wiki.sh`): this way, if you move to another machine, it will be in a up-to-date state, after pulling.
+
+For pulling (first thing you do):
+```bash
+cd ~/wiki-source # if you deleted it you need to clone it again
+git fetch origin && git reset --hard origin/main
+
+rsync -av --delete --exclude='.obsidian/' \
+  ~/wiki-source/content/ \
+  "/mnt/c/Users/<WIN_USER>/Documents/Obsidian Vault/"
+```
+
+For pushing (last thing you do):
+```bash
+
+./sync-wiki.sh
+
+```
