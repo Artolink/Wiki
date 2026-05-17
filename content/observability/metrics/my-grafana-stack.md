@@ -19,7 +19,7 @@ Actually, the Grafana stack can cover every pillar for observability:
 
 But in this wiki, I’ll show you how to use the Grafana stack only for metrics, while using the ELK stack only for logs. The goal is to showcase different technologies commonly used in production environments, including setups where responsibilities are split exactly this way.
  
-
+***
 ##  The architecture
 
 The whole stack consists in two machines that are on the same **private LAN**:
@@ -83,6 +83,7 @@ Actually, if your company uses Kubernetes, there's a dedicated **VictoriaMetrics
 
 The scraper layer, in fact, becomes essential once you start dealing with infrastructures of 2000+ machines: you **need** multiple dedicated scraper nodes to distribute the workload properly. That’s why I wanted to separate it here as well, to better distinguish its role and to show you how a scalable infrastructure is typically designed.
 
+***
 
 ##  1. Node-exporter setup
 
@@ -104,6 +105,8 @@ And to conclude, we harden everything by binding the service to our private LAN,
 ![[node-exporter#3. Hardening]]
 
 
+***
+
 ##  2. VictoriaMetrics setup
 
 Ok so now we are ready to install our TSDB: VictoriaMetrics, the place where we store metrics, and where we do queries via the Grafana GUI dashboard.
@@ -119,6 +122,8 @@ Then we verify the installation:
 And to conclude, we can do some iptables hardening for Docker (pretty interesting to see):
 ![[victoriametrics#3. Hardening]]
 
+
+***
 
 ##  3. VMAgent setup
 
@@ -140,6 +145,8 @@ If we did... our infrastructure is ready and we can move to the last step!
 
 The data now lives inside the DB, we just need a dashboard to make queries and visualize the results: that GUI is [[grafana|Grafana]].
 
+
+***
 
 ##  4. Grafana setup
 
