@@ -2,6 +2,7 @@
 title: The ultimate note taking setup! Create a Wiki like this!
 tags:
   - WebsiteCreation
+  - Projects
 ---
 Hi there!
 

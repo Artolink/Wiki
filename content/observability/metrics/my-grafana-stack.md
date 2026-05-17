@@ -2,6 +2,7 @@
 title: "My Grafana Stack: how to monitor metrics of your VMs!"
 tags:
   - WebsiteCreation
+  - Projects
 ---
 ![[Pasted image 20260515145323.png]]
 https://farnetiandrea.it/metrics
