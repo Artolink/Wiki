@@ -250,7 +250,7 @@ From now on, your daily workflow is the following:
 
 If you want to edit the wiki from more than one machine (e.g. work laptop + your home desktop), you don't need a fancy sync setup. 
 
-Since you're the only writer, the simplest rule is: **always run `sync-wiki.sh` before switching machines**. As long as the active PC has pushed its work to GitHub, the second one can just pull the latest `content/` and resume.
+Since you're the only writer, the simplest rules are: **always run `sync-wiki.sh` before switching machines**, and **always pull from the other side**. As long as the active PC has pushed its work to GitHub, the second one can just pull the latest `content/` and resume.
 
 Here's a recap of what you need to do for bootstrapping a new PC.
 ### 1. Prerequisites
