@@ -1,5 +1,5 @@
 ---
-title: "4. Grafana: visualize metrics"
+title: "Grafana: query and isualize metrics via GUI"
 tags:
 ---
 
