@@ -1,5 +1,5 @@
 ---
-title: "3. VMAgent: scrape and forward metrics"
+title: "VMAgent: scrape and forward metrics for VictoriaMetrics"
 tags:
 ---
 

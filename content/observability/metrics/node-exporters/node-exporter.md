@@ -1,5 +1,5 @@
 ---
-title: "1. Node Exporter: expose host metrics"
+title: "Node Exporter: expose host system metrics"
 tags:
 ---
 
