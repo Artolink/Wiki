@@ -129,7 +129,6 @@ example.com.        MX    10 mail.example.com.
 example.com.        TXT   "v=spf1 ip4:1.2.3.5 -all"
 ```
 
-
 ### TTL and DNS propagation
 
 Every DNS record has a **TTL** (time-to-live, in seconds), which tells resolvers how long they can cache the answer.

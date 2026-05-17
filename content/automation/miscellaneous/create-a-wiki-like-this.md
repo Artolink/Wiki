@@ -246,7 +246,7 @@ From now on, your daily workflow is the following:
 3. Refresh your wiki: changes are live in a few seconds.
 
 
-##  <input type="checkbox"> EXTRA. Work from another PC
+## EXTRA: Work from another PC
 
 If you want to edit the wiki from more than one machine (e.g. work laptop + your home desktop), you don't need a fancy sync setup. 
 
@@ -311,3 +311,15 @@ For pushing (last thing you do):
 ./sync-wiki.sh
 
 ```
+
+## Where to go next
+
+Great, so now you have your VPS hosting your personal Wiki on your domain.  
+
+But what can you build next?
+
+Well, this can also be the starting point for something bigger.  
+  
+If this is your first step into building your own homelab, a [metrics](my-grafana-stack) and logging stack is probably the next thing you'll want to set up.
+
+Go on and check out my guides!
