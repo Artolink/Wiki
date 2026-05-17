@@ -3,11 +3,13 @@
 
 Welcome to my Wiki! Here you can find [who I am](https://www.linkedin.com/in/andreafarneti/).
 
-**TL;DR** My career path has been the following:
+**TL;DR** I am an Infrastructure & Cloud Engineer specialized in open-source technologies, working remotely from Italy.
 
-- **Hardware repair/installation**: I used to drive the van and go to customers to do [these kinds of tasks](https://github.com/user-attachments/assets/0be38a78-6e00-4ac0-b0da-e6ef47d060eb): repairing, installing, and configuring PCs, racks, switches, routers, firewalls...
+My career path so far has been:
 
-- **IT Technical Specialist (NOC)**: support for 100+ different customers with diverse infrastructures and autonomous on-site activities.
+- **Hardware repair & installation**: I used to drive a van and visit customers to do [these kinds of tasks](https://github.com/user-attachments/assets/0be38a78-6e00-4ac0-b0da-e6ef47d060eb): repairing, installing, and configuring PCs, racks, switches, routers, firewalls...
+
+- **IT Technical Specialist (NOC)**: I provided support to 100+ customers with diverse IT infrastructures, including independent on-site activities.
 
 - **System Administrator (SOC)**: Malware and Mail Threat Analysis, secure domain management, networking and endpoint hardening.
 
@@ -19,9 +21,9 @@ What sets these notes apart from simply asking an AI for advice is that here you
 
 - **real-world experience** from someone who has worked in **large** and **international** environments, on **production** systems with **on-call rotations**
 
-- **focused yet detailed content**, presented in a concentrated and tightly consistent way
+- **essential yet in-depth content**, presented in a structured and consistent way
 
-- useful integrations: links to theory, tools, and software to simplify work and improve its quality
+- useful integrations: links to theory, tools and software to simplify work and improve its quality
 
 The notes are **truly** interconnected: each one is a node in a [graph](graph), so they contain only what is strictly necessary.<br>
 
