@@ -6,7 +6,7 @@ title: 📡 Scrapers
 
 A **scraper** is the piece of the observability pipeline that **pulls** metrics from the targets that expose them and **forwards** them to the TSDB. 
 
-It's the connection between the [exporters](../node-exporters/_index) (passive, just listening) and the [database](../TSDB/_index) (passive, just receiving).
+It's the connection between the [exporters](observability/metrics/exporters/_index.md) (passive, just listening) and the [database](../TSDB/_index) (passive, just receiving).
 
 The job is conceptually simple:
 

@@ -1,5 +1,5 @@
 ---
-title: 🛰️ Node Exporters
+title: 🛰️ Exporters
 ---
 
 ##  What is an exporter?
