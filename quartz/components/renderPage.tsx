@@ -69,7 +69,12 @@ function renderTranscludes(
   cfg: GlobalConfiguration,
   slug: FullSlug,
   componentData: QuartzComponentProps,
-  visited: Set<FullSlug>,
+  // Set di chiavi "target+anchor" già transcluse, NON solo dei target.
+  // Questo permette `![[file#sezA]]` + `![[file#sezB]]` nella stessa pagina
+  // (sezioni distinte = chiavi distinte) senza falsi positivi di "circular".
+  // Il self-embed `![[file]]` dentro `file` resta correttamente bloccato perché
+  // il caller seed-a il set con la chiave nuda del root slug.
+  visited: Set<string>,
 ) {
   // process transcludes in componentData
   visit(root, "element", (node, _index, _parent) => {
@@ -78,11 +83,18 @@ function renderTranscludes(
       if (classNames.includes("transclude")) {
         const inner = node.children[0] as Element
         const transcludeTarget = (inner.properties["data-slug"] ?? slug) as FullSlug
-        if (visited.has(transcludeTarget)) {
+        // Leggi blockRef PRIMA del check di ciclicità, così possiamo includere
+        // l'anchor nella chiave del Set. Senza, due `![[file#X]]` + `![[file#Y]]`
+        // nella stessa pagina collidevano (stesso target) e il secondo veniva
+        // skippato come "circular" anche se le sezioni erano diverse.
+        let blockRef = node.properties.dataBlock as string | undefined
+        const transcludeKey = `${transcludeTarget}${blockRef ?? ""}`
+
+        if (visited.has(transcludeKey)) {
           console.warn(
             styleText(
               "yellow",
-              `Warning: Skipping circular transclusion: ${slug} -> ${transcludeTarget}`,
+              `Warning: Skipping circular transclusion: ${slug} -> ${transcludeKey}`,
             ),
           )
           node.children = [
@@ -93,21 +105,19 @@ function renderTranscludes(
               children: [
                 {
                   type: "text",
-                  value: `Circular transclusion detected: ${transcludeTarget}`,
+                  value: `Circular transclusion detected: ${transcludeKey}`,
                 },
               ],
             },
           ]
           return
         }
-        visited.add(transcludeTarget)
+        visited.add(transcludeKey)
 
         const page = componentData.allFiles.find((f) => f.slug === transcludeTarget)
         if (!page) {
           return
         }
-
-        let blockRef = node.properties.dataBlock as string | undefined
         if (blockRef?.startsWith("#^")) {
           // block transclude
           blockRef = blockRef.slice("#^".length)
@@ -222,7 +232,9 @@ export function renderPage(
   // make a deep copy of the tree so we don't remove the transclusion references
   // for the file cached in contentMap in build.ts
   const root = clone(componentData.tree) as Root
-  const visited = new Set<FullSlug>([slug])
+  // Set di chiavi "slug+anchor" — pre-popolato con la pagina root (slug senza
+  // anchor) per prevenire self-embed (`![[stessa-pagina]]` dentro sé stessa).
+  const visited = new Set<string>([slug])
   renderTranscludes(root, cfg, slug, componentData, visited)
 
   // set componentData.tree to the edited html that has transclusions rendered
