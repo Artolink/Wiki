@@ -292,9 +292,8 @@ The new PC is now ready to use exactly like the first one.
 > [!DANGER]
 > From now on, you have to manually handle the sync state in every local Obsidian vault!
 >
-> This means that, whenever you start working on a PC after editing from another one, the first thing you must do **before making any changes** is to pull the latest state from GitHub, so your local vault reflects whatever was last pushed from the other PC.
->
-> Also, you should **always push your changes to GitHub before leaving a PC** (`./sync-wiki.sh`): this way, if you move to another machine, it will be in a up-to-date state, after pulling.
+> This means that, whenever you start working on a PC after editing from another one, the first thing you must do **before making any changes** is to **pull the latest state from GitHub**, so your local vault reflects whatever was last pushed from the other PC.
+> You must also **always push your changes to GitHub before leaving a PC** (`./sync-wiki.sh`): this way, if you move to another machine, it will be in an up-to-date state, after pulling.
 
 For pulling (first thing you do):
 ```bash
