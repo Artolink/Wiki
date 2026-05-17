@@ -89,6 +89,7 @@ const tagColors: Record<string, string> = {
   Utilities: "#6b7280",       // grigio neutro
   Advanced: "#ef4444",        // rosso (red-500) — distinto dal currentNodeColor (#dc2626, red-600)
   Maintenance: "#ca8a04",     // giallo scuro (yellow-600) — leggibile su bianco, distinto dall'amber di StartingTools
+  Projects: "#15803d",        // verde bosco (green-700)
 }
 
 // Colore del nodo "tu sei qui" nel grafo: distingue la pagina aperta dagli
@@ -185,6 +186,7 @@ export const defaultContentPageLayout: PageLayout = {
     Component.SidebarLink({ label: "Graph view", icon: "🕸️", slug: "graph" }),
     Component.SidebarLink({ label: "Starting Tools", icon: "🛠️", slug: "tags/StartingTools" }),
     Component.SidebarLink({ label: "Basic Knowledge", icon: "🧠", slug: "tags/Basics" }),
+    Component.SidebarLink({ label: "Projects", icon: "🚀", slug: "tags/Projects" }),
     Component.SidebarLink({ label: "Utilities", icon: "🧰", slug: "tags/Utilities" }),
     Component.Explorer({ title: "Notes", sortFn: explorerSortFn, filterFn: explorerFilterFn }),
   ],
@@ -222,6 +224,7 @@ export const defaultListPageLayout: PageLayout = {
     Component.SidebarLink({ label: "Graph view", icon: "🕸️", slug: "graph" }),
     Component.SidebarLink({ label: "Starting Tools", icon: "🛠️", slug: "tags/StartingTools" }),
     Component.SidebarLink({ label: "Basic Knowledge", icon: "🧠", slug: "tags/Basics" }),
+    Component.SidebarLink({ label: "Projects", icon: "🚀", slug: "tags/Projects" }),
     Component.SidebarLink({ label: "Utilities", icon: "🧰", slug: "tags/Utilities" }),
     Component.Explorer({ title: "Notes", sortFn: explorerSortFn, filterFn: explorerFilterFn }),
   ],

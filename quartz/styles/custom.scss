@@ -1655,6 +1655,12 @@ html[saved-theme] body[data-slug="tags/Maintenance"] {
   --highlight: rgba(202, 138, 4, 0.15);
 }
 
+html[saved-theme] body[data-slug="tags/Projects"] {
+  --secondary: #15803d;
+  --tertiary:  #22c55e;
+  --highlight: rgba(21, 128, 61, 0.15);
+}
+
 // ──────────────────────────────────────────────────────────────────────────────
 // CUSTOM FOOTER — minimal copyright line, link to /license
 // ──────────────────────────────────────────────────────────────────────────────
