@@ -32,9 +32,3 @@ An exporter doesn't push anywhere, doesn't store anything long-term, doesn't tal
 | **Your custom one** | Whatever your app does | (you decide) |
 
 You can also write your **own exporter** in any language with a Prometheus client library (Python, Go, Java...).
-
-##  In this folder
-
-At the moment I cover just one exporter: the one I use for my metrics stack.
-
-- [Node Exporter](node-exporter): exposes host system metrics

@@ -27,9 +27,3 @@ The job is conceptually simple:
 I use **VMAgent** in my stack for two reasons:
 1. It's the natural partner of [[victoriametrics|VictoriaMetrics]]: written by the same team, optimised for the pair.
 2. It demonstrates the **split architecture** in its purest form: a tiny agent on a dedicated VM, just scraping + forwarding.
-
-##  In this folder
-
-At the moment I cover just one scraper: 
-
-- [VMAgent](vmagent): scrapes our target exposed by [[node-exporter]] and forwards to [[victoriametrics|VictoriaMetrics]].

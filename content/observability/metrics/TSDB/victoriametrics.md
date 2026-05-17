@@ -1,5 +1,5 @@
 ---
-title: "2. VictoriaMetrics: store and query metrics"
+title: "VictoriaMetrics: store and query metrics"
 tags:
 ---
 

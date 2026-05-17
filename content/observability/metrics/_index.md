@@ -1,8 +1,6 @@
 ---
 title: 📈 Metrics (Grafana stack)
 ---
-
-
 Here you'll find a few observability notions concerning metrics, along my personal metrics stack for the VPS hosting `farnetiandrea.it`. 
 
 Four components, two machines (VPS + a dedicated scraper VM):
