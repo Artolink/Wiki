@@ -849,6 +849,23 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
     window.removeEventListener("sidebartoggled", handleSidebarToggle)
   })
 
+  // Re-render anche su window.resize: aprire/chiudere DevTools, ruotare
+  // un tablet, cambiare layout responsive… qualunque cambio di larghezza
+  // della finestra ridimensiona il container ma il canvas Pixi resta sulla
+  // misura vecchia. Debounce a 250ms per evitare spam durante il drag.
+  let resizeTimer: number | undefined
+  const handleResize = () => {
+    if (resizeTimer) window.clearTimeout(resizeTimer)
+    resizeTimer = window.setTimeout(() => {
+      void renderLocalGraph()
+    }, 250)
+  }
+  window.addEventListener("resize", handleResize)
+  window.addCleanup(() => {
+    if (resizeTimer) window.clearTimeout(resizeTimer)
+    window.removeEventListener("resize", handleResize)
+  })
+
   const containers = [...document.getElementsByClassName("global-graph-outer")] as HTMLElement[]
   async function renderGlobalGraph() {
     const slug = getFullSlug(window)
