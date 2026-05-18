@@ -1219,15 +1219,26 @@ pre > .clipboard-button {
   // Stato "appena copiato": bordo + bg + testo verdi per feedback netto.
   // La classe `copied` viene applicata da clipboard.inline.ts per 2s dopo
   // il click; in quel periodo l'svg interno è già il check verde.
+  //
+  // Bg SOLIDO (no alpha) altrimenti si vede in trasparenza il testo del code
+  // block sotto al pulsante (è position: absolute, sovrapposto al codice).
   &.copied {
     border-color: #16a34a !important; // green-600
-    background: rgba(22, 163, 74, 0.12) !important;
-    color: #15803d !important; // green-700, leggibile su bg tenue
+    background: #dcfce7 !important;   // green-100 solido — bg verde chiaro
+    color: #15803d !important;        // green-700, leggibile sul bg chiaro
 
     &::after {
       content: "Copied!";
     }
   }
+}
+
+// Dark mode: il green-100 stride sul body scuro. Usiamo un verde scuro
+// saturato come sfondo, con testo green-300 e bordo green-500.
+html[saved-theme="dark"] pre > .clipboard-button.copied {
+  border-color: #22c55e !important; // green-500
+  background: #14532d !important;   // green-900 solido
+  color: #86efac !important;        // green-300, chiaro su scuro
 }
 
 pre:hover > .clipboard-button {
