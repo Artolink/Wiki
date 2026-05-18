@@ -1487,29 +1487,18 @@ html[saved-theme="dark"] .callout[data-callout="warning"] {
   --bg: rgba(220, 38, 38, 0.07);
 }
 
-// ── Effetto "live" — alone colorato pulsante su warning e danger ─────────────
+// ── Effetto "live" — alone colorato pulsante solo su rossi (danger) ──────────
 // Box-shadow soft che cresce/decresce in loop infinito (~3s) per attirare
-// l'attenzione su avvisi importanti senza essere fastidiosi. La struttura
-// del box-shadow è dual:
-//   1) un "ring" inset 0..3px (alpha bassa, dà la sensazione di alone solido)
-//   2) un "glow" 16..24px (alpha media, irradia oltre i bordi)
+// l'attenzione sugli avvisi critici. I warning gialli NON hanno animazione
+// perché il loro bg solido (#fef3c7 in light) garantisce già contrasto netto.
+// L'animazione è riservata al rosso, dove l'urgenza ne giustifica l'enfasi.
 //
-// `prefers-reduced-motion`: utenti che hanno disabilitato le animazioni di
-// sistema (motion sickness, accessibilità) vedono solo lo stato statico al
-// 50% del keyframe — niente loop, ma alone comunque presente per l'enfasi.
-@keyframes callout-glow-warning {
-  0%, 100% {
-    box-shadow:
-      0 0 0 0 rgba(202, 138, 4, 0.15),
-      0 0 16px rgba(202, 138, 4, 0.2);
-  }
-  50% {
-    box-shadow:
-      0 0 0 3px rgba(202, 138, 4, 0.18),
-      0 0 24px rgba(202, 138, 4, 0.4);
-  }
-}
-
+// Struttura dual layer del box-shadow:
+//   1) ring inset 0..3px (alpha bassa, alone aderente ai bordi)
+//   2) glow 16..26px (alpha media, irradia all'esterno)
+//
+// `prefers-reduced-motion`: stop loop, glow statico per chi ha disabilitato
+// le animazioni di sistema (motion sickness / accessibilità).
 @keyframes callout-glow-danger {
   0%, 100% {
     box-shadow:
@@ -1523,10 +1512,6 @@ html[saved-theme="dark"] .callout[data-callout="warning"] {
   }
 }
 
-.callout[data-callout="warning"] {
-  animation: callout-glow-warning 3.5s ease-in-out infinite;
-}
-
 .callout[data-callout="danger"],
 .callout[data-callout="failure"],
 .callout[data-callout="bug"] {
@@ -1535,12 +1520,6 @@ html[saved-theme="dark"] .callout[data-callout="warning"] {
 
 // Accessibilità: stop dell'animazione, mantieni il glow statico
 @media (prefers-reduced-motion: reduce) {
-  .callout[data-callout="warning"] {
-    animation: none;
-    box-shadow:
-      0 0 0 2px rgba(202, 138, 4, 0.18),
-      0 0 20px rgba(202, 138, 4, 0.3);
-  }
   .callout[data-callout="danger"],
   .callout[data-callout="failure"],
   .callout[data-callout="bug"] {
