@@ -936,6 +936,13 @@ body[data-slug="graph"] {
     display: none !important;
   }
 
+  // Override del cap 860px del .page-footer (vedi sezione "L'articolo
+  // *interno* è cappato a 860px"): su /graph il footer ospita il grafo
+  // full-page, che DEVE prendersi tutta la larghezza disponibile.
+  .page > #quartz-body > .center > .page-footer {
+    max-width: none;
+  }
+
   // Il graph component vive in .page-footer (afterBody), non in .popover-hint.
   // Nascondi h3 (titolo "Graph View" ridondante) e ingrandisci graph-outer.
   .page-footer > .graph {
