@@ -1410,57 +1410,26 @@ pre {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// CALLOUT COLORS — palette ridotta e più contrastata
+// CALLOUT COLORS — override mirati su warning e danger
 // ──────────────────────────────────────────────────────────────────────────────
-// Quartz core (callouts.scss) assegna a ogni tipo di callout 3 vars:
-//   --color  (titolo + icona + accent), --border, --bg
-// Il default usa tinte calde (warning #db8942 ≈ arancio-marrone, ecc.) che
-// si confondono col bg beige caldo dei code block e della sidebar.
-// Qui sovrascriviamo con 5 colori netti che restano leggibili sia sul bg
-// bianco light che sul bg stone dark.
+// Tutti gli altri callout (note, tip, info, success, question, abstract,
+// example, todo, quote, ecc.) mantengono i colori di default del core
+// Quartz (vedi quartz/styles/callouts.scss).
+//
+// Override applicati qui:
+//   - WARNING (= attention, caution) → giallo più saturo + bg SOLIDO in
+//     light mode, perché il default arancio-marrone con bg translucido si
+//     confondeva col beige del code-bg quando il callout era tra due code block.
+//   - DANGER / FAILURE / BUG → rosso più "pulito" + alone pulsante per
+//     enfatizzare l'urgenza (vedi @keyframes callout-glow-danger sotto).
 //
 // Aliasing di Quartz (vedi quartz/plugins/transformers/ofm.ts ~riga 63):
-//   tip = hint = important   |  warning = attention = caution
-//   success = check = done   |  danger = error
-//   question = help = faq    |  failure = missing = fail
-//   abstract = summary = tldr|  quote = cite
-//
-// `attention` → mappato a `warning`: stesso colore (giallo). Per qualcosa
-// di rosso usare `danger`, `error`, `failure`, `bug`.
+//   warning = attention = caution
+//   danger = error
+//   failure = missing = fail
+// (bug ha il suo type)
 
-// BLU: note (default), tip, info, question, todo, abstract
-.callout[data-callout],
-.callout[data-callout="tip"],
-.callout[data-callout="info"],
-.callout[data-callout="question"],
-.callout[data-callout="todo"],
-.callout[data-callout="abstract"] {
-  --color: #3b82f6; // blue-500
-  --border: rgba(59, 130, 246, 0.3);
-  --bg: rgba(59, 130, 246, 0.07);
-}
-
-// VERDE: success, example
-.callout[data-callout="success"],
-.callout[data-callout="example"] {
-  --color: #16a34a; // green-600
-  --border: rgba(22, 163, 74, 0.3);
-  --bg: rgba(22, 163, 74, 0.07);
-}
-
-// GRIGIO: quote — torna al default neutro (stile blockquote markdown
-// standard). Nota: senza override esplicito qui, le quote cadrebbero nel
-// selettore generico `[data-callout]` sopra (BLU) per specificità uguale
-// + ordine di dichiarazione; serve quindi forzare i valori grigi.
-.callout[data-callout="quote"] {
-  --color: var(--secondary);
-  --border: var(--lightgray);
-  --bg: transparent;
-}
-
-// GIALLO: warning (= attention, caution). Più scuro/saturato del default
-// arancio-marrone così non si confonde col beige della palette.
-//
+// GIALLO: warning.
 // In LIGHT mode il bg è SOLIDO (amber-100 #fef3c7): un giallo translucido
 // con alpha bassa si miscela col bianco del body e produce un beige quasi
 // identico al --code-bg (#faf8f3), facendo "sparire" il callout quando è
