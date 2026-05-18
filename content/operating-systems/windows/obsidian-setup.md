@@ -10,7 +10,7 @@ Obsidian is a local-first Markdown note-taking app built around a **personal kno
 
 ...What? You don't know how to write Markdown files? 
 
-It's super easy! Check out my [guide](markdown-guide).
+It's super easy! Make sure to check out my [guide](markdown-guide), it brings Obsidian to the next level.
 
 The real power is in **linking notes together** and visualising connections through the graph view.
 
@@ -76,19 +76,6 @@ sudo apt install ./obsidian_amd64.deb
 
 - **Embed a note:** `![[note-name]]` (you just add a "!" before the Wikilink)
   
-- **Callout blocks:**
-
-```markdown
-> [!NOTE]
-> This is a note callout.
-
-> [!WARNING]
-> This is a warning callout.
-
-> [!TIP]
-> Available types: NOTE, TIP, WARNING, DANGER, INFO, SUCCESS, QUESTION
-```
-
 - **Frontmatter (metadata):**
 
 ```markdown

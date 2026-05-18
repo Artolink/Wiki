@@ -10,11 +10,13 @@ The document you are reading right now, is Markdown.
 
 Every note in this Wiki is written using Markdown... and it's super easy!
 
-Markdown is a tiny set of conventions for writing plain text that **looks structured** when rendered. You don't need a special editor — any `.txt` will do — but tools like [[obsidian-setup|Obsidian]] turn the syntax into a clean visual document as you type.
+Markdown is a tiny set of conventions for writing plain text that **looks structured** when rendered. You don't need a special editor, any `.txt` will do, but tools like [[obsidian-setup|Obsidian]] turn the syntax into a clean visual document as you type.
 
 The whole point: **stop fighting with formatting toolbars**. You write, your hands stay on the keyboard, and the document looks right.
 
-The syntax below covers 95% of what's needed for daily note-taking. Keep this page open while you learn — after a couple of days the muscle memory takes over.
+The syntax below covers 95% of what's needed for daily note-taking. 
+
+Keep this page open while you learn: after a couple of days the muscle memory takes over.
 
 ## The essentials
 
