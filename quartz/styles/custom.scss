@@ -1293,6 +1293,15 @@ pre {
 // del pre nidificato si aggiungono. Per questo annulliamo i margin del
 // pre nidificato dentro al figure (solo nei callout), e teniamo solo il
 // margin del figure stesso.
+
+// Padding-bottom sul callout per dare respiro al bordo inferiore (il
+// padding di default di Quartz è `0 1rem` → zero verticale; il respiro
+// veniva dal margin-bottom del :last-child, che però ora abbiamo
+// azzerato per uniformità interna).
+.callout {
+  padding-bottom: 0.8rem;
+}
+
 .callout > .callout-content {
   & > * {
     min-width: 0;
