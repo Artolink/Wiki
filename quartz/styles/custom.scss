@@ -939,8 +939,19 @@ body[data-slug="graph"] {
   // Override del cap 860px del .page-footer (vedi sezione "L'articolo
   // *interno* è cappato a 860px"): su /graph il footer ospita il grafo
   // full-page, che DEVE prendersi tutta la larghezza disponibile.
+  //
+  // NOTA CRITICA: NON basta annullare max-width. Il .center qui sopra è
+  // `display: flex; flex-direction: column`, e in flex column i children
+  // con `margin-left: auto; margin-right: auto` (che la regola generale
+  // imposta per centrare il footer) vengono centrati con la loro larghezza
+  // INTRINSECA invece di essere stretchati. Risultato: il footer collassa
+  // sul content (e il graph al suo interno diventa minuscolo).
+  // Azzeriamo i margin auto + width:100% per ripristinare lo stretch.
   .page > #quartz-body > .center > .page-footer {
     max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
   }
 
   // Il graph component vive in .page-footer (afterBody), non in .popover-hint.
