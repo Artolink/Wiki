@@ -316,9 +316,7 @@ For pushing (last thing you do):
 ***
 ## Where to go next
 
-Great, so now you have your VPS hosting your personal Wiki on your domain.  
-
-But what can you build next?
+Great, so now you have your VPS hosting your personal Wiki on your domain... But what can you build next?
 
 Well, this can also be the starting point for something bigger.  
   
