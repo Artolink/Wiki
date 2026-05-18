@@ -1179,20 +1179,32 @@ code {
   font-family: var(--codeFont);
 }
 
-// Inline code dentro pre: resetta lo stile pill (altrimenti si sovrappone)
+// Inline code dentro pre: resetta lo stile pill (altrimenti si sovrappone).
+// Padding orizzontale 1.2rem come FALLBACK per i code block senza linguaggio
+// (es. ``` plain ``` ): in quel caso rehype-pretty-code NON inserisce
+// <span data-line>, e il contenuto va direttamente nel <code>. Senza
+// fallback, il testo aderirebbe al bordo sinistro del pre.
 pre > code {
   background: transparent !important;
-  padding: 0 !important;
+  padding: 0 1.2rem !important;
   border-radius: 0 !important;
   font-size: 0.82rem;
 }
 
 // ── Highlight della singola riga su hover (in stile syselement) ──────────────
 // rehype-pretty-code wrappa ogni riga in un <span data-line>, figlio diretto
-// del <code> (che è un grid: display:grid via style inline). Il padding-x
-// è stato spostato dal <code> al singolo span[data-line] così l'highlight
-// del :hover si estende da bordo a bordo del <pre>, non solo nell'area di
-// testo come avveniva col padding sul <code>.
+// del <code> (che è un grid: display:grid via style inline). Quando ci sono
+// gli span, annulliamo il padding-x del <code> e lo spostiamo sul singolo
+// span così l'highlight del :hover si estende da bordo a bordo del <pre>,
+// non solo nell'area di testo.
+//
+// `:has()` è supportato in tutti i browser dal 2023 (Chrome 105+, Safari
+// 15.4+, Firefox 121+). Se mai serve fallback per browser più vecchi,
+// basterà invertire la logica (padding sul code, niente sullo span).
+pre > code:has(> span[data-line]) {
+  padding: 0 !important;
+}
+
 pre > code > span[data-line] {
   padding: 0 1.2rem;
   // L'highlight su hover usa una transizione brevissima per non sembrare un
