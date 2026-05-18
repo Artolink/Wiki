@@ -1222,6 +1222,23 @@ pre:hover > .clipboard-button {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
+// CODE BLOCKS DENTRO CALLOUT — fix scroll orizzontale
+// ──────────────────────────────────────────────────────────────────────────────
+// Bug originale di Quartz: `.callout-content` è un grid container con
+// `overflow: hidden` (vedi quartz/styles/callouts.scss). I figli del grid
+// hanno default `min-width: auto`, che li lascia espandere fino alla
+// larghezza del contenuto — un <pre> con una riga molto lunga sfonda la
+// colonna del grid, e l'overflow:hidden del genitore ritaglia tutto,
+// scrollbar inclusa. Risultato: comando troncato senza modo di scrollarlo.
+//
+// Fix: `min-width: 0` sui figli del grid li costringe a rispettare la
+// larghezza disponibile, così il loro `overflow-x: auto` (sopra) può
+// mostrare la barra di scroll come per i code block normali.
+.callout > .callout-content > * {
+  min-width: 0;
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
 // SEARCH DROPDOWN — tendina compatta in stile syselement
 // ──────────────────────────────────────────────────────────────────────────────
 // Trasforma il modal fullscreen di default in una piccola tendina ancorata
