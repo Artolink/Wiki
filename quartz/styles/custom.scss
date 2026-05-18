@@ -1284,26 +1284,51 @@ pre {
 // + spaziatura: i margin verticali di default (figure 1.25rem + pre 1rem,
 // più p 1rem) sommati al padding del callout rendono i blocchi dentro al
 // tip "galleggianti" con tanto spazio vuoto sopra/sotto. Stringiamoli per
-// riprodurre la compattezza di Obsidian (margin tipico ~0.4rem).
+// riprodurre la compattezza di Obsidian.
+//
+// Nota: .callout-content è un grid container → i margin dei figli NON
+// collassano (come invece accade nel normal flow). Quindi sommiamo
+// realmente i margin bottom + margin top del successivo. Inoltre il
+// <figure data-rehype-pretty-code-figure> ha un <pre> dentro, e i margin
+// del pre nidificato si aggiungono. Per questo annulliamo i margin del
+// pre nidificato dentro al figure (solo nei callout), e teniamo solo il
+// margin del figure stesso.
 .callout > .callout-content {
   & > * {
     min-width: 0;
   }
 
   & > p {
-    margin: 0.4rem 0;
+    margin: 0.3rem 0;
   }
 
   & > figure[data-rehype-pretty-code-figure] {
-    margin: 0.5rem 0;
+    margin: 0.3rem 0;
+
+    // Il <pre> dentro al figure ha già il proprio margin: 1rem 0 (da
+    // custom.scss più sopra). Quello si somma al margin del figure e
+    // crea spazio extra → azzera il margin del pre nidificato qui.
+    & > pre {
+      margin: 0;
+    }
   }
 
+  // Code block "nudo" (raro: senza figure wrapper, es. quando manca il
+  // titolo). Stessa spaziatura del figure per coerenza.
   & > pre {
-    margin: 0.5rem 0;
+    margin: 0.3rem 0;
   }
 
-  // Primo e ultimo elemento: ancora più stretti, così il bordo del callout
-  // non sembra "lontano" dal contenuto.
+  // Liste, blockquote, tabelle: stesso ritmo
+  & > ul,
+  & > ol,
+  & > blockquote,
+  & > table {
+    margin: 0.3rem 0;
+  }
+
+  // Primo e ultimo elemento: niente margin esterno, così il bordo del
+  // callout aderisce al contenuto.
   & > :first-child {
     margin-top: 0;
   }
