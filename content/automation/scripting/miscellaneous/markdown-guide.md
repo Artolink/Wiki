@@ -239,6 +239,12 @@ And here's every callout type:
 > [!tldr]
 > TL;DR: alias of abstract.
 
+> [!info]
+> Info: for neutral information.
+
+> [!todo]
+> Todo: for things you still need to do.
+
 ***
 
 #### TEAL: tips, hints, important advice
@@ -251,12 +257,6 @@ And here's every callout type:
 
 > [!important]
 > Important: alias of tip.
-
-> [!info]
-> Info: for neutral information.
-
-> [!todo]
-> Todo: for things you still need to do.
 
 ***
 
