@@ -2,7 +2,9 @@
 title: "Callouts: all types and aliases"
 tags:
 ---
-This is the callout test page. Each color group bundles the aliases that render identically.
+This is the callout visual test page. 
+
+Each color group bundles the aliases that render identically.
 
 ***
 
@@ -68,7 +70,7 @@ This is the callout test page. Each color group bundles the aliases that render 
 > Warning: heads-up, something might break. **Aliases**: `attention`, `caution`.
 
 > [!attention]
-> Attention: alias of warning (renders identically to a warning — it is NOT red). For red, use `danger`, `error` or `failure`.
+> Attention: alias of warning (renders identically to a warning, so it is NOT red). 
 
 > [!caution]
 > Caution: alias of warning.
@@ -97,7 +99,7 @@ This is the callout test page. Each color group bundles the aliases that render 
 
 ***
 
-## 🩷 PINK: quotes
+## ⚪ Grey: quotes
 
 > [!quote]
 > Quote: for quotations. **Alias**: `cite`.
