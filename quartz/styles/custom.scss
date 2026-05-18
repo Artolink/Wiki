@@ -1460,10 +1460,21 @@ pre {
 
 // GIALLO: warning (= attention, caution). Più scuro/saturato del default
 // arancio-marrone così non si confonde col beige della palette.
+//
+// In LIGHT mode il bg è SOLIDO (amber-100 #fef3c7): un giallo translucido
+// con alpha bassa si miscela col bianco del body e produce un beige quasi
+// identico al --code-bg (#faf8f3), facendo "sparire" il callout quando è
+// tra due code block. Un fill solido garantisce contrasto netto.
+// In DARK mode invece il translucido funziona bene sul body scuro, quindi
+// lo manteniamo per coerenza tonale (vedi override sotto).
 .callout[data-callout="warning"] {
-  --color: #ca8a04; // yellow-600
-  --border: rgba(202, 138, 4, 0.35);
-  --bg: rgba(202, 138, 4, 0.08);
+  --color: #ca8a04;             // yellow-600
+  --border: rgba(202, 138, 4, 0.45);
+  --bg: #fef3c7;                // amber-100 solido (light mode)
+}
+
+html[saved-theme="dark"] .callout[data-callout="warning"] {
+  --bg: rgba(202, 138, 4, 0.1); // translucido in dark — il body scuro fa già contrasto
 }
 
 // ROSSO: danger, failure, bug (gli alias error/missing/fail collassano
