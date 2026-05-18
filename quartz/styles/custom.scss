@@ -1448,11 +1448,14 @@ pre {
   --bg: rgba(22, 163, 74, 0.07);
 }
 
-// ROSA: quote
+// GRIGIO: quote — torna al default neutro (stile blockquote markdown
+// standard). Nota: senza override esplicito qui, le quote cadrebbero nel
+// selettore generico `[data-callout]` sopra (BLU) per specificità uguale
+// + ordine di dichiarazione; serve quindi forzare i valori grigi.
 .callout[data-callout="quote"] {
-  --color: #ec4899; // pink-500
-  --border: rgba(236, 72, 153, 0.3);
-  --bg: rgba(236, 72, 153, 0.07);
+  --color: var(--secondary);
+  --border: var(--lightgray);
+  --bg: transparent;
 }
 
 // GIALLO: warning (= attention, caution). Più scuro/saturato del default
