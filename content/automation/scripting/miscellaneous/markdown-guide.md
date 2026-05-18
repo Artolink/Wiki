@@ -219,20 +219,14 @@ Useful when a chunk of explanation belongs to several places: write it once, emb
 And here's every callout type:
 ***
 
-#### 🔵 BLUE: generic notes
+#### BLUE: generic notes
 
 > [!note]
 > Note (default): this is what you get if you write `> [!callout]` without specifying a type, or `> [!note]` explicitly.
 
-> [!info]
-> Info: for neutral information.
-
-> [!todo]
-> Todo: for things you still need to do.
-
 ***
 
-#### 🩵 CYAN: info, summaries, todos
+#### CYAN: info, summaries, todos
 
 > [!abstract]
 > Abstract / summary / tldr: for summaries at the top of a page. **Aliases**: `summary`, `tldr`.
@@ -245,7 +239,7 @@ And here's every callout type:
 
 ***
 
-#### 🌊 TEAL: tips, hints, important advice
+#### TEAL: tips, hints, important advice
 
 > [!tip]
 > Tip: the classic suggestion. **Aliases**: `hint`, `important`.
@@ -256,9 +250,15 @@ And here's every callout type:
 > [!important]
 > Important: alias of tip.
 
+> [!info]
+> Info: for neutral information.
+
+> [!todo]
+> Todo: for things you still need to do.
+
 ***
 
-#### 💚 GREEN: confirmations, success
+#### GREEN: confirmations, success
 
 > [!success]
 > Success: the operation worked. **Aliases**: `check`, `done`.
@@ -271,7 +271,7 @@ And here's every callout type:
 
 ***
 
-#### 🟠 AMBER: questions, help, FAQ
+#### AMBER: questions, help, FAQ
 
 > [!question]
 > Question: for open questions or doubts. **Aliases**: `help`, `faq`.
@@ -284,7 +284,7 @@ And here's every callout type:
 
 ***
 
-#### 🟡 YELLOW: heads-up, caution (highlighted with solid bg)
+#### YELLOW: heads-up, caution
 
 > [!warning]
 > Warning: heads-up, something might break. **Aliases**: `attention`, `caution`.
@@ -297,14 +297,14 @@ And here's every callout type:
 
 ***
 
-#### 🟣 PURPLE: examples
+#### PURPLE: examples
 
 > [!example]
 > Example: code or configuration snippet.
 
 ***
 
-#### 🔴 RED: danger, errors, failures (pulsing live glow)
+#### RED: danger, errors, failures
 
 > [!danger]
 > Danger: critical notice. **Alias**: `error`.
@@ -326,7 +326,7 @@ And here's every callout type:
 
 ***
 
-#### ⚪ GREY: quotes
+#### GREY: quotes
 
 > [!quote]
 > Quote: for quotations. **Alias**: `cite`.
