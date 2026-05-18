@@ -709,7 +709,12 @@ html[saved-theme="dark"] .graph .graph-outer {
 // Il blocco con article-title + content-meta + tag-list è in
 // .center > .page-header > .popover-hint (NON direct child di .center).
 // Senza questa regola il titolo risulta allineato a sinistra su schermi grandi.
-.page > #quartz-body > .center > .page-header > .popover-hint {
+.page > #quartz-body > .center > .page-header > .popover-hint,
+// Page-footer ospita i componenti `afterBody` (PageSequenceNav, ecc.) —
+// senza questo cap, su schermi larghi i bottoni Prev/Next si estenderebbero
+// oltre la larghezza dell'articolo. Componenti con `position: fixed` come
+// FontResizer/ScrollProgress non risentono del cap, quindi safe.
+.page > #quartz-body > .center > .page-footer {
   max-width: 860px;
   margin-left: auto;
   margin-right: auto;
