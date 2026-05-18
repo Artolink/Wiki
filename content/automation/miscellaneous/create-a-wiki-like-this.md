@@ -321,4 +321,4 @@ But what can you build next?
 
 Well, this can also be the starting point for something bigger.  
   
-If this is your first step into building your own homelab, a [metrics](my-grafana-stack) and logging stack is probably the next thing you'll want to set up. Go on and check out my guides!
+If this is your first step into building your own homelab, a [metrics](my-grafana-stack) and logging stack is probably the next thing to do. Go on and check out my guides!
