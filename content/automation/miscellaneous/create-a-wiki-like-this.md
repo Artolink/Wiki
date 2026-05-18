@@ -246,7 +246,7 @@ From now on, your daily workflow is the following:
 2. When you want to publish them: `./sync-wiki.sh`.
 3. Refresh your wiki: changes are live in a few seconds.
 
-
+***
 ## EXTRA: Work from another PC
 
 If you want to edit the wiki from more than one machine (e.g. work laptop + your home desktop), you don't need a fancy sync setup. 
@@ -313,6 +313,7 @@ For pushing (last thing you do):
 
 ```
 
+***
 ## Where to go next
 
 Great, so now you have your VPS hosting your personal Wiki on your domain.  
