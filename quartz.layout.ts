@@ -154,6 +154,10 @@ export const defaultContentPageLayout: PageLayout = {
       component: fullPageGraph,
       condition: (page) => page.fileData.slug === "graph",
     }),
+    // Bottoni Previous / Next per serie di pagine. Opt-in: si attiva solo
+    // se la pagina è elencata nel frontmatter `series:` di un'altra pagina
+    // ("hub"). Vedi quartz/components/PageSequenceNav.tsx per i dettagli.
+    Component.PageSequenceNav(),
     // FontResizer floating: posizionato con position: fixed, appare in basso al
     // centro quando il mouse si avvicina al fondo dello schermo.
     Component.FontResizer(),

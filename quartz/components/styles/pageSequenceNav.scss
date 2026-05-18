@@ -1,0 +1,86 @@
+// Page sequence navigation — bottoni Previous / Next stile syselement.
+// Si attiva solo se la pagina è elencata nel frontmatter `series:` di un'altra
+// pagina (l'"hub" della serie). Vedi PageSequenceNav.tsx.
+.page-sequence-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 2.5rem 0 1.5rem;
+
+  .page-sequence-link {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1.1rem;
+    border: 1px solid var(--lightgray);
+    border-radius: 10px;
+    background: var(--light);
+    text-decoration: none !important;
+    color: var(--dark) !important;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease,
+      transform 0.15s ease;
+
+    &:hover {
+      background: var(--sidebar-hover);
+      border-color: var(--gray);
+    }
+
+    // Spazio invisibile quando manca un lato (es. prima pagina della serie:
+    // niente "Previous"). Riserva la colonna del grid così "Next" resta a destra.
+    &.disabled {
+      visibility: hidden;
+    }
+
+    .arrow {
+      font-size: 1.4rem;
+      color: var(--gray);
+      flex: 0 0 auto;
+      line-height: 1;
+    }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0; // evita overflow su titoli lunghi
+
+      .label {
+        font-size: 0.72rem;
+        color: var(--gray);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .title {
+        font-weight: 600;
+        font-size: 0.95rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    // "Next" allineato a destra: arrow a destra, testo a destra.
+    &.next {
+      .content {
+        text-align: right;
+        align-items: flex-end;
+      }
+    }
+  }
+}
+
+// Mobile: stack verticale (le card una sopra l'altra) per non spezzare i
+// titoli, più leggibile su schermi stretti.
+@media (max-width: 600px) {
+  .page-sequence-nav {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+
+    .page-sequence-link.disabled {
+      display: none; // sotto i 600px, non sprecare spazio per il placeholder
+    }
+  }
+}
