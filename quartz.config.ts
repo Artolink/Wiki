@@ -74,7 +74,9 @@ const config: QuartzConfig = {
       }),
       Plugin.ObsidianFlavoredMarkdown({ enableInHtmlEmbed: false, enableCheckbox: true }),
       Plugin.GitHubFlavoredMarkdown(),
-      Plugin.TableOfContents(),
+      // maxDepth default è 3 → gli `####` (h4) verrebbero esclusi dalla TOC.
+      // Alziamo a 4 così le sottosezioni `####` compaiono nel menu a destra.
+      Plugin.TableOfContents({ maxDepth: 4 }),
       Plugin.CrawlLinks({ markdownLinkResolution: "shortest" }),
       Plugin.Description(),
       Plugin.Latex({ renderEngine: "katex" }),

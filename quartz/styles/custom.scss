@@ -1940,6 +1940,40 @@ html[saved-theme] body[data-slug="tags/Projects"] {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
+// HEADING DEPTH (h4 / h5 / h6) — scala progressiva, stile syselement
+// ──────────────────────────────────────────────────────────────────────────────
+// Quartz base.scss raggruppa h4/h5/h6 con `font-size: 1rem` uguali: visivamente
+// indistinguibili dal body text e fra loro. Qui restituiamo una gerarchia
+// chiara — h4 leggermente più grande del body, h5 in piccolo uppercase
+// (caps + letter-spacing), h6 muted. h1/h2/h3 restano invariati.
+.popover-hint h4 {
+  font-size: 1.02rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.popover-hint h5 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--darkgray);
+  margin-top: 1.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.popover-hint h6 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gray);
+  margin-top: 1.2rem;
+  margin-bottom: 0.4rem;
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
 // CUSTOM FOOTER — minimal copyright line, link to /license
 // ──────────────────────────────────────────────────────────────────────────────
 // Override del footer SCSS condiviso: una riga piccola, grigia, allineata a
