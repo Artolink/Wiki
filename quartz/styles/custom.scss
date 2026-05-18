@@ -18,11 +18,12 @@ $navH: 66px;
 // ──────────────────────────────────────────────────────────────────────────────
 
 :root {
-  // Light mode — palette syselement (bianco puro, grigi neutri)
-  --code-bg:          #f9fafb;
-  --code-border:      #e5e7eb;
-  --code-header-bg:   #f3f4f6;
-  --code-inline-bg:   #f3f4f6;
+  // Light mode — palette syselement (beige caldo crema, toni neutri ma caldi)
+  --code-bg:          #faf6ec;     // crema beige (allineato al tono caldo della sidebar)
+  --code-border:      #ebe3d2;     // beige medio chiaro
+  --code-header-bg:   #f3ecdb;
+  --code-inline-bg:   #f3ecdb;
+  --code-line-hover:  #ece2cc;     // un tono sotto al bg per highlight riga (vedi sotto)
   --copy-btn-bg:      #ffffff;
   --copy-btn-border:  #e5e7eb;
   --sidebar-hover:    rgba(17, 24, 39, 0.05);
@@ -42,6 +43,7 @@ html[saved-theme="dark"] {
   --code-border:      #44403c;     // stone-700 (bordo visibile)
   --code-header-bg:   #292524;
   --code-inline-bg:   #292524;     // inline code stesso bg dei block
+  --code-line-hover:  #3a3431;     // stone più chiaro per highlight riga
   --copy-btn-bg:      #292524;
   --copy-btn-border:  #44403c;
   --sidebar-hover:    rgba(231, 229, 228, 0.06);
@@ -1137,8 +1139,10 @@ figure[data-rehype-pretty-code-figure] {
 }
 
 // Pre: il "riquadro" del blocco di codice
+// Padding verticale sul pre (il padding orizzontale è sul singolo span[data-line]
+// così l'highlight su hover si estende bordo-a-bordo come su syselement).
 pre {
-  padding: 0 !important;
+  padding: 1rem 0 !important;
   border-radius: 10px !important;
   border: 1px solid var(--code-border) !important;
   background: var(--code-bg) !important;
@@ -1149,7 +1153,7 @@ pre {
   & > code {
     font-size: 0.82rem;
     line-height: 1.55;
-    padding: 1rem 1.2rem !important;
+    padding: 0 !important;
     background: transparent !important;
   }
 
@@ -1176,9 +1180,26 @@ code {
 // Inline code dentro pre: resetta lo stile pill (altrimenti si sovrappone)
 pre > code {
   background: transparent !important;
-  padding: 1rem 1.2rem !important;
+  padding: 0 !important;
   border-radius: 0 !important;
   font-size: 0.82rem;
+}
+
+// ── Highlight della singola riga su hover (in stile syselement) ──────────────
+// rehype-pretty-code wrappa ogni riga in un <span data-line>, figlio diretto
+// del <code> (che è un grid: display:grid via style inline). Il padding-x
+// è stato spostato dal <code> al singolo span[data-line] così l'highlight
+// del :hover si estende da bordo a bordo del <pre>, non solo nell'area di
+// testo come avveniva col padding sul <code>.
+pre > code > span[data-line] {
+  padding: 0 1.2rem;
+  // L'highlight su hover usa una transizione brevissima per non sembrare un
+  // flash brusco quando si scorre tra righe vicine.
+  transition: background-color 0.08s ease;
+}
+
+pre > code > span[data-line]:hover {
+  background: var(--code-line-hover);
 }
 
 // ── Pulsante Copy in alto a destra, stile syselement ──────────────────────────
