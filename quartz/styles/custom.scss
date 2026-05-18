@@ -26,6 +26,11 @@ $navH: 66px;
   --code-header-bg:   #f3eee0;     // un tono sotto al bg del code, per stacco soft del titolo
   --code-inline-bg:   #f1ebde;     // pill beige più "carico" per distinguersi dal bg bianco del paragrafo
   --code-line-hover:  #efe8d4;     // un tono sotto al bg per highlight riga (visibile ma non aggressivo)
+  // Tabelle: palette grigio neutro, distinta dal beige della sidebar/code
+  // per evitare una pagina monocromatica
+  --table-border:     #e5e7eb;     // gray-200
+  --table-header-bg:  #f3f4f6;     // gray-100, header tinted soft
+  --table-row-hover:  #f9fafb;     // gray-50, hover quasi impercettibile
   --copy-btn-bg:      #ffffff;
   --copy-btn-border:  #e5e7eb;
   --sidebar-hover:    rgba(17, 24, 39, 0.05);
@@ -46,6 +51,10 @@ html[saved-theme="dark"] {
   --code-header-bg:   #292524;
   --code-inline-bg:   #292524;     // inline code stesso bg dei block
   --code-line-hover:  #3a3431;     // stone più chiaro per highlight riga
+  // Tabelle dark: stone neutro, leggera distinzione dal body
+  --table-border:     #44403c;     // stone-700
+  --table-header-bg:  #2e2a28;     // un soffio sopra al body
+  --table-row-hover:  #322e2c;     // hover sottile
   --copy-btn-bg:      #292524;
   --copy-btn-border:  #44403c;
   --sidebar-hover:    rgba(231, 229, 228, 0.06);
@@ -1374,10 +1383,11 @@ pre {
 // ──────────────────────────────────────────────────────────────────────────────
 // Quartz wrappa ogni <table> in `.table-container { overflow-x: auto }`
 // (vedi base.scss). Aggiungiamo bordo + border-radius sul container così la
-// tabella sembra una "card", come i code block. Header e hover row riusano
-// le stesse CSS vars dei code block per coerenza tonale (palette beige caldo).
+// tabella sembra una "card", come i code block — ma con palette grigio
+// neutro, NON il beige caldo di sidebar/code: voluto, così la pagina non
+// diventa monocromatica.
 .table-container {
-  border: 1px solid var(--code-border);
+  border: 1px solid var(--table-border);
   border-radius: 8px;
   margin: 1.25rem 0;
 
@@ -1389,15 +1399,15 @@ pre {
     width: 100%;
   }
 
-  // Header: bg beige tinted, lo stesso usato per i titoli dei code block
+  // Header: bg grigio chiarissimo neutro
   & > table > thead {
-    background: var(--code-header-bg);
+    background: var(--table-header-bg);
   }
 
   // Le th hanno già `border-bottom: 2px solid var(--gray)` da base.scss; la
-  // sovrascrivo col bordo armonico alla palette code + padding più generoso.
+  // sovrascrivo col bordo armonico alla palette grigio + padding più generoso.
   & > table th {
-    border-bottom: 1px solid var(--code-border) !important;
+    border-bottom: 1px solid var(--table-border) !important;
     padding: 0.7rem 1rem !important;
     font-weight: 600;
   }
@@ -1410,10 +1420,10 @@ pre {
     line-height: 1.55;
   }
 
-  // Righe del body: divider sottile beige + hover sottile.
-  // Sovrascrivo i border di base.scss (--lightgray) col tono caldo.
+  // Righe del body: divider sottile + hover quasi impercettibile.
+  // Sovrascrivo i border di base.scss (--lightgray).
   & > table tbody > tr {
-    border-bottom: 1px solid var(--code-border) !important;
+    border-bottom: 1px solid var(--table-border) !important;
     transition: background-color 0.1s ease;
 
     &:last-child {
@@ -1421,7 +1431,7 @@ pre {
     }
 
     &:hover {
-      background: var(--code-line-hover);
+      background: var(--table-row-hover);
     }
   }
 }
