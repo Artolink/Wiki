@@ -81,7 +81,7 @@ Internal link to another note (Obsidian-flavored, also supported by Quartz):
 [[obsidian-setup|with custom label]]
 ```
 
-The double-bracket form looks the file up by name across the whole vault — no need to write the path.
+The double-bracket form looks the file up by name across the whole vault, no need to write the path.
 
 ### Images
 
@@ -134,7 +134,7 @@ The hyphens under the header decide the column. Add `:` for alignment: `:---` le
 ### Horizontal rule
 
 ```md
----
+--- (or ***)
 ```
 
 Three or more dashes on their own line. Useful as a section separator inside a long note.
@@ -165,23 +165,6 @@ Inside the body (rendered as clickable):
 This note is part of the #StartingTools collection.
 ```
 
-Or in the frontmatter (cleaner — doesn't show up in the rendered text).
-
-### Callouts
-
-```md
-> [!note]
-> A regular highlighted note.
-
-> [!warning]
-> Something to be careful about.
-
-> [!tip]
-> A small piece of advice.
-```
-
-Common types: `note`, `tip`, `warning`, `info`, `danger`, `quote`, `example`.
-
 ### Embeds
 
 Drop another note's content into the current one:
@@ -193,9 +176,162 @@ Drop another note's content into the current one:
 
 Useful when a chunk of explanation belongs to several places: write it once, embed it where needed.
 
-## A few habits that pay off
+### Callouts
 
-- **One concept per note.** Markdown rewards short, linkable atoms. A 50-line note with three ideas is harder to reuse than three 15-line notes connected by `[[...]]`.
-- **Stay flat.** Deep folder hierarchies become a maintenance burden. Use tags and links, fold the structure into the graph.
-- **Don't style what's already styled.** No `<font>`, no `<center>`. The whole point of Markdown is that the renderer decides how things look — focus on the content.
-- **Preview while you learn.** In Obsidian, switch between *Source* mode and *Reading* view (`Ctrl+E`) to see how the syntax becomes a finished document. After a week you won't need the preview anymore.
+```md
+> [!<CALLOUT_TYPE>]
+> Lorem Impsum
+
+```
+
+#### Modifiers
+
+> [!tip]- Collapsed by default
+> Add `-` right after the type: `> [!tip]-` to make it collapsed on page load.
+
+> [!warning]+ Expanded by default (click to collapse)
+> Add `+` right after the type: `> [!warning]+` to make it collapsible but open on page load.
+
+> [!info] Custom title
+> You can write a custom title right after the type, on the same line: `> [!info] Custom title`.
+
+#### Rich content
+
+> [!example] Callout with everything inside
+> Opening paragraph with **bold**, *italic*, `inline code`.
+> 
+> - Bullet item 1
+> - Bullet item 2
+> 
+> 1. Numbered item 1
+> 2. Numbered item 2
+> 
+> ```bash
+> # Code block inside a callout
+> echo "horizontal scroll + click-to-copy both work"
+> ```
+> 
+> | Column A | Column B |
+> |----------|----------|
+> | Row 1    | Value 1  |
+> | Row 2    | Value 2  |
+
+And here's every callout type:
+***
+
+#### 🔵 BLUE: generic notes
+
+> [!note]
+> Note (default): this is what you get if you write `> [!callout]` without specifying a type, or `> [!note]` explicitly.
+
+> [!info]
+> Info: for neutral information.
+
+> [!todo]
+> Todo: for things you still need to do.
+
+***
+
+#### 🩵 CYAN: info, summaries, todos
+
+> [!abstract]
+> Abstract / summary / tldr: for summaries at the top of a page. **Aliases**: `summary`, `tldr`.
+
+> [!summary]
+> Summary: alias of abstract.
+
+> [!tldr]
+> TL;DR: alias of abstract.
+
+***
+
+#### 🌊 TEAL: tips, hints, important advice
+
+> [!tip]
+> Tip: the classic suggestion. **Aliases**: `hint`, `important`.
+
+> [!hint]
+> Hint: alias of tip.
+
+> [!important]
+> Important: alias of tip.
+
+***
+
+#### 💚 GREEN: confirmations, success
+
+> [!success]
+> Success: the operation worked. **Aliases**: `check`, `done`.
+
+> [!check]
+> Check: alias of success.
+
+> [!done]
+> Done: alias of success.
+
+***
+
+#### 🟠 AMBER: questions, help, FAQ
+
+> [!question]
+> Question: for open questions or doubts. **Aliases**: `help`, `faq`.
+
+> [!help]
+> Help: alias of question.
+
+> [!faq]
+> FAQ: alias of question.
+
+***
+
+#### 🟡 YELLOW: heads-up, caution (highlighted with solid bg)
+
+> [!warning]
+> Warning: heads-up, something might break. **Aliases**: `attention`, `caution`.
+
+> [!attention]
+> Attention: alias of warning (renders identically to a warning, so it is NOT red).
+
+> [!caution]
+> Caution: alias of warning.
+
+***
+
+#### 🟣 PURPLE: examples
+
+> [!example]
+> Example: code or configuration snippet.
+
+***
+
+#### 🔴 RED: danger, errors, failures (pulsing live glow)
+
+> [!danger]
+> Danger: critical notice. **Alias**: `error`.
+
+> [!error]
+> Error: alias of danger.
+
+> [!failure]
+> Failure: something went wrong. **Aliases**: `missing`, `fail`.
+
+> [!missing]
+> Missing: alias of failure.
+
+> [!fail]
+> Fail: alias of failure.
+
+> [!bug]
+> Bug: documenting a known bug.
+
+***
+
+#### ⚪ GREY: quotes
+
+> [!quote]
+> Quote: for quotations. **Alias**: `cite`.
+
+> [!cite]
+> Cite: alias of quote.
+
+***
