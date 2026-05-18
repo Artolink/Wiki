@@ -133,7 +133,7 @@ git rebase main         # replay feature commits on top of main's tip
 Linear history. No merge commits. Conflicts surface one commit at a time during the replay.
 
 > [!tip]
-> When to pick which
+> When to pick which:
 >- **On personal/local branches before sharing**: rebase liberally. Cleans up before review. Squash trivial "fix typo" commits.
 >- **On shared branches** (multiple people pushing, others have pulled it): **never rebase**. Hashes change, everyone else's history diverges, force-pushes are needed → broken trees, bad day.
 >- **Merging `main` into a long-lived feature branch**: usually rebase to keep the feature branch on top of latest `main`. Daily ritual on long PRs.

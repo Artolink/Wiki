@@ -150,13 +150,13 @@ git show <commit-id>             # full details + diff of a past commit
 > [!TIP]
 > To improve git diff readability, install **delta**:
 >
-> curl -s https://api.github.com/repos/dandavison/delta/releases/latest \
-> | grep browser_download_url \
-> | grep amd64.deb \
-> | cut -d '"' -f 4 \
-> | wget -qi - -O /tmp/git-delta.deb \
-> && dpkg -i /tmp/git-delta.deb \
-> && apt -f install -y \
+> curl -s https://api.github.com/repos/dandavison/delta/releases/latest \\
+> | grep browser_download_url \\
+> | grep amd64.deb \\
+> | cut -d '"' -f 4 \\
+> | wget -qi - -O /tmp/git-delta.deb \\
+> && dpkg -i /tmp/git-delta.deb \\
+> && apt -f install -y \\
 > && delta --version
 >
 > Then configure git accordingly:
