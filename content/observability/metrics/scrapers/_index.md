@@ -24,6 +24,5 @@ The job is conceptually simple:
 | **Telegraf**                | InfluxData      | Generalist agent, 200+ input plugins, multiple output protocols. Heavier, but versatile. Useful when you also need to ingest non-Prometheus formats (SNMP, MQTT...). |
 | **OpenTelemetry Collector** | CNCF            | Cross-vendor agent for metrics + logs + traces. Future-proof, less mature for metrics-only scenarios.                                                                |
 
-I use **VMAgent** in my stack for two reasons:
-1. It's the natural partner of [[victoriametrics|VictoriaMetrics]]: written by the same team, optimised for the pair.
-2. It demonstrates the **split architecture** in its purest form: a tiny agent on a dedicated VM, just scraping + forwarding.
+ ***
+ 

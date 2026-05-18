@@ -11,3 +11,5 @@ Four components, two machines (VPS + a dedicated scraper VM):
 - [Grafana](dashboard/grafana): Docker container on the VPS for dashboards and visualization, exposed publicly at [farnetiandrea.it/metrics](https://farnetiandrea.it/metrics) as a read-only public preview.
 
 For the full step-by-step walkthrough, check out [[my-grafana-stack|my Grafana stack]].
+ ***
+ 

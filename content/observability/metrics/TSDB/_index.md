@@ -24,12 +24,5 @@ That's why generic SQL databases (PostgreSQL, MySQL) are inadequate: they'd work
 | **InfluxDB**                | Classic alternative. Own query language (Flux / InfluxQL). <br>Common in IoT/metrics-of-things.                              |
 | **TimescaleDB**             | PostgreSQL extension. SQL queries. Great when you also need relational queries on top.                                       |
 | **OpenTSDB**                | HBase-backed. Heavy ops, used at huge scale (e.g. Salesforce, Yahoo!).                                                       |
-
-
-##  In this folder
-
-For my stack I use **VictoriaMetrics**: it's the modern, no-frills, single-binary solution. 
-
-Same PromQL as Prometheus (everything you learn here transfers to Prometheus too), more efficient storage, no operational drama.
-
-- [VictoriaMetrics](victoriametrics): stores all the metrics and answers PromQL queries.
+ ***
+ 

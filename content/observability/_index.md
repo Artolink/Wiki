@@ -21,3 +21,6 @@ In modern infrastructure, observability rests on a few pillars:
 | **Logs**    | "*What exactly* happened at 14:23 on this server?"                            | Free-form text events (often structured JSON)                  |
 
 There is also the **traces** aspect: "*Where* in the call chain did the request get stuck?", but for the moment, I won't cover that aspect in this Wiki.
+
+ ***
+ 

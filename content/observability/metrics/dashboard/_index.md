@@ -21,3 +21,5 @@ A few reasons it became the standard:
 - **Open-source:**, no vendor lock-in.
 - **Massive dashboard ecosystem**: [grafana.com/dashboards](https://grafana.com/dashboards) has thousands of community-maintained, ready-to-import dashboards. Often you don't need to write anything, just import.
 - **PromQL native**, so the queries you write here transfer 1:1 to Prometheus.
+ ***
+ 
