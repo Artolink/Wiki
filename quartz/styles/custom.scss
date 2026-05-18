@@ -18,12 +18,14 @@ $navH: 66px;
 // ──────────────────────────────────────────────────────────────────────────────
 
 :root {
-  // Light mode — palette syselement (beige caldo crema, toni neutri ma caldi)
-  --code-bg:          #faf6ec;     // crema beige (allineato al tono caldo della sidebar)
-  --code-border:      #ebe3d2;     // beige medio chiaro
-  --code-header-bg:   #f3ecdb;
-  --code-inline-bg:   #f3ecdb;
-  --code-line-hover:  #ece2cc;     // un tono sotto al bg per highlight riga (vedi sotto)
+  // Light mode — palette syselement (beige caldo crema, toni neutri ma caldi).
+  // Il bg dei code block è ALLINEATO al bg della sidebar (#faf8f3) così la
+  // pagina ha un unico tono caldo coerente, senza stacchi di luminosità.
+  --code-bg:          #faf8f3;     // = --sidebar-bg (coerenza visuale)
+  --code-border:      #ede7d6;     // beige chiaro, un filo più visibile del sidebar-border
+  --code-header-bg:   #f3eee0;     // un tono sotto al bg del code, per stacco soft del titolo
+  --code-inline-bg:   #f1ebde;     // pill beige più "carico" per distinguersi dal bg bianco del paragrafo
+  --code-line-hover:  #efe8d4;     // un tono sotto al bg per highlight riga (visibile ma non aggressivo)
   --copy-btn-bg:      #ffffff;
   --copy-btn-border:  #e5e7eb;
   --sidebar-hover:    rgba(17, 24, 39, 0.05);
