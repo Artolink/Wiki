@@ -1215,10 +1215,45 @@ pre > .clipboard-button {
     margin-left: 0.3rem;
     font-weight: 500;
   }
+
+  // Stato "appena copiato": bordo + bg + testo verdi per feedback netto.
+  // La classe `copied` viene applicata da clipboard.inline.ts per 2s dopo
+  // il click; in quel periodo l'svg interno è già il check verde.
+  &.copied {
+    border-color: #16a34a !important; // green-600
+    background: rgba(22, 163, 74, 0.12) !important;
+    color: #15803d !important; // green-700, leggibile su bg tenue
+
+    &::after {
+      content: "Copied!";
+    }
+  }
 }
 
 pre:hover > .clipboard-button {
   opacity: 1;
+}
+
+// `.copied` resta visibile anche fuori hover (altrimenti l'utente non vede
+// mai il feedback verde a meno che non tenga il mouse sul code block).
+pre > .clipboard-button.copied {
+  opacity: 1;
+}
+
+// ── Click ovunque sul code block = copia ─────────────────────────────────────
+// L'handler in clipboard.inline.ts ascolta i click sul <pre> e, se non c'è
+// una selezione attiva (l'utente sta solo cliccando, non evidenziando), copia
+// tutto il contenuto. Il cursor: pointer comunica l'affordance.
+// (Le selezioni con drag continuano a funzionare normalmente — il check su
+// window.getSelection() le filtra.)
+pre {
+  cursor: pointer;
+
+  // Tornare al testo selezionabile quando si seleziona davvero, così non
+  // sembra "non selezionabile" a chi vuole copiare solo una parola.
+  & code {
+    cursor: text;
+  }
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -1234,8 +1269,36 @@ pre:hover > .clipboard-button {
 // Fix: `min-width: 0` sui figli del grid li costringe a rispettare la
 // larghezza disponibile, così il loro `overflow-x: auto` (sopra) può
 // mostrare la barra di scroll come per i code block normali.
-.callout > .callout-content > * {
-  min-width: 0;
+//
+// + spaziatura: i margin verticali di default (figure 1.25rem + pre 1rem,
+// più p 1rem) sommati al padding del callout rendono i blocchi dentro al
+// tip "galleggianti" con tanto spazio vuoto sopra/sotto. Stringiamoli per
+// riprodurre la compattezza di Obsidian (margin tipico ~0.4rem).
+.callout > .callout-content {
+  & > * {
+    min-width: 0;
+  }
+
+  & > p {
+    margin: 0.4rem 0;
+  }
+
+  & > figure[data-rehype-pretty-code-figure] {
+    margin: 0.5rem 0;
+  }
+
+  & > pre {
+    margin: 0.5rem 0;
+  }
+
+  // Primo e ultimo elemento: ancora più stretti, così il bordo del callout
+  // non sembra "lontano" dal contenuto.
+  & > :first-child {
+    margin-top: 0;
+  }
+  & > :last-child {
+    margin-bottom: 0;
+  }
 }
 
 // ──────────────────────────────────────────────────────────────────────────────

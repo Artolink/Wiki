@@ -6,7 +6,8 @@ const svgCheck =
 document.addEventListener("nav", () => {
   const els = document.getElementsByTagName("pre")
   for (let i = 0; i < els.length; i++) {
-    const codeBlock = els[i].getElementsByTagName("code")[0]
+    const pre = els[i]
+    const codeBlock = pre.getElementsByTagName("code")[0]
     if (codeBlock) {
       const source = (
         codeBlock.dataset.clipboard ? JSON.parse(codeBlock.dataset.clipboard) : codeBlock.innerText
@@ -16,22 +17,51 @@ document.addEventListener("nav", () => {
       button.type = "button"
       button.innerHTML = svgCopy
       button.ariaLabel = "Copy source"
-      function onClick() {
+
+      // Triggera la copia + feedback visivo. Usato sia dal click sul button
+      // che dal click ovunque sul <pre> (vedi onPreClick sotto).
+      function triggerCopy() {
         navigator.clipboard.writeText(source).then(
           () => {
             button.blur()
             button.innerHTML = svgCheck
+            // Classe `copied` per lo stile verde + label "Copied!" via CSS
+            // (vedi pre > .clipboard-button.copied in custom.scss).
+            button.classList.add("copied")
             setTimeout(() => {
               button.innerHTML = svgCopy
+              button.classList.remove("copied")
               button.style.borderColor = ""
             }, 2000)
           },
           (error) => console.error(error),
         )
       }
+
+      function onClick() {
+        triggerCopy()
+      }
+
+      // Click ovunque sul <pre> = copia. Skip se:
+      //   - l'utente sta selezionando del testo (drag-to-select) → window.getSelection
+      //   - il click è sul .clipboard-button stesso → lo gestisce il suo handler
+      //   - il click è sul .expand-button di Mermaid → non c'entra
+      function onPreClick(e: MouseEvent) {
+        const target = e.target as Element
+        if (target.closest(".clipboard-button")) return
+        if (target.closest(".expand-button")) return
+        const sel = window.getSelection()
+        if (sel && sel.toString().length > 0) return
+        triggerCopy()
+      }
+
       button.addEventListener("click", onClick)
-      window.addCleanup(() => button.removeEventListener("click", onClick))
-      els[i].prepend(button)
+      pre.addEventListener("click", onPreClick)
+      window.addCleanup(() => {
+        button.removeEventListener("click", onClick)
+        pre.removeEventListener("click", onPreClick)
+      })
+      pre.prepend(button)
     }
   }
 })
