@@ -946,6 +946,10 @@ body[data-slug="graph"] {
   // Il graph component vive in .page-footer (afterBody), non in .popover-hint.
   // Nascondi h3 (titolo "Graph View" ridondante) e ingrandisci graph-outer.
   .page-footer > .graph {
+    width: 100%; // safety: il parent ora ha max-width:none (vedi sopra),
+                 // forziamo il graph a riempire tutta la colonna disponibile
+                 // anziché lasciare al .graph la sua width "intrinseca".
+
     & > h3 {
       display: none;
     }
@@ -955,6 +959,7 @@ body[data-slug="graph"] {
     }
 
     & > .graph-outer {
+      width: 100%; // idem, riempi il parent
       height: calc(100vh - #{$navH} - 16rem);
       max-height: 70vh;
       min-height: 400px;
