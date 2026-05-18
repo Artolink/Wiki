@@ -1,14 +1,11 @@
 ---
 title: 📊 Observability
-series: "observability/metrics/my-grafana-stack\r
-
-  observability/metrics/exporters/node-exporter\r
-
-  observability/metrics/TSDB/victoriametrics\r
-
-  observability/metrics/scrapers/vmagent\r
-
-  observability/metrics/dashboard/grafana"
+tags:
+series:
+  - observability/metrics/exporters/node-exporter
+  - observability/metrics/TSDB/victoriametrics
+  - observability/metrics/scrapers/vmagent
+  - observability/metrics/dashboard/grafana
 ---
 ##  What is observability?
 
