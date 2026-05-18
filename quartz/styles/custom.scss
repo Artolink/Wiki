@@ -1370,6 +1370,63 @@ pre {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
+// TABLES — stile syselement (bordo esterno + header tinted + righe separate)
+// ──────────────────────────────────────────────────────────────────────────────
+// Quartz wrappa ogni <table> in `.table-container { overflow-x: auto }`
+// (vedi base.scss). Aggiungiamo bordo + border-radius sul container così la
+// tabella sembra una "card", come i code block. Header e hover row riusano
+// le stesse CSS vars dei code block per coerenza tonale (palette beige caldo).
+.table-container {
+  border: 1px solid var(--code-border);
+  border-radius: 8px;
+  margin: 1.25rem 0;
+
+  // Reset dei margin/padding di base.scss che spostavano la tabella DENTRO
+  // al container; il container ora ha il suo bordo, la tabella deve aderirvi.
+  & > table {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100%;
+  }
+
+  // Header: bg beige tinted, lo stesso usato per i titoli dei code block
+  & > table > thead {
+    background: var(--code-header-bg);
+  }
+
+  // Le th hanno già `border-bottom: 2px solid var(--gray)` da base.scss; la
+  // sovrascrivo col bordo armonico alla palette code + padding più generoso.
+  & > table th {
+    border-bottom: 1px solid var(--code-border) !important;
+    padding: 0.7rem 1rem !important;
+    font-weight: 600;
+  }
+
+  // Body cells: padding leggermente più stretto delle th
+  & > table td {
+    padding: 0.55rem 1rem !important;
+    // Line-height ridotta rispetto al default 2rem di base.scss, per righe
+    // compatte; resta abbastanza arioso da non sembrare denso.
+    line-height: 1.55;
+  }
+
+  // Righe del body: divider sottile beige + hover sottile.
+  // Sovrascrivo i border di base.scss (--lightgray) col tono caldo.
+  & > table tbody > tr {
+    border-bottom: 1px solid var(--code-border) !important;
+    transition: background-color 0.1s ease;
+
+    &:last-child {
+      border-bottom: none !important;
+    }
+
+    &:hover {
+      background: var(--code-line-hover);
+    }
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
 // SEARCH DROPDOWN — tendina compatta in stile syselement
 // ──────────────────────────────────────────────────────────────────────────────
 // Trasforma il modal fullscreen di default in una piccola tendina ancorata
