@@ -1410,6 +1410,70 @@ pre {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
+// CALLOUT COLORS — palette ridotta e più contrastata
+// ──────────────────────────────────────────────────────────────────────────────
+// Quartz core (callouts.scss) assegna a ogni tipo di callout 3 vars:
+//   --color  (titolo + icona + accent), --border, --bg
+// Il default usa tinte calde (warning #db8942 ≈ arancio-marrone, ecc.) che
+// si confondono col bg beige caldo dei code block e della sidebar.
+// Qui sovrascriviamo con 5 colori netti che restano leggibili sia sul bg
+// bianco light che sul bg stone dark.
+//
+// Aliasing di Quartz (vedi quartz/plugins/transformers/ofm.ts ~riga 63):
+//   tip = hint = important   |  warning = attention = caution
+//   success = check = done   |  danger = error
+//   question = help = faq    |  failure = missing = fail
+//   abstract = summary = tldr|  quote = cite
+//
+// `attention` → mappato a `warning`: stesso colore (giallo). Per qualcosa
+// di rosso usare `danger`, `error`, `failure`, `bug`.
+
+// BLU: note (default), tip, info, question, todo, abstract
+.callout[data-callout],
+.callout[data-callout="tip"],
+.callout[data-callout="info"],
+.callout[data-callout="question"],
+.callout[data-callout="todo"],
+.callout[data-callout="abstract"] {
+  --color: #3b82f6; // blue-500
+  --border: rgba(59, 130, 246, 0.3);
+  --bg: rgba(59, 130, 246, 0.07);
+}
+
+// VERDE: success, example
+.callout[data-callout="success"],
+.callout[data-callout="example"] {
+  --color: #16a34a; // green-600
+  --border: rgba(22, 163, 74, 0.3);
+  --bg: rgba(22, 163, 74, 0.07);
+}
+
+// ROSA: quote
+.callout[data-callout="quote"] {
+  --color: #ec4899; // pink-500
+  --border: rgba(236, 72, 153, 0.3);
+  --bg: rgba(236, 72, 153, 0.07);
+}
+
+// GIALLO: warning (= attention, caution). Più scuro/saturato del default
+// arancio-marrone così non si confonde col beige della palette.
+.callout[data-callout="warning"] {
+  --color: #ca8a04; // yellow-600
+  --border: rgba(202, 138, 4, 0.35);
+  --bg: rgba(202, 138, 4, 0.08);
+}
+
+// ROSSO: danger, failure, bug (gli alias error/missing/fail collassano
+// su questi tre per il calloutMapping di Quartz).
+.callout[data-callout="danger"],
+.callout[data-callout="failure"],
+.callout[data-callout="bug"] {
+  --color: #dc2626; // red-600
+  --border: rgba(220, 38, 38, 0.3);
+  --bg: rgba(220, 38, 38, 0.07);
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
 // SEARCH DROPDOWN — tendina compatta in stile syselement
 // ──────────────────────────────────────────────────────────────────────────────
 // Trasforma il modal fullscreen di default in una piccola tendina ancorata
