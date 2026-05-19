@@ -36,6 +36,20 @@ export default ((opts?: Partial<FolderContentOptions>) => {
       return null
     }
 
+    // Modalità "series": se il frontmatter dell'_index dichiara un array
+    // `series: [...]` con gli slug delle pagine della serie, mostra QUELLA
+    // lista (nell'ordine dichiarato) invece dell'auto-listing dei figli
+    // della cartella. Le pagine non trovate (slug obsoleti) vengono silenziosamente
+    // skippate. Utile per pagine di indice che curano un percorso di lettura
+    // ordinato (es. la stack di Grafana: exporter → tsdb → scraper → grafana).
+    const seriesSlugs = fileData.frontmatter?.series as string[] | undefined
+    const isSeries = Array.isArray(seriesSlugs) && seriesSlugs.length > 0
+    const seriesPages: QuartzPluginData[] = isSeries
+      ? seriesSlugs!
+          .map((slug) => allFiles.find((f) => f.slug === slug))
+          .filter((p): p is QuartzPluginData => p !== undefined)
+      : []
+
     const allPagesInFolder: QuartzPluginData[] =
       folder.children
         .map((node) => {
@@ -90,10 +104,14 @@ export default ((opts?: Partial<FolderContentOptions>) => {
         .filter((page) => page !== undefined) ?? []
     const cssClasses: string[] = fileData.frontmatter?.cssclasses ?? []
     const classes = cssClasses.join(" ")
+    // In modalità series usiamo le seriesPages e disabilitiamo il sort
+    // (`() => 0` mantiene l'ordine dell'array originale grazie a Array.sort
+    // stable in JS moderni). Default: comportamento auto-listing.
+    const displayPages = isSeries ? seriesPages : allPagesInFolder
     const listProps = {
       ...props,
-      sort: options.sort,
-      allFiles: allPagesInFolder,
+      sort: isSeries ? () => 0 : options.sort,
+      allFiles: displayPages,
     }
 
     const content = (
@@ -105,12 +123,14 @@ export default ((opts?: Partial<FolderContentOptions>) => {
     return (
       <div class="popover-hint">
         <article class={classes}>{content}</article>
-        <div class="page-listing">
+        <div class={isSeries ? "page-listing series-list" : "page-listing"}>
           {options.showFolderCount && (
             <p>
-              {i18n(cfg.locale).pages.folderContent.itemsUnderFolder({
-                count: allPagesInFolder.length,
-              })}
+              {isSeries
+                ? `${displayPages.length} pages in this series, in suggested reading order:`
+                : i18n(cfg.locale).pages.folderContent.itemsUnderFolder({
+                    count: displayPages.length,
+                  })}
             </p>
           )}
           <div>

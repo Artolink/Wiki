@@ -1956,6 +1956,48 @@ html[saved-theme] body[data-slug="tags/Projects"] {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
+// SERIES LIST — listing "indice" per le pagine _index con frontmatter `series:`
+// ──────────────────────────────────────────────────────────────────────────────
+// Quando un _index dichiara `series: [slug1, slug2, ...]`, FolderContent.tsx
+// (pages/FolderContent.tsx) sostituisce l'auto-listing dei figli con la lista
+// curata e applica la classe `.series-list` al wrapper.
+// Qui: numero progressivo come prefisso (via CSS counter, no markup extra),
+// niente date a sinistra (poco rilevanti per un percorso curato), un filo di
+// spaziatura più stretta perché è un indice non un feed.
+.page-listing.series-list {
+  // Reset del counter all'inizio della lista
+  counter-reset: series-counter;
+
+  // La data a sinistra (`<p class="meta">May 18, 2026</p>`) è poco utile in
+  // una serie ordinata logicamente, non cronologicamente. La nascondiamo.
+  .section-li .meta {
+    display: none;
+  }
+
+  // Numerazione automatica: counter-increment su ogni voce, prefix nel titolo
+  .section-li {
+    counter-increment: series-counter;
+
+    .section {
+      // Grid normalmente è "meta | desc | tags" — senza meta riduciamo lo
+      // spazio sinistro così l'indice si stringe.
+      grid-template-columns: 2.5rem 1fr auto;
+
+      .desc h3 a::before {
+        content: counter(series-counter) ".";
+        display: inline-block;
+        width: 2rem;
+        margin-left: -2.5rem;
+        text-align: right;
+        padding-right: 0.5rem;
+        color: var(--gray);
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
 // HEADING DEPTH (h4 / h5 / h6) — scala progressiva, stile syselement
 // ──────────────────────────────────────────────────────────────────────────────
 // Quartz base.scss raggruppa h4/h5/h6 con `font-size: 1rem` uguali: visivamente
