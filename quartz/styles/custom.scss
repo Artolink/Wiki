@@ -1968,17 +1968,17 @@ html[saved-theme] body[data-slug="tags/Projects"] {
   // Reset del counter all'inizio della lista
   counter-reset: series-counter;
 
-  // "Table of Contents:" heading sopra alla lista numerata. Stile da "label
-  // di sezione" (caps, peso, spacing) per distinguerlo dal paragrafo
-  // introduttivo regolare.
+  // "Index" heading sopra alla lista numerata. Stile da titolo di sezione
+  // (uppercase + letter-spacing) per distinguerlo dal paragrafo introduttivo,
+  // ma più "robusto" — dimensione e peso più alti, colore più scuro.
   .series-toc-heading {
-    margin-top: 1.5rem;
-    margin-bottom: 0.3rem;
-    font-weight: 600;
-    font-size: 0.9rem;
+    margin-top: 1.8rem;
+    margin-bottom: 0.6rem;
+    font-weight: 700;
+    font-size: 1.15rem;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--darkgray);
+    letter-spacing: 0.06em;
+    color: var(--dark);
   }
 
   .section-li {

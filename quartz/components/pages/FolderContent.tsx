@@ -128,10 +128,13 @@ export default ((opts?: Partial<FolderContentOptions>) => {
             <>
               <p>
                 Here you can follow the detailed pages in their suggested
-                reading order. Start from the first one and continue! (you'll
-                find back-forth buttons at the end of the page)
+                reading order.
               </p>
-              <p class="series-toc-heading">Table of Contents:</p>
+              <p>
+                Start from the first one and continue! (you'll find back-forth
+                buttons at the end of the page)
+              </p>
+              <p class="series-toc-heading">Index</p>
             </>
           ) : (
             options.showFolderCount && (
