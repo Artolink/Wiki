@@ -3,6 +3,17 @@
 // volutamente IDENTICO al blocco TOC: stessa tipografia per il titolo
 // ("INDEX" in uppercase grigio chiaro), stessa freccetta di collapse,
 // stessa separazione con border-top.
+//
+// Visibilità: nascosto su desktop (≥1101px), visibile solo nel drawer
+// destro mobile (≤1100px). Su desktop l'utente accede all'indice della
+// series tramite il bottone "libro" in topbar (SeriesIndexToggle), che è
+// nascosto in mobile per evitare ridondanza con questo blocco statico.
+@media (min-width: 1101px) {
+  .series-index {
+    display: none;
+  }
+}
+
 .series-index {
   display: flex;
   flex-direction: column;

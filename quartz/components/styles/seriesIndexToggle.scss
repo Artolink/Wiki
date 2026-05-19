@@ -1,6 +1,16 @@
 // Pulsante "libro" + popup nella topbar.
 // Il wrapper è position:relative così il popup absolute si ancora sotto il
 // bottone. Niente nel popup interferisce con la topbar (z-index alto).
+//
+// Visibilità: nascosto in mobile (≤1100px). In mobile la versione statica
+// del SeriesIndex appare direttamente nel drawer destro (vedi seriesIndex.scss).
+// Avere ENTRAMBI (popup + drawer statico) sarebbe ridondante e confusionario.
+@media (max-width: 1100px) {
+  .series-index-toggle {
+    display: none !important;
+  }
+}
+
 .series-index-toggle {
   position: relative;
   display: inline-flex;
