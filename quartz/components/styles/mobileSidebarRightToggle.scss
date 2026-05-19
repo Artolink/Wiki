@@ -1,7 +1,9 @@
 @use "../../styles/variables.scss" as *;
 
-// Altezza navbar (deve coincidere con $navH in custom.scss)
-$navH: 60px;
+// Altezza navbar (deve coincidere con $navH in custom.scss = 66px).
+// Era 60px ma la navbar reale è 66px → il drawer copriva i 6px inferiori
+// della topbar invece di partire esattamente sotto.
+$navH: 66px;
 
 // Stesso breakpoint del drawer sinistro: sotto i 1100px la sidebar.right è
 // già nascosta dall'auto-focus-mode in custom.scss → diamo accesso via drawer.
