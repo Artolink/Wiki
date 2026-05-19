@@ -16,6 +16,11 @@ function setupSeriesIndexToggle() {
     }
   }
 
+  // In mobile (≤1100px) il popup floating è nascosto via CSS, e il bottone
+  // libro funge invece da toggle per il SeriesIndex statico presente nel
+  // drawer destro. Deleghiamo il click al pulsante header del blocco statico.
+  const isMobile = () => window.matchMedia("(max-width: 1100px)").matches
+
   for (const wrapper of wrappers) {
     const button = wrapper.querySelector<HTMLElement>(".series-index-toggle-btn")
     const popup = wrapper.querySelector<HTMLElement>(".series-index-popup")
@@ -23,6 +28,17 @@ function setupSeriesIndexToggle() {
 
     const onClick = (e: Event) => {
       e.stopPropagation()
+
+      if (isMobile()) {
+        // Delegate al SeriesIndex statico nel drawer destro
+        const staticHeader = document.querySelector<HTMLElement>(
+          ".sidebar.right .series-index-header",
+        )
+        staticHeader?.click()
+        return
+      }
+
+      // Desktop: comportamento popup floating
       const isOpen = popup.classList.toggle("open")
       popup.setAttribute("aria-hidden", isOpen ? "false" : "true")
       button.setAttribute("aria-expanded", isOpen ? "true" : "false")

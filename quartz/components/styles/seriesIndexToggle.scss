@@ -2,11 +2,13 @@
 // Il wrapper è position:relative così il popup absolute si ancora sotto il
 // bottone. Niente nel popup interferisce con la topbar (z-index alto).
 //
-// Visibilità: nascosto in mobile (≤1100px). In mobile la versione statica
-// del SeriesIndex appare direttamente nel drawer destro (vedi seriesIndex.scss).
-// Avere ENTRAMBI (popup + drawer statico) sarebbe ridondante e confusionario.
+// Visibilità in mobile (≤1100px): il bottone resta visibile nel drawer destro
+// (cliccarlo deleghi al toggle dell'header del SeriesIndex statico — vedi
+// seriesIndexToggle.inline.ts). Il popup floating è invece nascosto: in mobile
+// l'indice ha già la sua rappresentazione completa come blocco statico nel
+// drawer, quindi sovrapporre un popup sarebbe ridondante.
 @media (max-width: 1100px) {
-  .series-index-toggle {
+  .series-index-toggle > .series-index-popup {
     display: none !important;
   }
 }

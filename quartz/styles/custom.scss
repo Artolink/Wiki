@@ -785,6 +785,30 @@ html, body {
   overflow-x: hidden;
 }
 
+// ── Body lock quando un drawer mobile è aperto ───────────────────────────────
+// Senza questa regola, swipe-scroll dentro un drawer mobile (sx o dx) molto
+// lungo (es. l'INDEX di una series con tante voci che eccede il viewport)
+// veniva "passato" al body sottostante via scroll-chaining del browser — il
+// drawer non scrollava e scorreva invece il content MD dietro.
+// Soluzione: blocco lo scroll del root quando il drawer è aperto, e aggiungo
+// `overscroll-behavior: contain` ai drawer per essere sicuri che il loro
+// scroll non si propaghi al body neanche quando raggiungono i limiti.
+html[data-mobile-sidebar-open="true"],
+html[data-mobile-sidebar-right-open="true"] {
+  overflow: hidden;
+  // Su iOS Safari `overflow: hidden` sul html non basta sempre — bloccare il
+  // body con position aiuta a prevenire il bouncing scroll della pagina sotto.
+  & > body {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+}
+
+.page > #quartz-body > .sidebar.left,
+.page > #quartz-body > .sidebar.right {
+  overscroll-behavior: contain;
+}
+
 // ──────────────────────────────────────────────────────────────────────────────
 // ARTICLE TITLE + GITHUB EDIT (stessa riga)
 // ──────────────────────────────────────────────────────────────────────────────
