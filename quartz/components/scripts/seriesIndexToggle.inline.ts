@@ -16,10 +16,15 @@ function setupSeriesIndexToggle() {
     }
   }
 
-  // In mobile (≤1100px) il popup floating è nascosto via CSS, e il bottone
-  // libro funge invece da toggle per il SeriesIndex statico presente nel
-  // drawer destro. Deleghiamo il click al pulsante header del blocco statico.
+  // In mobile (≤1100px) il popup floating è disabilitato via CSS. Il bottone
+  // libro nel drawer destro fa toggle dell'intero blocco SeriesIndex statico
+  // (show/hide), settando l'attributo `data-series-index-open` su <html>. Il
+  // CSS in seriesIndex.scss usa quell'attributo per `display: flex/none`.
+  const ATTR_INDEX_OPEN = "data-series-index-open"
   const isMobile = () => window.matchMedia("(max-width: 1100px)").matches
+
+  // Reset dello stato a ogni nav (chiudi se cambi pagina)
+  document.documentElement.setAttribute(ATTR_INDEX_OPEN, "false")
 
   for (const wrapper of wrappers) {
     const button = wrapper.querySelector<HTMLElement>(".series-index-toggle-btn")
@@ -30,11 +35,10 @@ function setupSeriesIndexToggle() {
       e.stopPropagation()
 
       if (isMobile()) {
-        // Delegate al SeriesIndex statico nel drawer destro
-        const staticHeader = document.querySelector<HTMLElement>(
-          ".sidebar.right .series-index-header",
-        )
-        staticHeader?.click()
+        const open =
+          document.documentElement.getAttribute(ATTR_INDEX_OPEN) === "true"
+        document.documentElement.setAttribute(ATTR_INDEX_OPEN, open ? "false" : "true")
+        button.setAttribute("aria-expanded", open ? "false" : "true")
         return
       }
 

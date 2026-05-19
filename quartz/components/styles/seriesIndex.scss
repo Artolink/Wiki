@@ -1,18 +1,15 @@
-// Sidebar "Index" — appare sotto al TableOfContents nella sidebar destra,
-// SOLO sulle pagine che fanno parte di una series. L'aspetto è
-// volutamente IDENTICO al blocco TOC: stessa tipografia per il titolo
-// ("INDEX" in uppercase grigio chiaro), stessa freccetta di collapse,
-// stessa separazione con border-top.
+// Sidebar "Index" — block statico che vive nel drawer destro su mobile.
+// Aspetto IDENTICO al blocco TOC: tipografia uppercase grigia, freccetta di
+// collapse, separazione con border-top.
 //
-// Visibilità: nascosto su desktop (≥1101px), visibile solo nel drawer
-// destro mobile (≤1100px). Su desktop l'utente accede all'indice della
-// series tramite il bottone "libro" in topbar (SeriesIndexToggle), che è
-// nascosto in mobile per evitare ridondanza con questo blocco statico.
-@media (min-width: 1101px) {
-  .series-index {
-    display: none;
-  }
-}
+// Visibilità (gestita dalle media query in FONDO al file, dopo lo style
+// principale, per battere il `display: flex` qui sotto per ordine di
+// dichiarazione):
+//   - Desktop (≥1101px): sempre nascosto. L'indice è accessibile dal popup
+//     del bottone "libro" in topbar (SeriesIndexToggle).
+//   - Mobile (≤1100px): nascosto DI DEFAULT. Visibile solo quando l'utente
+//     clicca il libro nel drawer (vedi seriesIndexToggle.inline.ts che
+//     setta `data-series-index-open="true"` su <html>).
 
 .series-index {
   display: flex;
@@ -103,5 +100,25 @@
         font-weight: 600;
       }
     }
+  }
+}
+
+// ─── Visibilità responsive (vedi nota in cima al file) ───────────────────────
+// Desktop ≥1101px: sempre nascosto (l'index è nel popup del bottone libro).
+@media (min-width: 1101px) {
+  .series-index {
+    display: none !important;
+  }
+}
+
+// Mobile ≤1100px: nascosto di default; appare solo quando l'utente clicca
+// il libro nel drawer e il JS aggiunge data-series-index-open al <html>.
+@media (max-width: 1100px) {
+  .sidebar.right .series-index {
+    display: none;
+  }
+
+  html[data-series-index-open="true"] .sidebar.right .series-index {
+    display: flex;
   }
 }
