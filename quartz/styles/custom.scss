@@ -802,13 +802,17 @@ html, body {
   -webkit-overflow-scrolling: touch;
 }
 
-// Il canvas Pixi del Graph ha `touch-action: none` (graph.scss) per gestire
-// internamente zoom/pan del grafo. Però quando il graph è dentro al drawer
-// destro mobile, questa proprietà "ruba" anche i swipe verticali che
-// l'utente vorrebbe usare per scrollare il drawer → il drawer non scorre.
-// Override: dentro al drawer mobile, lascia al browser lo swipe verticale
-// (pan-y = scroll della pagina/drawer), e blocca il pan orizzontale per
-// evitare che lo swipe trascini la pagina laterale del browser.
+// Il canvas Pixi del Graph ha `touch-action: none` (graph.scss) e ascolta
+// touch events via d3-drag (che chiama preventDefault). Su mobile, dentro
+// al drawer destro, questi handler intercettano TUTTI i swipe — anche quelli
+// verticali che l'utente userebbe per scrollare il drawer. Risultato: il
+// drawer non scorre quando il dito è sopra l'area del graph.
+//
+// Soluzione: nel drawer mobile disabilitiamo `pointer-events` sul canvas.
+// Gli eventi touch passano through al .graph-outer e al drawer parent →
+// il drawer riceve gli swipe e scorre normalmente. Il graph mobile diventa
+// "decorativo" (no zoom/pan), accettabile perché è già piccolo e l'utente
+// ha la versione full-page in /graph se vuole interagire col grafo.
 @media (max-width: 1100px) {
   html[data-mobile-sidebar-right-open="true"]
     .page
@@ -816,6 +820,7 @@ html, body {
     > .sidebar.right
     .graph
     canvas {
+    pointer-events: none !important;
     touch-action: pan-y !important;
   }
 }
