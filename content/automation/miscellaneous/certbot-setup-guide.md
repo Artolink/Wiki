@@ -59,11 +59,11 @@ Certbot will:
 
 ### Wildcard certificates
 
-> [!WARNING]
+> [!Attention]
 > **`certbot --nginx` cannot issue wildcard certificates** (e.g. `*.example.com`).
 > The Nginx plugin uses the **HTTP-01 challenge**, which validates only the exact hostname being requested. Wildcards require the **DNS-01 challenge**, which proves control of the entire DNS zone by writing a TXT record.
 
-For a wildcard you need a DNS plugin matching your provider (Cloudflare, Route53, DigitalOcean, OVH, …):
+For a wildcard you need a DNS plugin matching your provider (Cloudflare, Route53, DigitalOcean, OVH…):
 
 ```bash
 # Cloudflare example
@@ -168,7 +168,9 @@ server = https://acme-v02.api.letsencrypt.org/directory
 
 ### Real-world example: this wiki
 
-The wiki you're reading runs the exact setup described above. The vhost lives in `/etc/nginx/conf.d/wiki.farnetiandrea.it.conf`:
+> [!example]
+>The wiki you're reading runs the exact setup described above. 
+>The vhost lives in `/etc/nginx/conf.d/wiki.farnetiandrea.it.conf`
 
 ```nginx
 server {

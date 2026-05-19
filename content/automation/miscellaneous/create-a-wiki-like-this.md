@@ -96,8 +96,10 @@ Quartz is what converts your Markdown notes into a real site.
 
 You can follow the [[quartz-setup-linux#Installation (Ubuntu/Debian)|Quartz setup on Linux]] for the detailed explanation. 
 
-**TL;DR:** you need to clone the Quartz repository in the directory that you want to use as the "container" for your site.
-I host this Wiki in the `~/wiki` directory of my VPS, so i'll use that as a reference throughout the guide:
+> [!tldr] TL;DR:
+> You need to clone the Quartz repository in the directory that you want to use as the "container" for your site.
+>I host this Wiki in the `~/wiki` directory of my VPS, so i'll use that as a reference throughout the guide
+
 ```bash
 git clone https://github.com/jackyzha0/quartz.git wiki
 cd wiki
@@ -132,7 +134,9 @@ Nginx is the web-server that allows you to publish the site you just created wit
 
 You can see a detailed explanation of Nginx and the configuration I use [here](nginx-web-server-setup).
 
-**TL;DR:** you just need to point Nginx `root` at `~/wiki/public/`:
+> [!tldr] TL;DR:
+ >You just need to point Nginx `root` at `~/wiki/public/`
+
 ![[nginx-web-server-setup#^basic-conf]]
 
 So in our case `server_name ...` will be something like `server_name wiki.<YOUR_SITE.COM>;`
@@ -147,7 +151,8 @@ Certbot is the software that issues a certificate for your domain, so that it ca
 
 You can see the [Certbot setup guide](certbot-setup-guide.md) to install Certbot and activate it for you website.
 
-**TL;DR:** it will issue a certificate and add the following lines to your Nginx configuration:
+>[!tldr] TL;DR:
+> It will issue a certificate and add the following lines to your Nginx configuration:
 
 ![[certbot-setup-guide#^basic-conf]]
 

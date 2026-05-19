@@ -147,15 +147,8 @@ git push -u origin main
 
 The `-u` flag links the local `main` to the remote `main` — after this, `git push` and `git pull` know where to go without arguments.
 
-> [!TIP]
+> [!TIP] Tips
 >- **Commit often, push when stable.** Small commits with clear messages make the history readable. "Fix typo" beats one giant "WIP" commit per week.
 >- **Write the message in the imperative.** `Add login form`, not `Added login form` or `Adds login form`. Matches Git's own style.
 >- **Never commit secrets.** API keys, passwords, `.env` files. If it happens, rotate the key immediately: `git rm` doesn't remove it from history.
 >- **Branches for anything risky.** Mainline stays clean, experiments live on their own branch, merge when ready.
-
-
-## Files every repo should have
-
-- `README.md` — what the project does, how to install/run it, basic usage. Renders as the homepage of the repo.
-- `.gitignore` — patterns of files Git should never track (build artifacts, `node_modules/`, `.env`, IDE folders). Use the templates from https://github.com/github/gitignore.
-- `LICENSE` — only for public repos. No license = nobody legally allowed to use the code, even if it's visible.

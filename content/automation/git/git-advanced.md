@@ -37,6 +37,8 @@ For high-velocity teams where merges happen all day.
 
 The principle is the same in both: **`main` is sacred**, every change goes through review, and conflicts get resolved on the *feature side* before merging, not on `main`.
 
+***
+
 ## The pull-request flow
 
 ```bash
@@ -72,6 +74,8 @@ git branch -d feat/short-description
 The merge button in the UI usually offers three options: **Create a merge commit**, **Squash and merge**, **Rebase and merge**. 
 
 The one to pick depends on the team's policy.
+
+***
 
 ## Always pull-rebase first
 
@@ -111,6 +115,8 @@ git config --global pull.rebase true
 
 The early-morning `git pull --rebase` keeps your branch in sync **without merge crap**, and any conflict appears now (small, manageable) instead of later when you open the PR (large, scary).
 
+***
+
 ## Merging vs Rebasing
 
 The two operations produce **the same code** but a different history. 
@@ -132,12 +138,13 @@ git rebase main         # replay feature commits on top of main's tip
 
 Linear history. No merge commits. Conflicts surface one commit at a time during the replay.
 
-> [!tip]
-> When to pick which:
+> [!tip] When to pick which:
 >- **On personal/local branches before sharing**: rebase liberally. Cleans up before review. Squash trivial "fix typo" commits.
 >- **On shared branches** (multiple people pushing, others have pulled it): **never rebase**. Hashes change, everyone else's history diverges, force-pushes are needed → broken trees, bad day.
 >- **Merging `main` into a long-lived feature branch**: usually rebase to keep the feature branch on top of latest `main`. Daily ritual on long PRs.
 >- **Merging a feature branch into `main`**: depends on team policy. Squash-and-merge is common (clean `main` log), `--no-ff` is the next most common (preserves feature grouping), plain `merge` (with fast-forward when possible) only on tiny/trivial PRs.
+
+***
 
 ## Resolving conflicts
 
@@ -170,6 +177,8 @@ A trick that helps: configure a **3-way merge tool** so you see *both sides plus
 git config --global merge.tool vscode    # adapt to your tool of choice
 git mergetool                            # opens it on the conflicting files
 ```
+
+***
 
 ## Recovery methods
 
@@ -204,6 +213,8 @@ git reflog                    # list of every HEAD move with hashes
 git reset --hard HEAD@{2}     # rewind to where you were 2 moves ago
 ```
 Knowing reflog exists is what separates "Git ate my work" from "give me 30 seconds to recover".
+
+***
 
 ## Force pushing correctly
 
