@@ -2,6 +2,8 @@ import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } fro
 import { resolveRelative, FullSlug } from "../util/path"
 import { classNames } from "../util/lang"
 import style from "./styles/seriesIndex.scss"
+// @ts-ignore
+import script from "./scripts/seriesIndex.inline"
 
 // Sidebar "Index" — mostra l'indice della series a cui appartiene la pagina
 // corrente (sia che ne sia l'HUB che un MEMBER). L'item corrispondente alla
@@ -50,7 +52,23 @@ const SeriesIndex: QuartzComponent = ({
 
   return (
     <div class={classNames(displayClass, "series-index")}>
-      <h3>Index</h3>
+      <button type="button" class="series-index-header" aria-expanded="true">
+        <h3>Index</h3>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="fold"
+        >
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
       <ol class="series-index-list">
         {series.map((slug) => {
           const page = findPage(slug)
@@ -74,5 +92,6 @@ const SeriesIndex: QuartzComponent = ({
 }
 
 SeriesIndex.css = style
+SeriesIndex.afterDOMLoaded = script
 
 export default (() => SeriesIndex) satisfies QuartzComponentConstructor

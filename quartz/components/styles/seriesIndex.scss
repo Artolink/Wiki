@@ -1,21 +1,59 @@
 // Sidebar "Index" — appare sotto al TableOfContents nella sidebar destra,
-// SOLO sulle pagine che fanno parte di una series. Pattern visivo identico
-// alla TOC (uppercase title piccolo, lista compatta, item attivo colorato).
+// SOLO sulle pagine che fanno parte di una series. L'aspetto è
+// volutamente IDENTICO al blocco TOC: stessa tipografia per il titolo
+// ("INDEX" in uppercase grigio chiaro), stessa freccetta di collapse,
+// stessa separazione con border-top.
 .series-index {
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+  min-height: 1.4rem;
   margin-top: 1.5rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--lightgray);
 
-  & > h3 {
-    font-size: 1rem;
-    display: inline-block;
-    margin: 0 0 0.5rem 0;
+  // Header pulsante — replica .toc-header (vedi custom.scss ~riga 610).
+  // Mantenere allineato a quello se mai si cambia lo stile della TOC.
+  & > button.series-index-header {
+    background-color: transparent;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    padding: 0 0 0.5rem 0;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+
+    & h3 {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      color: var(--gray);
+      margin: 0;
+      display: inline-block;
+    }
+
+    & .fold {
+      margin-left: 0.5rem;
+      transition: transform 0.3s ease;
+      opacity: 0.8;
+      color: var(--gray);
+    }
+
+    &.collapsed .fold {
+      transform: rotateZ(-90deg);
+    }
   }
 
   .series-index-list {
     list-style: decimal outside;
-    margin: 0.5rem 0;
+    margin: 0.25rem 0;
     padding-left: 1.4rem;
+
+    &.collapsed {
+      display: none;
+    }
 
     & > li {
       margin: 0.25rem 0;
