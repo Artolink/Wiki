@@ -71,11 +71,17 @@ ul.toc-content.overflow {
     // (vedi data-collapsed in TableOfContents.tsx). Posizionato absolute così
     // gli item SENZA caret restano allineati col testo grazie al padding-left
     // dei depth-#{$i} che riserva sempre uno slot di 1rem.
+    //
+    // Allineamento verticale: do al button la stessa altezza di una riga di
+    // testo (1.6em = line-height ereditata dai link) e centro il SVG col flex.
+    // Così il caret resta sempre allineato alla PRIMA riga del link anche se
+    // il testo va a capo, indipendentemente da font-size override.
     & > button.toc-fold {
       position: absolute;
       left: 0;
-      top: 0.1rem;
+      top: 0;
       width: 1rem;
+      height: 1.6em;
       padding: 0;
       background: none;
       border: none;
