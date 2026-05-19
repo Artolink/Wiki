@@ -20,10 +20,10 @@ Different tools implement slightly different flavors, so knowing which one you'r
 | `grep -P` | Perl / PCRE                  | [grep Regex](regex-grep)     |
 | VSCode    | JavaScript (similar to Perl) | [VSCode Regex](regex-vscode) |
 
-**In practice: learn SED and VSCode, and the others will follow naturally**:
-
- - `vim` is similar to `sed`, so refer to the SED page
- - `grep -P` supports most POSIX + Perl extensions, so refer to the VSCode page for complex patterns
+> [!hint] Hint: learn SED and VSCode, and the others will follow naturally
+>
+ > - `vim` is similar to `sed`, so refer to the SED page
+ > - `grep -P` supports most POSIX + Perl extensions, so refer to the VSCode page for complex patterns
 
 ---
 

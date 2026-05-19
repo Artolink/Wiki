@@ -74,8 +74,8 @@ ls -lah "$SNAP"
 
 What each file gives you back later:
 
-- **`sysinfo.txt`** — distro/kernel version + uptime. The "before" line of any post-mortem.
-- **`holds.txt`** — packages explicitly held back. Empty is fine; non-empty means those holds need to survive the upgrade.
-- **`services.txt`** — failed and inactive services *as they are right now*. Critical: if a service is already failed before the upgrade, you don't want to chase it as a regression afterwards.
-- **`storage.txt`** — runtime mounts vs persistent `fstab`. A discrepancy is a red flag worth investigating *before* the reboot, not after.
-- **`network.txt`** — interfaces, netplan, firewall rules. Iptables especially: Docker recreates its chains on every restart, but your custom rules don't come back unless `netfilter-persistent` survived the upgrade.
+- **`sysinfo.txt`**: distro/kernel version + uptime. The "before" line of any post-mortem.
+- **`holds.txt`**: packages explicitly held back. Empty is fine; non-empty means those holds need to survive the upgrade.
+- **`services.txt`**: failed and inactive services *as they are right now*. Critical: if a service is already failed before the upgrade, you don't want to chase it as a regression afterwards.
+- **`storage.txt`**: runtime mounts vs persistent `fstab`. A discrepancy is a red flag worth investigating *before* the reboot, not after.
+- **`network.txt`**: interfaces, netplan, firewall rules. Iptables especially: Docker recreates its chains on every restart, but your custom rules don't come back unless `netfilter-persistent` survived the upgrade.

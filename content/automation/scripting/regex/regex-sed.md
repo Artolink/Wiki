@@ -2,12 +2,12 @@
 title: Regex for sed (Posix)
 ---
 > [!NOTE]
-> **This is also valid for** [vim](regex-vim.md) (POSIX-like with minor extensions — behavior is nearly identical)
+> **This is also valid for** [vim](regex-vim.md) (POSIX-like with minor extensions: behavior is nearly identical)
 
 > [!INFO]
 > **sed has two modes:**
-> - **BRE** (Basic Regular Expressions) — default, `sed 'pattern'`
-> - **ERE** (Extended Regular Expressions) — activated with `-E` flag, `sed -E 'pattern'`
+> - **BRE** (Basic Regular Expressions): default, `sed 'pattern'`
+> - **ERE** (Extended Regular Expressions): activated with `-E` flag, `sed -E 'pattern'`
 >
 > The main difference is how special characters are escaped (see each section below).
 
@@ -112,7 +112,9 @@ sed -E 's/(hello) (world)/\2 \1/' file.txt
 sed -E 's/(High|Mid|Low)-level/LEVEL/g' file.txt
 ```
 
-> **Note:** Alternation with `|` requires `-E` in SED. In BRE it is not supported natively.
+> [!Note] Note:
+> Alternation with `|` requires `-E` in SED. 
+> In BRE it is not supported natively.
 
 ---
 
