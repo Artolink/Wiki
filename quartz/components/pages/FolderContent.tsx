@@ -44,9 +44,18 @@ export default ((opts?: Partial<FolderContentOptions>) => {
     // ordinato (es. la stack di Grafana: exporter → tsdb → scraper → grafana).
     const seriesSlugs = fileData.frontmatter?.series as string[] | undefined
     const isSeries = Array.isArray(seriesSlugs) && seriesSlugs.length > 0
+    // Match flessibile: lo slug del frontmatter può essere il "public" slug
+    // (es. `observability/metrics/exporters`, come appare nell'URL del sito)
+    // mentre Quartz internamente registra l'_index.md come
+    // `observability/metrics/exporters/index`. Tentiamo entrambe le forme,
+    // così l'utente può scrivere quello che vede nel browser senza pensarci.
     const seriesPages: QuartzPluginData[] = isSeries
       ? seriesSlugs!
-          .map((slug) => allFiles.find((f) => f.slug === slug))
+          .map(
+            (slug) =>
+              allFiles.find((f) => f.slug === slug) ??
+              allFiles.find((f) => f.slug === `${slug}/index`),
+          )
           .filter((p): p is QuartzPluginData => p !== undefined)
       : []
 

@@ -23,25 +23,37 @@ const PageSequenceNav: QuartzComponent = ({ fileData, allFiles }: QuartzComponen
   const currentSlug = fileData.slug
   if (!currentSlug) return null
 
+  // Quartz internamente usa `<path>/index` come slug per gli _index.md di
+  // cartella, ma l'URL pubblico è `<path>` (senza /index). L'utente
+  // probabilmente scrive lo slug pubblico nel frontmatter `series:`, quindi
+  // facciamo match flessibile su entrambe le forme. Vedi anche FolderContent.tsx.
+  const publicSlug = currentSlug.replace(/\/index$/, "")
+  const matchSlug = (s: string) => s === currentSlug || s === publicSlug
+
   // Trova il primo file con un array `series` nel frontmatter che contiene
-  // questo slug. Quel file è l'"hub" della serie.
+  // questo slug (in qualunque forma). Quel file è l'"hub" della serie.
   let hubSeries: string[] | null = null
   for (const f of allFiles) {
     const series = f.frontmatter?.series as unknown
-    if (Array.isArray(series) && series.includes(currentSlug)) {
+    if (Array.isArray(series) && (series as string[]).some(matchSlug)) {
       hubSeries = series as string[]
       break
     }
   }
   if (!hubSeries) return null
 
-  const idx = hubSeries.indexOf(currentSlug)
+  // Cerca la posizione con entrambe le forme; vince la prima che trova
+  let idx = hubSeries.findIndex(matchSlug)
   if (idx < 0) return null
 
   const prevSlug = idx > 0 ? hubSeries[idx - 1] : null
   const nextSlug = idx < hubSeries.length - 1 ? hubSeries[idx + 1] : null
 
-  const findPage = (slug: string) => allFiles.find((f) => f.slug === slug)
+  // findPage: stesso fallback `/index` di FolderContent — accetta sia slug
+  // "pubblico" che slug "interno" Quartz.
+  const findPage = (slug: string) =>
+    allFiles.find((f) => f.slug === slug) ??
+    allFiles.find((f) => f.slug === `${slug}/index`)
   const prevPage = prevSlug ? findPage(prevSlug) : null
   const nextPage = nextSlug ? findPage(nextSlug) : null
 
