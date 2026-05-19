@@ -738,7 +738,15 @@ html[saved-theme="dark"] .graph .graph-outer {
 // Lo slider applica una CSS variable --font-scale su <html>. I calc() qui
 // sotto la usano per ridimensionare in tempo reale tutto il blocco di testo
 // del markdown: titolo (h1), meta (data/reading time), tag-list e body.
-.page > #quartz-body > .center > article {
+//
+// Due selettori per matchare entrambe le strutture di pagina:
+//   - Content pages (.md normali, vedi components/pages/Content.tsx):
+//     <article class="popover-hint"> figlio diretto di .center
+//   - List pages (_index e tags, vedi components/pages/FolderContent.tsx
+//     e TagContent.tsx): <div class="popover-hint"><article> — l'article
+//     è NIPOTE di .center, non figlio
+.page > #quartz-body > .center > article,
+.page > #quartz-body > .center > .popover-hint > article {
   font-size: calc(1rem * var(--font-scale, 1));
 }
 
