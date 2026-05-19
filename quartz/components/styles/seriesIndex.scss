@@ -14,8 +14,13 @@
 .series-index {
   display: flex;
   flex-direction: column;
-  overflow-y: hidden;
-  min-height: 1.4rem;
+  // NIENTE `overflow-y: hidden` qui (era ereditato dal pattern del TOC ma in
+  // questo contesto è dannoso): segnala al browser che il content interno è
+  // clippabile, quindi nei calcoli flex il browser considera questo elemento
+  // "comprimibile" a min-height — il drawer parent non rileva più overflow
+  // e non attiva lo scroll. Senza, l'altezza effettiva dell'elemento riflette
+  // la lista di N voci, e se eccede il drawer, lo scroll del drawer si
+  // attiva normalmente.
   margin-top: 1.5rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--lightgray);
