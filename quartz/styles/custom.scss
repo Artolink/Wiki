@@ -1409,6 +1409,22 @@ pre {
   }
 }
 
+// ── Bug fix: contenuto visibile quando il callout è collapsed ────────────────
+// Il core di Quartz (callouts.scss) usa `height: 0; padding: 0; margin: 0` con
+// transition sui figli di .callout-content quando il callout ha is-collapsed.
+// Però le mie regole `pre { padding: 1rem 0 !important; border: 1px ... !important }`
+// (più sopra in custom.scss) vincono per `!important` sul core (che NON usa
+// !important). Risultato: il <pre> resta alto ~2rem anche con height:0, e si
+// vede il contenuto "spuntare" sotto al titolo collapsed.
+//
+// Fix: quando is-collapsed, nascondo del tutto i figli con display:none. Si
+// perde la transition smooth del fold (0.1s), ma è impercettibile e il content
+// non spunta più. Per riavere la transition, servirebbe sovrascrivere padding
+// e border con !important qui — più verbose e meno robusto a future regole.
+.callout.is-collapsed > .callout-content > * {
+  display: none !important;
+}
+
 // ──────────────────────────────────────────────────────────────────────────────
 // CALLOUT COLORS — override mirati su warning e danger
 // ──────────────────────────────────────────────────────────────────────────────
