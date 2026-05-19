@@ -71,10 +71,15 @@
     }
 
     // "Next" allineato a destra: arrow a destra, testo a destra.
+    // NOTA: NON usare `align-items: flex-end` qui — impedirebbe ai children
+    // (.label e .title) di stretchare a width: 100% del .content, e quindi
+    // `text-overflow: ellipsis` sul .title non scatterebbe mai (il testo
+    // overflowerebbe ancorato a destra, sbordando a sinistra dal box).
+    // `text-align: right` da solo allinea il testo a destra DENTRO i
+    // children full-width, mantenendo l'ellipsis funzionante.
     &.next {
       .content {
         text-align: right;
-        align-items: flex-end;
       }
     }
   }
