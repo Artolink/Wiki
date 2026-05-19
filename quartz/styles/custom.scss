@@ -785,28 +785,28 @@ html, body {
   overflow-x: hidden;
 }
 
-// ── Body lock quando un drawer mobile è aperto ───────────────────────────────
-// Senza questa regola, swipe-scroll dentro un drawer mobile (sx o dx) molto
-// lungo (es. l'INDEX di una series con tante voci che eccede il viewport)
-// veniva "passato" al body sottostante via scroll-chaining del browser — il
-// drawer non scrollava e scorreva invece il content MD dietro.
-// Soluzione: blocco lo scroll del root quando il drawer è aperto, e aggiungo
-// `overscroll-behavior: contain` ai drawer per essere sicuri che il loro
-// scroll non si propaghi al body neanche quando raggiungono i limiti.
-html[data-mobile-sidebar-open="true"],
-html[data-mobile-sidebar-right-open="true"] {
-  overflow: hidden;
-  // Su iOS Safari `overflow: hidden` sul html non basta sempre — bloccare il
-  // body con position aiuta a prevenire il bouncing scroll della pagina sotto.
-  & > body {
-    overflow: hidden;
-    overscroll-behavior: none;
-  }
-}
-
+// ── Scroll-isolation dei drawer mobili ───────────────────────────────────────
+// Problema: il drawer destro mobile ha contenuto più alto del viewport (es.
+// SeriesIndex con tante voci). Su touch, lo swipe verso il basso veniva
+// "delegato" al body sottostante via scroll-chaining del browser.
+//
+// Tentativo 1 (rifiutato): `html, body { overflow: hidden }` quando un drawer
+// è aperto. PROBLEMA: su iOS Safari `overflow: hidden` sul body congela TUTTI
+// gli scroll, anche quelli interni a elementi `position: fixed` come il
+// drawer. Bug noto, vedi https://bugs.webkit.org/show_bug.cgi?id=153852.
+//
+// Tentativo 2 (questo): `overscroll-behavior: contain` sul drawer è
+// sufficiente. Quando l'utente raggiunge il limite dello scroll interno del
+// drawer, il browser non propaga lo scroll al parent. Lo scroll del body
+// resta abilitato (così iOS è felice), ma di fatto non si attiva mai durante
+// l'interazione col drawer perché il touch è "catturato" dal drawer stesso.
 .page > #quartz-body > .sidebar.left,
 .page > #quartz-body > .sidebar.right {
   overscroll-behavior: contain;
+  // iOS Safari < 13: scroll momentum fluido dentro elementi scrollabili.
+  // Senza, lo scroll è "stuttering". Property deprecata ma rispettata da
+  // dispositivi vecchi, ignorata dai nuovi. Safe da lasciare.
+  -webkit-overflow-scrolling: touch;
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
