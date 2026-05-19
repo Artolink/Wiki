@@ -214,6 +214,20 @@ export const defaultListPageLayout: PageLayout = {
     }),
     Component.ContentMeta(),
   ],
+  // PageSequenceNav prima dei due "shared" (FontResizer + SidebarToggle)
+  // così le _index pages che fanno parte di una series mostrano i bottoni
+  // Prev/Next a fondo pagina come le content page normali. Le _index pages
+  // senza `series:` (o non elencate nella series di un'altra pagina) vedono
+  // PageSequenceNav che ritorna null e quindi non renderizza nulla.
+  //
+  // Le altre due voci sono replicate dallo sharedPageComponents.afterBody
+  // perché lo spread `...pageLayout` in renderPage.tsx sovrascrive interamente
+  // l'afterBody condiviso quando il PageLayout ne dichiara uno proprio.
+  afterBody: [
+    Component.PageSequenceNav(),
+    Component.FontResizer(),
+    Component.SidebarToggle(),
+  ],
   left: [
     Component.SidebarToggle(),
     Component.PageTitle(),
