@@ -38,6 +38,7 @@ import MobileSidebarRightToggle from "./MobileSidebarRightToggle"
 import ScrollProgress from "./ScrollProgress"
 import PageProgress from "./PageProgress"
 import PageSequenceNav from "./PageSequenceNav"
+import SeriesIndex from "./SeriesIndex"
 
 export {
   ArticleTitle,
@@ -80,4 +81,5 @@ export {
   ScrollProgress,
   PageProgress,
   PageSequenceNav,
+  SeriesIndex,
 }

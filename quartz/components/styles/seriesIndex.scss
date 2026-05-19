@@ -1,0 +1,58 @@
+// Sidebar "Index" — appare sotto al TableOfContents nella sidebar destra,
+// SOLO sulle pagine che fanno parte di una series. Pattern visivo identico
+// alla TOC (uppercase title piccolo, lista compatta, item attivo colorato).
+.series-index {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--lightgray);
+
+  & > h3 {
+    font-size: 1rem;
+    display: inline-block;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .series-index-list {
+    list-style: decimal outside;
+    margin: 0.5rem 0;
+    padding-left: 1.4rem;
+
+    & > li {
+      margin: 0.25rem 0;
+      font-size: 0.85rem;
+      line-height: 1.4;
+
+      &::marker {
+        color: var(--gray);
+        font-weight: 500;
+      }
+
+      & > a {
+        color: var(--dark);
+        opacity: 0.4;
+        background: none;
+        transition:
+          opacity 0.3s ease,
+          color 0.3s ease;
+
+        &:hover {
+          opacity: 0.85;
+        }
+      }
+
+      // Item attivo = pagina corrente: numeretto + testo a piena opacità
+      // e in accent color (--secondary), per replicare lo stile della TOC
+      // "in-view".
+      &.active::marker {
+        color: var(--secondary);
+        font-weight: 600;
+      }
+
+      & > a.active {
+        opacity: 1;
+        color: var(--secondary);
+        font-weight: 600;
+      }
+    }
+  }
+}

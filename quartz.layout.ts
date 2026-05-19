@@ -198,6 +198,11 @@ export const defaultContentPageLayout: PageLayout = {
     sidebarRightActions,
     sidebarGraph,
     Component.DesktopOnly(Component.TableOfContents()),
+    // SeriesIndex: appare solo sulle pagine che fanno parte di una series
+    // (hub o member). Return null sulle altre. Va sotto al TOC e si separa
+    // automaticamente con border-top (stile coerente con gli altri blocchi
+    // della sidebar destra).
+    Component.DesktopOnly(Component.SeriesIndex()),
     // Backlinks disabilitati a livello di layout — il componente esiste ancora
     // in quartz/components/Backlinks.tsx, basta rimettere `Component.Backlinks()`
     // qui sotto per riattivarli.
@@ -246,7 +251,8 @@ export const defaultListPageLayout: PageLayout = {
     Component.SidebarLink({ label: "Utilities", icon: "🧰", slug: "tags/Utilities" }),
     Component.Explorer({ title: "Notes", sortFn: explorerSortFn, filterFn: explorerFilterFn }),
   ],
-  // Solo i pulsanti utility nel drawer destro (no Graph/TOC/Backlinks per le
-  // list pages). Nascosti su desktop, visibili solo nel drawer mobile.
-  right: [sidebarRightActions],
+  // Pulsanti utility nel drawer destro (no Graph/TOC/Backlinks per le list
+  // pages) + SeriesIndex per le _index pages che sono membri di una series.
+  // Il SeriesIndex restituisce null sulle altre, quindi safe ovunque.
+  right: [sidebarRightActions, Component.DesktopOnly(Component.SeriesIndex())],
 }
