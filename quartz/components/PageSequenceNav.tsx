@@ -30,8 +30,43 @@ const PageSequenceNav: QuartzComponent = ({ fileData, allFiles }: QuartzComponen
   const publicSlug = currentSlug.replace(/\/index$/, "")
   const matchSlug = (s: string) => s === currentSlug || s === publicSlug
 
-  // Trova il primo file con un array `series` nel frontmatter che contiene
-  // questo slug (in qualunque forma). Quel file è l'"hub" della serie.
+  // findPage: stesso fallback `/index` di FolderContent — accetta sia slug
+  // "pubblico" che slug "interno" Quartz.
+  const findPage = (slug: string) =>
+    allFiles.find((f) => f.slug === slug) ??
+    allFiles.find((f) => f.slug === `${slug}/index`)
+
+  // CASO 1 — Questa pagina è l'HUB di una series (ha `series: [...]` nel suo
+  // frontmatter). Mostra un solo bottone Next che porta alla prima pagina
+  // della series. Nessun Previous perché l'hub è il "punto di ingresso".
+  const ownSeries = fileData.frontmatter?.series as unknown
+  if (Array.isArray(ownSeries) && (ownSeries as string[]).length > 0) {
+    const firstSlug = (ownSeries as string[])[0]
+    const firstPage = findPage(firstSlug)
+    if (!firstPage) return null
+
+    return (
+      <nav class="page-sequence-nav" aria-label="Series navigation">
+        <span class="page-sequence-link disabled" aria-hidden="true" />
+        <a
+          class="page-sequence-link next"
+          href={resolveRelative(currentSlug, firstPage.slug as FullSlug)}
+        >
+          <span class="content">
+            <span class="label">Start the series</span>
+            <span class="title">{firstPage.frontmatter?.title ?? firstPage.slug}</span>
+          </span>
+          <span class="arrow" aria-hidden="true">
+            ›
+          </span>
+        </a>
+      </nav>
+    )
+  }
+
+  // CASO 2 — Questa pagina è MEMBRO di una series (il suo slug compare nel
+  // `series:` di un'altra pagina). Trova quell'hub, calcola la posizione,
+  // mostra Prev + Next basati sui vicini nell'array.
   let hubSeries: string[] | null = null
   for (const f of allFiles) {
     const series = f.frontmatter?.series as unknown
@@ -43,17 +78,11 @@ const PageSequenceNav: QuartzComponent = ({ fileData, allFiles }: QuartzComponen
   if (!hubSeries) return null
 
   // Cerca la posizione con entrambe le forme; vince la prima che trova
-  let idx = hubSeries.findIndex(matchSlug)
+  const idx = hubSeries.findIndex(matchSlug)
   if (idx < 0) return null
 
   const prevSlug = idx > 0 ? hubSeries[idx - 1] : null
   const nextSlug = idx < hubSeries.length - 1 ? hubSeries[idx + 1] : null
-
-  // findPage: stesso fallback `/index` di FolderContent — accetta sia slug
-  // "pubblico" che slug "interno" Quartz.
-  const findPage = (slug: string) =>
-    allFiles.find((f) => f.slug === slug) ??
-    allFiles.find((f) => f.slug === `${slug}/index`)
   const prevPage = prevSlug ? findPage(prevSlug) : null
   const nextPage = nextSlug ? findPage(nextSlug) : null
 
