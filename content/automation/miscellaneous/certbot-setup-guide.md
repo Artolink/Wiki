@@ -153,6 +153,62 @@ server = https://acme-v02.api.letsencrypt.org/directory
 ***
 
 ## 4. Extra 
+
+### Real-world example: this wiki
+
+The wiki you're reading runs the exact setup described above. 
+
+The vhost lives in `/etc/nginx/conf.d/wiki.farnetiandrea.it.conf`
+
+> [!example]- Example: wiki.farnetiandrea.it
+> ```nginx
+> server {
+>     server_name wiki.farnetiandrea.it;
+>     root ~/wiki/public;
+>     index index.html;
+>     location / { try_files $uri $uri.html $uri/ =404; }
+> 
+>     listen [::]:443 ssl;            # managed by Certbot
+>     listen 443 ssl;                 # managed by Certbot
+>     ssl_certificate     /etc/letsencrypt/live/wiki.farnetiandrea.it/fullchain.pem;
+>     ssl_certificate_key /etc/letsencrypt/live/wiki.farnetiandrea.it/privkey.pem;
+>     include /etc/letsencrypt/options-ssl-nginx.conf;
+>     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+> }
+> 
+> server {
+>     if ($host = wiki.farnetiandrea.it) {
+>         return 301 https://$host$request_uri;
+>     }
+>     listen 80;
+>     listen [::]:80;
+>     server_name wiki.farnetiandrea.it;
+>     return 404;
+> }
+> ```
+
+The renewal config in `/etc/letsencrypt/renewal/wiki.farnetiandrea.it.conf` declares `authenticator = nginx, installer = nginx`, so Certbot reuses the Nginx plugin both to validate and to install renewed certs directly in Nginx.
+
+> [!example]- Example: renewal configuration
+> ```ini
+> # renew_before_expiry = 30 days
+> version = <VERSION>
+> archive_dir = /etc/letsencrypt/archive/wiki.farnetiandrea.it
+> cert = /etc/letsencrypt/live/wiki.farnetiandrea.it/cert.pem
+> privkey = /etc/letsencrypt/live/wiki.farnetiandrea.it/privkey.pem
+> chain = /etc/letsencrypt/live/wiki.farnetiandrea.it/chain.pem
+> fullchain = /etc/letsencrypt/live/wiki.farnetiandrea.it/fullchain.pem
+> 
+> # Options used in the renewal process
+> [renewalparams]
+> account = <YOUR_ACCOUNT_ID>
+> authenticator = nginx
+> installer = nginx
+> server = https://acme-v02.api.letsencrypt.org/directory
+> ```
+> 
+> The `authenticator = nginx` and `installer = nginx` lines tell Certbot to reuse the Nginx plugin both to validate the `http-01` challenge (served from the Nginx vhost) and to install renewed certificates directly into the Nginx config.
+
 ### Useful commands
 
 | Command                                           | What it does                                  |
@@ -163,40 +219,3 @@ server = https://acme-v02.api.letsencrypt.org/directory
 | `sudo certbot delete --cert-name <domain>`        | Remove a cert                                 |
 | `sudo certbot --nginx -d new.example.com`         | Add HTTPS to a new domain                     |
 | `sudo certbot --nginx --expand -d a.com -d b.com` | Add another domain to an existing cert        |
-
-***
-
-### Real-world example: this wiki
-
-> [!example]
->The wiki you're reading runs the exact setup described above. 
->The vhost lives in `/etc/nginx/conf.d/wiki.farnetiandrea.it.conf`
-
-```nginx
-server {
-    server_name wiki.farnetiandrea.it;
-    root ~/wiki/public;
-    index index.html;
-    location / { try_files $uri $uri.html $uri/ =404; }
-
-    listen [::]:443 ssl;            # managed by Certbot
-    listen 443 ssl;                 # managed by Certbot
-    ssl_certificate     /etc/letsencrypt/live/wiki.farnetiandrea.it/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/wiki.farnetiandrea.it/privkey.pem;
-    include /etc/letsencrypt/options-ssl-nginx.conf;
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
-}
-
-server {
-    if ($host = wiki.farnetiandrea.it) {
-        return 301 https://$host$request_uri;
-    }
-    listen 80;
-    listen [::]:80;
-    server_name wiki.farnetiandrea.it;
-    return 404;
-}
-```
-
-The renewal config in `/etc/letsencrypt/renewal/wiki.farnetiandrea.it.conf` declares `authenticator = nginx, installer = nginx`, so Certbot reuses the Nginx plugin both to validate and to install renewed certs directly in Nginx.
-

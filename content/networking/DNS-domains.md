@@ -52,37 +52,34 @@ Domain names look flat (`mail.google.com`) but they're actually a tree that read
 
 So `wiki.farnetiandrea.it` parses as: subdomain `wiki` of `farnetiandrea`, registered under TLD `it`.
 
-
-### From `wiki.farnetiandrea.it` to `1.2.3.4`
-
-Type `wiki.farnetiandrea.it` and press Enter. 
-
-Behind the scenes, four actors talk to each other:
-
-1. **Stub resolver** (your laptop / phone) asks the question. 
-   "What's the IP of `wiki.farnetiandrea.it`?"
-2. **Recursive resolver**: usually run by your ISP, by a public DNS like Google's `8.8.8.8` or Cloudflare's `1.1.1.1`, or by your router. It does the heavy lifting on your behalf, asking around until it gets the answer.
-3. **Authoritative servers** at three levels of the tree:
-    - **Root servers** know who's authoritative for each TLD.
-    - **TLD servers** (the ones for `.it`, in this case) know who's authoritative for each second-level domain under them.
-    - **Authoritative servers** for `farnetiandrea.it` itself hold the actual records.
-
-The conversation, simplified, is the following:
-
-```
-You      → Resolver:  "What's the A record for wiki.farnetiandrea.it?"
-Resolver → Root:      "Who handles .it?"
-Root     → Resolver:  "These nameservers do."
-Resolver → TLD (.it): "Who handles farnetiandrea.it?"
-TLD      → Resolver:  "These nameservers do."
-Resolver → Authoritative: "What's the A record for wiki.farnetiandrea.it?"
-Auth     → Resolver:  "1.2.3.4"
-Resolver → You:       "1.2.3.4"
-```
-
-Your laptop now opens a TCP connection to `1.2.3.4` on port 443. Done.
-
-The resolver caches every answer for the duration of its **TTL**, so the next visitor in the same office doesn't have to re-walk the whole chain.
+> [!example]- Example: From `wiki.farnetiandrea.it` to `1.2.3.4`
+> Type `wiki.farnetiandrea.it` and press Enter.
+> 
+> Behind the scenes, four actors talk to each other:
+> 
+> 1. Stub resolver (your laptop / phone) asks the question. "What's the IP of `wiki.farnetiandrea.it`?"
+> 2. Recursive resolver: usually run by your ISP, by a public DNS like Google's `8.8.8.8` or Cloudflare's `1.1.1.1`, or by your router. It does the heavy lifting on your behalf, asking around until it gets the answer.
+> 3. Authoritative servers at three levels of the tree:
+>    * Root servers know who's authoritative for each TLD.
+>    * TLD servers (the ones for `.it`, in this case) know who's authoritative for each second-level domain under them.
+>    * Authoritative servers for `farnetiandrea.it` itself hold the actual records.
+> 
+> The conversation, simplified, is the following:
+> 
+> ```
+> You      → Resolver:  "What's the A record for wiki.farnetiandrea.it?"
+> Resolver → Root:      "Who handles .it?"
+> Root     → Resolver:  "These nameservers do."
+> Resolver → TLD (.it): "Who handles farnetiandrea.it?"
+> TLD      → Resolver:  "These nameservers do."
+> Resolver → Authoritative: "What's the A record for wiki.farnetiandrea.it?"
+> Auth     → Resolver:  "1.2.3.4"
+> Resolver → You:       "1.2.3.4"
+> ```
+> 
+> Your laptop now opens a TCP connection to `1.2.3.4` on port 443. Done.
+> 
+> The resolver caches every answer for the duration of its TTL, so the next visitor in the same office doesn't have to re-walk the whole chain.
 
 ### The local `hosts` file
 

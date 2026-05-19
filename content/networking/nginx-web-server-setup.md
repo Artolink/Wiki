@@ -16,7 +16,7 @@ It's event-driven, single-threaded per worker, and uses very little RAM compared
 
 ***
 
-## Installation (Ubuntu/Debian)
+## 1. Installation (Ubuntu/Debian)
 
 ```bash
 sudo apt update
@@ -35,23 +35,24 @@ curl -I http://localhost
 
 ***
 
-## Directory layout
+## 2. How it works
+### Directory layout
 
-| Path | Purpose |
-|---|---|
-| `/etc/nginx/nginx.conf` | Master config — `events {}`, `http {}`, includes |
-| `/etc/nginx/conf.d/*.conf` | Drop-in vhosts auto-loaded by `nginx.conf` |
-| `/etc/nginx/sites-available/` | Vhosts you write but may not enable |
-| `/etc/nginx/sites-enabled/` | Symlinks → `sites-available/` (only enabled ones) |
-| `/etc/nginx/snippets/` | Reusable config fragments (TLS hardening, etc.) |
-| `/var/log/nginx/access.log` | Request log |
-| `/var/log/nginx/error.log` | Errors — first place to look when something breaks |
+| Path                          | Purpose                                           |
+| ----------------------------- | ------------------------------------------------- |
+| `/etc/nginx/nginx.conf`       | Master config                                     |
+| `/etc/nginx/conf.d/*.conf`    | Drop-in vhosts auto-loaded by `nginx.conf`        |
+| `/etc/nginx/sites-available/` | Vhosts you write but may not enable               |
+| `/etc/nginx/sites-enabled/`   | Symlinks → `sites-available/` (only enabled ones) |
+| `/etc/nginx/snippets/`        | Reusable config fragments (TLS hardening, etc.)   |
+| `/var/log/nginx/access.log`   | Request log                                       |
+| `/var/log/nginx/error.log`    | Errors: first place to look when something breaks |
 
-`conf.d/` and `sites-enabled/` are equivalent — pick one and stick with it. Personally I prefer `conf.d/` for a flatter layout (no symlink dance).
+`conf.d/` and `sites-enabled/` are equivalent: pick one and stick with it. 
 
-***
+Personally I prefer `conf.d/` for a flatter layout (no symlink dance).
 
-## Anatomy of a vhost
+### Anatomy of a vhost
 
 A *server block* (vhost) tells Nginx how to handle requests for a given domain.
 
@@ -70,25 +71,9 @@ server {
 }
 ```
 ^basic-conf
+#### Common patterns
 
-Key directives:
-
-| Directive | What it does |
-|---|---|
-| `listen` | Port + protocol (add `ssl` for HTTPS, `http2` for HTTP/2) |
-| `server_name` | Domain(s) this block answers for |
-| `root` | Directory mapped to `/` of the URL |
-| `index` | Default file when the URL is a directory |
-| `location <pattern> { … }` | Matches request paths; can nest |
-| `try_files` | Try each path in order, fall back to last |
-| `return 301 $url` | Permanent redirect |
-| `proxy_pass <upstream>` | Reverse proxy to a backend |
-
-***
-
-## Common patterns
-
-### 1. Static site
+##### 1. Static site
 
 ```nginx
 server {
@@ -104,7 +89,7 @@ server {
 }
 ```
 
-### 2. Reverse proxy to a Node app on `127.0.0.1:3000`
+##### 2. Reverse proxy to a Node app
 
 ```nginx
 server {
@@ -121,35 +106,69 @@ server {
 }
 ```
 
-### 4. Hardening headers (one-liner per header)
+#### My vhost
 
-```nginx
-add_header X-Content-Type-Options nosniff always;
-add_header X-Frame-Options DENY always;
-add_header Referrer-Policy no-referrer-when-downgrade always;
-add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-```
+This wiki is a static site (Quartz output), then served by Nginx with HTTPS issued by Certbot. 
+
+The vhost lives in `/etc/nginx/conf.d/wiki.farnetiandrea.it.conf` (it also hosts `farnetiandrea.it`, a small landing page + a reverse-proxied Node app called *OfficeGamble*: one file per domain in `conf.d/`!):
+> [!example]- Real-world example: this wiki
+> ```nginx
+> # HTTP -> HTTPS redirect (added by Certbot)
+> server {
+>     if ($host = wiki.farnetiandrea.it) {
+>         return 301 https://$host$request_uri;
+>     }
+>     listen 80;
+>     listen [::]:80;
+>     server_name wiki.farnetiandrea.it;
+>     return 404;
+> }
+> 
+> # HTTPS: serve the static Quartz output
+> server {
+>     server_name wiki.farnetiandrea.it;
+> 
+>     root ~/wiki/public;       # Quartz build output
+>     index index.html;
+> 
+>     location / {
+>         try_files $uri $uri.html $uri/ =404;
+>     }
+> 
+>     listen [::]:443 ssl;      # managed by Certbot
+>     listen 443 ssl;           # managed by Certbot
+>     ssl_certificate     /etc/letsencrypt/live/wiki.farnetiandrea.it/fullchain.pem;
+>     ssl_certificate_key /etc/letsencrypt/live/wiki.farnetiandrea.it/privkey.pem;
+>     include /etc/letsencrypt/options-ssl-nginx.conf;
+>     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+> }
+> ```
+
+> [!Important]
+> Nginx does **not** expand `~` to the user's home directory, that's a shell convention, not an Nginx one! 
+> In a real config use the absolute path (e.g. `/var/www/wiki` or the full home path): `~/wiki/public` is shown here only to keep the example free of personal account details.
 
 ***
 
-## Test + reload — every time you edit a config
+## 3. Tips
+### Always test and reload
 
+Every time you edit a config:
 ```bash
 sudo nginx -t            # syntax check
 sudo systemctl reload nginx
 ```
 
-`reload` is a graceful restart — no dropped connections. Use `restart` only when you change `nginx.conf` itself.
+`reload` is a graceful restart: no dropped connections. 
 
-***
+Use `restart` only when you change `nginx.conf` itself.
 
-## HTTPS
+### Run HTTPS
 
-Nginx doesn't issue certificates on its own. Pair it with [Certbot](certbot-setup-guide): a single `sudo certbot --nginx -d your-domain.com` adds `listen 443 ssl`, the cert paths, and an HTTP→HTTPS redirect to the existing vhost, plus auto-renewal via `certbot.timer`.
+Nginx doesn't issue certificates on its own. 
 
-***
-
-## Useful commands
+Pair it with [Certbot](certbot-setup-guide): a single `sudo certbot --nginx -d your-domain.com` adds `listen 443 ssl`, the cert paths, and an HTTP→HTTPS redirect to the existing vhost, plus auto-renewal via `certbot.timer`.
+### Useful commands
 
 | Command | What it does |
 |---|---|
@@ -160,46 +179,3 @@ Nginx doesn't issue certificates on its own. Pair it with [Certbot](certbot-setu
 | `sudo journalctl -u nginx -f` | Tail the service journal |
 | `sudo tail -f /var/log/nginx/error.log` | Tail the error log |
 | `curl -I https://your-domain.com` | Quick header / status check |
-
-***
-
-## Real-world example: this wiki
-
-This wiki is a **static site** (Quartz output) served by Nginx with HTTPS issued by Certbot. The vhost lives in `/etc/nginx/conf.d/wiki.farnetiandrea.it.conf`:
-
-```nginx
-# HTTP -> HTTPS redirect (added by Certbot)
-server {
-    if ($host = wiki.farnetiandrea.it) {
-        return 301 https://$host$request_uri;
-    }
-    listen 80;
-    listen [::]:80;
-    server_name wiki.farnetiandrea.it;
-    return 404;
-}
-
-# HTTPS: serve the static Quartz output
-server {
-    server_name wiki.farnetiandrea.it;
-
-    root ~/wiki/public;       # Quartz build output
-    index index.html;
-
-    location / {
-        try_files $uri $uri.html $uri/ =404;
-    }
-
-    listen [::]:443 ssl;      # managed by Certbot
-    listen 443 ssl;           # managed by Certbot
-    ssl_certificate     /etc/letsencrypt/live/wiki.farnetiandrea.it/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/wiki.farnetiandrea.it/privkey.pem;
-    include /etc/letsencrypt/options-ssl-nginx.conf;
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
-}
-```
-
-> [!NOTE]
-> Nginx does **not** expand `~` to the user's home directory — that's a shell convention, not an Nginx one. In a real config use the absolute path (e.g. `/var/www/wiki` or the full home path). `~/wiki/public` is shown here only to keep the example free of personal account details.
-
-The same VPS also hosts `farnetiandrea.it` (a small landing page + a reverse-proxied Node app called *OfficeGamble*). One file per domain in `conf.d/`!
