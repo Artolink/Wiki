@@ -1968,30 +1968,25 @@ html[saved-theme] body[data-slug="tags/Projects"] {
   // Reset del counter all'inizio della lista
   counter-reset: series-counter;
 
-  // La data a sinistra (`<p class="meta">May 18, 2026</p>`) è poco utile in
-  // una serie ordinata logicamente, non cronologicamente. La nascondiamo.
-  .section-li .meta {
-    display: none;
-  }
-
-  // Numerazione automatica: counter-increment su ogni voce, prefix nel titolo
   .section-li {
     counter-increment: series-counter;
 
-    .section {
-      // Grid normalmente è "meta | desc | tags" — senza meta riduciamo lo
-      // spazio sinistro così l'indice si stringe.
-      grid-template-columns: 2.5rem 1fr auto;
+    // La cella `.meta` di default contiene il `<Date>` ("May 18, 2026"). Per
+    // una serie l'ordine è logico, non cronologico → sostituiamo il contenuto
+    // della meta col numero progressivo. Non tocchiamo `grid-template-columns`:
+    // il layout originale `fit-content(8em) 3fr 1fr` (meta | desc | tags)
+    // resta intatto, evitando di rompere il sizing del titolo (1fr → desc
+    // ottiene la larghezza giusta).
+    .section .meta {
+      & > * {
+        display: none; // nasconde il <Date> interno (può essere <time> o div)
+      }
 
-      .desc h3 a::before {
+      &::before {
         content: counter(series-counter) ".";
-        display: inline-block;
-        width: 2rem;
-        margin-left: -2.5rem;
-        text-align: right;
-        padding-right: 0.5rem;
         color: var(--gray);
         font-weight: 600;
+        font-size: 1.05em;
       }
     }
   }
