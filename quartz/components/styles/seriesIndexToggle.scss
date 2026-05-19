@@ -28,12 +28,14 @@
     }
   }
 
-  // Popup: card flottante ancorata sotto al bottone, a destra.
-  // Default: nascosta. Apparire al click via classe `.open`.
+  // Popup: card flottante ancorata al viewport (NON al bottone) così sta
+  // sempre nell'angolo in alto a destra dello schermo e non rischia mai di
+  // sovrapporsi al contenuto al centro. La topbar è alta 66px ($navH in
+  // custom.scss), quindi top = 66px + un piccolo gap.
   & > .series-index-popup {
-    position: absolute;
-    top: calc(100% + 0.5rem);
-    right: 0;
+    position: fixed;
+    top: calc(66px + 0.5rem);
+    right: 1.5rem;
     width: 320px;
     max-width: 90vw;
     max-height: 70vh;
