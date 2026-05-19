@@ -17,6 +17,7 @@ The main functionality that DNS accomplishes is translating the domain name into
 
 Now let's start seeing how everything actually works.
 
+***
 ## 1. The main actors
 
 - **Registrar**: the company that *sells* you the right to use the name. 
@@ -27,6 +28,7 @@ Now let's start seeing how everything actually works.
 
 You can mix-and-match: register at Namecheap, host DNS at Cloudflare, run the site on Aruba... Or all three at the same provider.
 
+***
 ## 2. The DNS hierarchy
 
 Domain names look flat (`mail.google.com`) but they're actually a tree that reads from **right-to-left**, with each dot being a branch:
@@ -104,6 +106,7 @@ Editing it by hand is fine for one-off changes, but switching between environmen
 
 On Windows, [[hostprofiles|HostProfiles]] turns it into a one-click profile switcher with automatic DNS-flush; on Linux/macOS, [hostctl](https://github.com/guumaster/hostctl) is the CLI equivalent.
 
+***
 ## 3. The DNS records types
 
 As we said, a DNS zone is a *bag of records*. 
@@ -149,6 +152,7 @@ dig @8.8.8.8 example.com            # ask Google's resolver specifically
 
 `dig` shipped with most Linux/macOS systems; on Windows use `nslookup` or `Resolve-DnsName` in PowerShell.
 
+***
 ## 4. Extras
 
 ### Let's use this wiki as an example
