@@ -44,13 +44,14 @@
   // sempre nell'angolo in alto a destra dello schermo e non rischia mai di
   // sovrapporsi al contenuto al centro. La topbar è alta 66px ($navH in
   // custom.scss), quindi top = 66px + un piccolo gap.
-  // `right: 2.5rem` dà un margine di stacco visibile tra il bordo sinistro
-  // del popup e il content centrale (in particolare il bottone GitHub Edit
-  // a destra del titolo articolo).
+  // `right` è la distanza dal bordo destro del viewport: più piccolo =
+  // popup più vicino al bordo destro = più lontano dal content centrale.
+  // `0.75rem` lascia un sottile margine dal bordo senza far cozzare con
+  // il pulsante GitHub Edit accanto al titolo dell'articolo.
   & > .series-index-popup {
     position: fixed;
     top: calc(66px + 0.5rem);
-    right: 2.5rem;
+    right: 0.75rem;
     width: 320px;
     max-width: 90vw;
     max-height: 70vh;
