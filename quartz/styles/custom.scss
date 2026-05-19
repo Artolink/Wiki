@@ -793,27 +793,31 @@ html, body {
 }
 
 // ── Scroll-isolation dei drawer mobili ───────────────────────────────────────
-// Problema: il drawer destro mobile ha contenuto più alto del viewport (es.
-// SeriesIndex con tante voci). Su touch, lo swipe verso il basso veniva
-// "delegato" al body sottostante via scroll-chaining del browser.
-//
-// Tentativo 1 (rifiutato): `html, body { overflow: hidden }` quando un drawer
-// è aperto. PROBLEMA: su iOS Safari `overflow: hidden` sul body congela TUTTI
-// gli scroll, anche quelli interni a elementi `position: fixed` come il
-// drawer. Bug noto, vedi https://bugs.webkit.org/show_bug.cgi?id=153852.
-//
-// Tentativo 2 (questo): `overscroll-behavior: contain` sul drawer è
-// sufficiente. Quando l'utente raggiunge il limite dello scroll interno del
-// drawer, il browser non propaga lo scroll al parent. Lo scroll del body
-// resta abilitato (così iOS è felice), ma di fatto non si attiva mai durante
-// l'interazione col drawer perché il touch è "catturato" dal drawer stesso.
+// `overscroll-behavior: contain` impedisce che lo scroll del drawer "fughi"
+// al body sottostante quando si raggiunge il limite. `-webkit-overflow-
+// scrolling: touch` è il momentum scroll per iOS < 13 (deprecato ma safe).
 .page > #quartz-body > .sidebar.left,
 .page > #quartz-body > .sidebar.right {
   overscroll-behavior: contain;
-  // iOS Safari < 13: scroll momentum fluido dentro elementi scrollabili.
-  // Senza, lo scroll è "stuttering". Property deprecata ma rispettata da
-  // dispositivi vecchi, ignorata dai nuovi. Safe da lasciare.
   -webkit-overflow-scrolling: touch;
+}
+
+// Il canvas Pixi del Graph ha `touch-action: none` (graph.scss) per gestire
+// internamente zoom/pan del grafo. Però quando il graph è dentro al drawer
+// destro mobile, questa proprietà "ruba" anche i swipe verticali che
+// l'utente vorrebbe usare per scrollare il drawer → il drawer non scorre.
+// Override: dentro al drawer mobile, lascia al browser lo swipe verticale
+// (pan-y = scroll della pagina/drawer), e blocca il pan orizzontale per
+// evitare che lo swipe trascini la pagina laterale del browser.
+@media (max-width: 1100px) {
+  html[data-mobile-sidebar-right-open="true"]
+    .page
+    > #quartz-body
+    > .sidebar.right
+    .graph
+    canvas {
+    touch-action: pan-y !important;
+  }
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
