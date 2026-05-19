@@ -794,50 +794,13 @@ html, body {
 
 // ── Scroll-isolation dei drawer mobili ───────────────────────────────────────
 // `overscroll-behavior: contain` impedisce che lo scroll del drawer "fughi"
-// al body sottostante quando si raggiunge il limite. `-webkit-overflow-
-// scrolling: touch` è il momentum scroll per iOS < 13 (deprecato ma safe).
+// al body sottostante quando si raggiunge il limite (no scroll-chaining).
+// `-webkit-overflow-scrolling: touch` è il momentum scroll per iOS < 13
+// (deprecato ma rispettato dai vecchi WebKit, ignorato dai nuovi).
 .page > #quartz-body > .sidebar.left,
 .page > #quartz-body > .sidebar.right {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-}
-
-// Forza lo scroll del drawer destro in mobile. La regola del drawer in
-// mobileSidebarRightToggle.scss ha già `overflow-y: auto !important` ma
-// non funzionava: usiamo `scroll` (scrollbar sempre visibile, debug helper)
-// e specificità ancora maggiore. `100dvh` invece di `100vh` gestisce
-// meglio l'address bar dinamica del browser mobile.
-@media (max-width: 1100px) {
-  html[data-mobile-sidebar-right-open="true"] .page > #quartz-body > .sidebar.right {
-    overflow-y: scroll !important;
-    overflow-x: hidden !important;
-    height: calc(100dvh - 66px) !important;
-    max-height: calc(100dvh - 66px) !important;
-    min-height: 0 !important;
-  }
-}
-
-// Il canvas Pixi del Graph ha `touch-action: none` (graph.scss) e ascolta
-// touch events via d3-drag (che chiama preventDefault). Su mobile, dentro
-// al drawer destro, questi handler intercettano TUTTI i swipe — anche quelli
-// verticali che l'utente userebbe per scrollare il drawer. Risultato: il
-// drawer non scorre quando il dito è sopra l'area del graph.
-//
-// Soluzione: nel drawer mobile disabilitiamo `pointer-events` sul canvas.
-// Gli eventi touch passano through al .graph-outer e al drawer parent →
-// il drawer riceve gli swipe e scorre normalmente. Il graph mobile diventa
-// "decorativo" (no zoom/pan), accettabile perché è già piccolo e l'utente
-// ha la versione full-page in /graph se vuole interagire col grafo.
-@media (max-width: 1100px) {
-  html[data-mobile-sidebar-right-open="true"]
-    .page
-    > #quartz-body
-    > .sidebar.right
-    .graph
-    canvas {
-    pointer-events: none !important;
-    touch-action: pan-y !important;
-  }
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
