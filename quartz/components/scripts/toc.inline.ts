@@ -44,7 +44,53 @@ function setupTocActiveState() {
   }
 }
 
+// Collapse/expand dei sotto-livelli della TOC. Gli item con figli hanno un
+// caret cliccabile (vedi TableOfContents.tsx). Click → toggle `data-collapsed`
+// sull'<li> + ricalcolo della visibilità di tutti gli item.
+//
+// Algoritmo "ancestor stack" (O(n)): iteriamo gli item in ordine documento,
+// mantenendo uno stack degli antenati attivi. Per ogni item:
+//   1. pop dallo stack tutti gli antenati con depth >= depth corrente
+//   2. l'item è nascosto sse un qualunque elemento nello stack è collapsed
+//   3. push dell'item corrente sullo stack (per i suoi futuri discendenti)
+function setupTocFolding() {
+  for (const toc of document.getElementsByClassName("toc")) {
+    const items = Array.from(toc.querySelectorAll<HTMLLIElement>(".toc-content > li"))
+    if (items.length === 0) continue
+
+    const recompute = () => {
+      const stack: { depth: number; collapsed: boolean }[] = []
+      for (const item of items) {
+        const depth = parseInt(item.dataset.depth ?? "0", 10)
+        while (stack.length > 0 && stack[stack.length - 1].depth >= depth) {
+          stack.pop()
+        }
+        const hidden = stack.some((a) => a.collapsed)
+        item.classList.toggle("hidden-by-fold", hidden)
+        stack.push({ depth, collapsed: item.dataset.collapsed === "true" })
+      }
+    }
+
+    recompute()
+
+    const folds = toc.querySelectorAll<HTMLButtonElement>(".toc-content > li > button.toc-fold")
+    for (const fold of folds) {
+      const li = fold.parentElement as HTMLLIElement | null
+      if (!li) continue
+      const handler = (e: Event) => {
+        e.preventDefault()
+        e.stopPropagation()
+        li.dataset.collapsed = li.dataset.collapsed === "true" ? "false" : "true"
+        recompute()
+      }
+      fold.addEventListener("click", handler)
+      window.addCleanup(() => fold.removeEventListener("click", handler))
+    }
+  }
+}
+
 document.addEventListener("nav", () => {
   setupToc()
   setupTocActiveState()
+  setupTocFolding()
 })

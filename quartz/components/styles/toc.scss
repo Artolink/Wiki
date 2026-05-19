@@ -47,20 +47,73 @@ ul.toc-content.overflow {
   overscroll-behavior: contain;
   list-style: none;
 
-  & > li > a {
-    color: var(--dark);
-    opacity: 0.35;
-    transition:
-      0.5s ease opacity,
-      0.3s ease color;
-    &.in-view {
-      opacity: 0.75;
+  & > li {
+    position: relative;
+    // hidden-by-fold = item discendente di un antenato attualmente collapsed
+    // (gestito da setupTocFolding in toc.inline.ts). display:none invece di
+    // visibility:hidden perché non vogliamo che occupi spazio.
+    &.hidden-by-fold {
+      display: none;
+    }
+
+    & > a {
+      color: var(--dark);
+      opacity: 0.35;
+      transition:
+        0.5s ease opacity,
+        0.3s ease color;
+      &.in-view {
+        opacity: 0.75;
+      }
+    }
+
+    // Caret di collapse — presente solo sugli item che hanno discendenti
+    // (vedi data-collapsed in TableOfContents.tsx). Posizionato absolute così
+    // gli item SENZA caret restano allineati col testo grazie al padding-left
+    // dei depth-#{$i} che riserva sempre uno slot di 1rem.
+    & > button.toc-fold {
+      position: absolute;
+      left: 0;
+      top: 0.1rem;
+      width: 1rem;
+      padding: 0;
+      background: none;
+      border: none;
+      color: var(--gray);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      svg {
+        transition: transform 0.2s ease;
+        opacity: 0.7;
+      }
+
+      &:hover svg {
+        opacity: 1;
+        color: var(--dark);
+      }
+    }
+
+    // Stato collapsed: caret ruotato di 90° (apre verso il basso)
+    &[data-collapsed="true"] > button.toc-fold svg {
+      transform: rotateZ(-90deg);
     }
   }
 
+  // Padding-left = indentazione per depth + slot fisso 1rem per il caret.
+  // Lo slot esiste anche per gli item senza caret così il testo dei link
+  // resta perfettamente allineato in colonna a destra dei caret di pari livello.
   @for $i from 0 through 6 {
     & .depth-#{$i} {
-      padding-left: calc(1rem * #{$i});
+      padding-left: calc(1rem * #{$i} + 1rem);
+
+      // Il caret stesso slitta verso destra in base alla depth, così sta
+      // sempre subito a sinistra del testo del proprio item.
+      & > button.toc-fold {
+        left: calc(1rem * #{$i});
+      }
     }
   }
 }

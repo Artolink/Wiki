@@ -59,13 +59,48 @@ export default ((opts?: Partial<Options>) => {
           id={id}
           class={fileData.collapseToc ? "collapsed toc-content" : "toc-content"}
         >
-          {fileData.toc.map((tocEntry) => (
-            <li key={tocEntry.slug} class={`depth-${tocEntry.depth}`}>
-              <a href={`#${tocEntry.slug}`} data-for={tocEntry.slug}>
-                {tocEntry.text}
-              </a>
-            </li>
-          ))}
+          {fileData.toc.map((tocEntry, idx) => {
+            // Un item ha figli se l'item successivo è a depth maggiore.
+            // Solo gli item con figli mostrano il caret di collapse.
+            const nextEntry = fileData.toc![idx + 1]
+            const hasChildren = !!nextEntry && nextEntry.depth > tocEntry.depth
+            return (
+              <li
+                key={tocEntry.slug}
+                class={`depth-${tocEntry.depth}`}
+                data-depth={tocEntry.depth}
+                // data-collapsed presente solo sugli item che possono essere
+                // collapsati. Lo script JS leggerà questo attributo per
+                // calcolare la visibilità.
+                data-collapsed={hasChildren ? "false" : undefined}
+              >
+                {hasChildren && (
+                  <button
+                    class="toc-fold"
+                    type="button"
+                    aria-label="Toggle subsections"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
+                )}
+                <a href={`#${tocEntry.slug}`} data-for={tocEntry.slug}>
+                  {tocEntry.text}
+                </a>
+              </li>
+            )
+          })}
         </OverflowList>
       </div>
     )
