@@ -44,6 +44,24 @@ export default ((opts?: Partial<FolderContentOptions>) => {
     // ordinato (es. la stack di Grafana: exporter → tsdb → scraper → grafana).
     const seriesSlugs = fileData.frontmatter?.series as string[] | undefined
     const isSeries = Array.isArray(seriesSlugs) && seriesSlugs.length > 0
+
+    // "Membro di una serie altrui": questa _index è ELENCATA in un'altra
+    // pagina con `series:` (es. l'_index della cartella `exporters` è
+    // menzionato nella series dell'_index di `metrics`). In quel caso il
+    // listing automatico della cartella non serve — la pagina ha già i
+    // bottoni Prev/Next a fondo pagina (vedi PageSequenceNav) e il listing
+    // delle children è ridondante / fuorviante (suggerisce un percorso
+    // diverso da quello della series).
+    const currentSlug = fileData.slug
+    const publicSlug = currentSlug?.replace(/\/index$/, "")
+    const isMemberOfSeries =
+      !!currentSlug &&
+      allFiles.some((f) => {
+        if (f.slug === currentSlug) return false // skip self
+        const series = f.frontmatter?.series as unknown
+        if (!Array.isArray(series)) return false
+        return (series as string[]).some((s) => s === currentSlug || s === publicSlug)
+      })
     // Match flessibile: lo slug del frontmatter può essere il "public" slug
     // (es. `observability/metrics/exporters`, come appare nell'URL del sito)
     // mentre Quartz internamente registra l'_index.md come
@@ -129,35 +147,44 @@ export default ((opts?: Partial<FolderContentOptions>) => {
         : htmlToJsx(fileData.filePath!, tree)
     ) as ComponentChildren
 
+    // Mostra il listing automatico solo se questa pagina NON è membro di
+    // un'altra series (sennò il listing è ridondante con i bottoni Prev/Next)
+    // e NON è essa stessa un hub di series (che ha rendering dedicato).
+    const showAutoListing = !isSeries && !isMemberOfSeries
+
     return (
       <div class="popover-hint">
         <article class={classes}>{content}</article>
-        <div class={isSeries ? "page-listing series-list" : "page-listing"}>
-          {isSeries ? (
-            <>
-              <p>
-                Here you can follow the individual guides in their suggested
-                reading order.
-              </p>
-              <p>
-                Start from the first one and continue! You'll find back and
-                forth navigation buttons at the end of each page.
-              </p>
-              <p class="series-toc-heading">Index</p>
-            </>
-          ) : (
-            options.showFolderCount && (
+        {isSeries && (
+          <div class="page-listing series-list">
+            <p>
+              Here you can follow the individual guides in their suggested
+              reading order.
+            </p>
+            <p>
+              Start from the first one and continue! You'll find back and forth
+              navigation buttons at the end of each page.
+            </p>
+            <p class="series-toc-heading">Index</p>
+            <div>
+              <PageList {...listProps} />
+            </div>
+          </div>
+        )}
+        {showAutoListing && (
+          <div class="page-listing">
+            {options.showFolderCount && (
               <p>
                 {i18n(cfg.locale).pages.folderContent.itemsUnderFolder({
                   count: displayPages.length,
                 })}
               </p>
-            )
-          )}
-          <div>
-            <PageList {...listProps} />
+            )}
+            <div>
+              <PageList {...listProps} />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     )
   }
