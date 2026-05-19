@@ -205,11 +205,11 @@ export const defaultContentPageLayout: PageLayout = {
     sidebarRightActions,
     sidebarGraph,
     Component.DesktopOnly(Component.TableOfContents()),
-    // SeriesIndex: appare solo sulle pagine che fanno parte di una series
-    // (hub o member). Return null sulle altre. Va sotto al TOC e si separa
-    // automaticamente con border-top (stile coerente con gli altri blocchi
-    // della sidebar destra).
-    Component.DesktopOnly(Component.SeriesIndex()),
+    // SeriesIndex disabilitato — sostituito dal toggle "libro" in topbar
+    // (vedi Component.SeriesIndexToggle() nel Flex dell'header). Il
+    // componente esiste ancora in quartz/components/SeriesIndex.tsx,
+    // basta rimettere `Component.DesktopOnly(Component.SeriesIndex())` qui
+    // sotto per riattivarlo come blocco statico nella sidebar destra.
     // Backlinks disabilitati a livello di layout — il componente esiste ancora
     // in quartz/components/Backlinks.tsx, basta rimettere `Component.Backlinks()`
     // qui sotto per riattivarli.
@@ -259,7 +259,8 @@ export const defaultListPageLayout: PageLayout = {
     Component.Explorer({ title: "Notes", sortFn: explorerSortFn, filterFn: explorerFilterFn }),
   ],
   // Pulsanti utility nel drawer destro (no Graph/TOC/Backlinks per le list
-  // pages) + SeriesIndex per le _index pages che sono membri di una series.
-  // Il SeriesIndex restituisce null sulle altre, quindi safe ovunque.
-  right: [sidebarRightActions, Component.DesktopOnly(Component.SeriesIndex())],
+  // pages). Nascosti su desktop, visibili solo nel drawer mobile.
+  // Il SeriesIndex statico è stato rimosso — l'indice della series è ora
+  // accessibile dal toggle "libro" in topbar (vedi sidebarRightActions).
+  right: [sidebarRightActions],
 }
