@@ -8,6 +8,14 @@
   margin: 2.5rem 0 1.5rem;
 
   .page-sequence-link {
+    // `min-width: 0` è FONDAMENTALE: i grid items hanno `min-width: auto` di
+    // default, che diventa = min-content del contenuto. Per titoli lunghi
+    // con `white-space: nowrap`, min-content = larghezza intera del titolo,
+    // e il grid item "sfora" la colonna 1fr ignorando il sizing. Stesso
+    // problema risolto per `.center` in custom.scss e per `.callout-content`
+    // grid in custom.scss — pattern ricorrente di CSS grid.
+    min-width: 0;
+
     display: flex;
     align-items: center;
     gap: 0.6rem;
