@@ -40,6 +40,7 @@ import PageProgress from "./PageProgress"
 import PageSequenceNav from "./PageSequenceNav"
 import SeriesIndex from "./SeriesIndex"
 import SeriesIndexToggle from "./SeriesIndexToggle"
+import BuyMeCoffee from "./BuyMeCoffee"
 
 export {
   ArticleTitle,
@@ -84,4 +85,5 @@ export {
   PageSequenceNav,
   SeriesIndex,
   SeriesIndexToggle,
+  BuyMeCoffee,
 }

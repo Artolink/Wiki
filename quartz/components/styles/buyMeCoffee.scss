@@ -1,0 +1,55 @@
+// Pulsante "Buy me a coffee" — replica visivamente lo stile del bottone
+// ufficiale (bg giallo BMC #FFDD00, testo nero, bordo nero soft, leggero
+// lift al hover). Compare SOLO nella home (vedi BuyMeCoffee.tsx).
+.bmc-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.85rem;
+  background: #ffdd00;
+  color: #000 !important;
+  border: 1px solid #000;
+  border-radius: 8px;
+  text-decoration: none !important;
+  font-weight: 700;
+  font-size: 0.85rem;
+  font-family: var(--bodyFont);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+
+  &:hover {
+    background: #ffe833; // un filo più chiaro per dare feedback
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    color: #000 !important;
+  }
+
+  & svg {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    stroke: #000;
+  }
+
+  // Mobile stretto (≤480px): solo l'icona, niente testo — per non occupare
+  // spazio nella topbar già affollata.
+  @media (max-width: 480px) {
+    padding: 0.4rem 0.55rem;
+    gap: 0;
+
+    .bmc-text {
+      display: none;
+    }
+  }
+}
+
+// Dark mode: il giallo resta uguale (è il branding di BMC), ma teniamo
+// stroke nero della icona per leggibilità.
+html[saved-theme="dark"] .bmc-button {
+  color: #000 !important;
+  border-color: #000;
+}

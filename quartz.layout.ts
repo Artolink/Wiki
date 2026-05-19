@@ -57,9 +57,13 @@ export const sharedPageComponents: SharedLayout = {
     Component.Search({ enablePreview: false }),
     Component.Flex({
       components: [
+        // BuyMeCoffee: visibile SOLO nella home (vedi BuyMeCoffee.tsx).
+        // Auto-hide via return null sulle altre pagine. Va come primo del
+        // Flex (a sinistra di tutti gli altri utility buttons).
+        { Component: Component.BuyMeCoffee() },
         // SeriesIndexToggle: bottone "libro" che apre un popup con l'indice
         // della series corrente. Self-hides quando la pagina non è in alcuna
-        // series (return null). Va come primo nel Flex, a sinistra degli altri.
+        // series (return null).
         { Component: Component.SeriesIndexToggle() },
         { Component: Component.GraphToggle() },
         { Component: Component.Darkmode() },
@@ -136,8 +140,9 @@ const sidebarGraph = Component.Graph({
 // Vedi mobileSidebarRightToggle.scss per le regole di display.
 const sidebarRightActions = Component.Flex({
   components: [
-    // Stesso ordine della topbar: il toggle indice come primo, poi gli altri.
-    // Self-hide se la pagina non è in una series.
+    // Stesso ordine della topbar: BuyMeCoffee come primo (solo home), poi
+    // il toggle indice (solo pagine in series), poi gli altri utility.
+    { Component: Component.BuyMeCoffee() },
     { Component: Component.SeriesIndexToggle() },
     { Component: Component.GraphToggle() },
     { Component: Component.Darkmode() },
