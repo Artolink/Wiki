@@ -124,14 +124,23 @@ export default ((opts?: Partial<FolderContentOptions>) => {
       <div class="popover-hint">
         <article class={classes}>{content}</article>
         <div class={isSeries ? "page-listing series-list" : "page-listing"}>
-          {options.showFolderCount && (
-            <p>
-              {isSeries
-                ? `${displayPages.length} pages in this series, in suggested reading order:`
-                : i18n(cfg.locale).pages.folderContent.itemsUnderFolder({
-                    count: displayPages.length,
-                  })}
-            </p>
+          {isSeries ? (
+            <>
+              <p>
+                Here you can follow the detailed pages in their suggested
+                reading order. Start from the first one and continue! (you'll
+                find back-forth buttons at the end of the page)
+              </p>
+              <p class="series-toc-heading">Table of Contents:</p>
+            </>
+          ) : (
+            options.showFolderCount && (
+              <p>
+                {i18n(cfg.locale).pages.folderContent.itemsUnderFolder({
+                  count: displayPages.length,
+                })}
+              </p>
+            )
           )}
           <div>
             <PageList {...listProps} />
