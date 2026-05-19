@@ -72,16 +72,18 @@ ul.toc-content.overflow {
     // gli item SENZA caret restano allineati col testo grazie al padding-left
     // dei depth-#{$i} che riserva sempre uno slot di 1rem.
     //
-    // Allineamento verticale: do al button la stessa altezza di una riga di
-    // testo (1.6em = line-height ereditata dai link) e centro il SVG col flex.
-    // Così il caret resta sempre allineato alla PRIMA riga del link anche se
-    // il testo va a capo, indipendentemente da font-size override.
+    // Allineamento verticale: il button copre l'altezza del line-box del
+    // link (1.6rem = line-height ereditata da base.scss `li { line-height:
+    // 1.6rem }`). Il SVG ha un margin-top per compensare la differenza tra
+    // centro GEOMETRICO del line-box (dove `align-items: center` lo metterebbe)
+    // e centro OTTICO del testo (più basso, dove il testo è realmente
+    // disegnato — i caratteri si appoggiano al baseline).
     & > button.toc-fold {
       position: absolute;
       left: 0;
       top: 0;
       width: 1rem;
-      height: 1.6em;
+      height: 1.6rem;
       padding: 0;
       background: none;
       border: none;
@@ -92,6 +94,7 @@ ul.toc-content.overflow {
       justify-content: center;
 
       svg {
+        margin-top: 0.25rem; // shift al centro ottico (≈ +4px su 1.6rem line-box)
         transition: transform 0.2s ease;
         opacity: 0.7;
       }
