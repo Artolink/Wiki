@@ -9,6 +9,22 @@ import { QuartzPluginData } from "../../plugins/vfile"
 import { ComponentChildren } from "preact"
 import { concatenateResources } from "../../util/resources"
 import { trieFromAllFiles } from "../../util/ctx"
+import { isFolderPath } from "../../util/path"
+
+// Ordinamento alfabetico per titolo, con cartelle in cima (stessa convenzione
+// di `byDateAndAlphabeticalFolderFirst` in PageList.tsx). `numeric: true`
+// abilita il "natural sort": "0. Pre-upgrade", "1. Patch", "2. Post-upgrade"
+// vengono ordinati correttamente invece di "0., 1., 10., 2., 3.".
+const alphabeticalFolderFirst: SortFn = (a, b) => {
+  const aIsFolder = isFolderPath(a.slug ?? "")
+  const bIsFolder = isFolderPath(b.slug ?? "")
+  if (aIsFolder && !bIsFolder) return -1
+  if (!aIsFolder && bIsFolder) return 1
+
+  const aTitle = (a.frontmatter?.title ?? a.slug ?? "").toLowerCase()
+  const bTitle = (b.frontmatter?.title ?? b.slug ?? "").toLowerCase()
+  return aTitle.localeCompare(bTitle, undefined, { numeric: true })
+}
 
 interface FolderContentOptions {
   /**
@@ -137,7 +153,9 @@ export default ((opts?: Partial<FolderContentOptions>) => {
     const displayPages = isSeries ? seriesPages : allPagesInFolder
     const listProps = {
       ...props,
-      sort: isSeries ? () => 0 : options.sort,
+      // Series → ordine dichiarato nell'array (sort identity, no riordino).
+      // Default → alfabetico per titolo con cartelle in cima (non più per data).
+      sort: isSeries ? () => 0 : options.sort ?? alphabeticalFolderFirst,
       allFiles: displayPages,
     }
 
