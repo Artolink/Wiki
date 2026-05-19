@@ -1,0 +1,128 @@
+// Pulsante "libro" + popup nella topbar.
+// Il wrapper è position:relative così il popup absolute si ancora sotto il
+// bottone. Niente nel popup interferisce con la topbar (z-index alto).
+.series-index-toggle {
+  position: relative;
+  display: inline-flex;
+
+  & > button.series-index-toggle-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.3rem;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: color 0.15s ease, background-color 0.15s ease;
+
+    &:hover {
+      color: var(--secondary);
+      background-color: var(--sidebar-hover);
+    }
+
+    & svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  // Popup: card flottante ancorata sotto al bottone, a destra.
+  // Default: nascosta. Apparire al click via classe `.open`.
+  & > .series-index-popup {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    width: 320px;
+    max-width: 90vw;
+    max-height: 70vh;
+    overflow-y: auto;
+
+    background: var(--light);
+    border: 1px solid var(--lightgray);
+    border-radius: 8px;
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.08),
+      0 1px 3px rgba(0, 0, 0, 0.05);
+
+    padding: 0.9rem 1.1rem;
+    z-index: 1000;
+
+    opacity: 0;
+    transform: translateY(-4px);
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 0.15s ease,
+      transform 0.15s ease,
+      visibility 0.15s ease;
+
+    &.open {
+      opacity: 1;
+      transform: translateY(0);
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    & > .series-index-popup-title {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      color: var(--gray);
+      margin: 0 0 0.6rem 0;
+    }
+
+    & > .series-index-popup-list {
+      list-style: decimal outside;
+      margin: 0;
+      padding-left: 1.4rem;
+
+      & > li {
+        margin: 0.35rem 0;
+        font-size: 0.9rem;
+        line-height: 1.4;
+
+        &::marker {
+          color: var(--gray);
+          font-weight: 500;
+        }
+
+        & > a {
+          color: var(--dark);
+          opacity: 0.75;
+          background: none;
+          transition:
+            opacity 0.2s ease,
+            color 0.2s ease;
+
+          &:hover {
+            opacity: 1;
+            color: var(--secondary);
+          }
+        }
+
+        &.active::marker {
+          color: var(--secondary);
+          font-weight: 600;
+        }
+
+        & > a.active {
+          opacity: 1;
+          color: var(--secondary);
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
+
+// Dark mode: shadow leggermente più marcata + border armonizzato
+html[saved-theme="dark"] .series-index-toggle > .series-index-popup {
+  background: var(--code-bg);
+  border-color: var(--code-border);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.4),
+    0 1px 4px rgba(0, 0, 0, 0.3);
+}

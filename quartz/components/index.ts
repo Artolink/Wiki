@@ -39,6 +39,7 @@ import ScrollProgress from "./ScrollProgress"
 import PageProgress from "./PageProgress"
 import PageSequenceNav from "./PageSequenceNav"
 import SeriesIndex from "./SeriesIndex"
+import SeriesIndexToggle from "./SeriesIndexToggle"
 
 export {
   ArticleTitle,
@@ -82,4 +83,5 @@ export {
   PageProgress,
   PageSequenceNav,
   SeriesIndex,
+  SeriesIndexToggle,
 }
