@@ -1,55 +1,46 @@
-// Pulsante "Buy me a coffee" — replica visivamente lo stile del bottone
-// ufficiale (bg giallo BMC #FFDD00, testo nero, bordo nero soft, leggero
-// lift al hover). Compare SOLO nella home (vedi BuyMeCoffee.tsx).
+// Pulsante "Buy me a coffee" — usa l'asset ufficiale dal CDN BMC (vedi
+// BuyMeCoffee.tsx). Compare SOLO nella home.
+//
+// Il bottone è solo un wrapper <a> sull'<img> ufficiale BMC. Niente bordi/bg
+// custom: il bottone PNG ha già il suo styling completo (gialli, bordi neri,
+// font "Cookie" di BMC, tazza di caffè). Aggiungiamo solo: dimensionamento
+// uniforme con gli altri utility button della topbar e un leggero lift al hover.
 .bmc-button {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 0.85rem;
-  background: #ffdd00;
-  color: #000 !important;
-  border: 1px solid #000;
-  border-radius: 8px;
   text-decoration: none !important;
-  font-weight: 700;
-  font-size: 0.85rem;
-  font-family: var(--bodyFont);
-  white-space: nowrap;
   cursor: pointer;
+  border-radius: 6px; // per il focus-ring/hover, non visibile sul bottone stesso
   transition:
     transform 0.15s ease,
-    box-shadow 0.15s ease,
-    background 0.15s ease;
+    box-shadow 0.15s ease;
+
+  & img {
+    display: block;
+    // Altezza fissa per allinearsi agli altri pulsanti utility della topbar
+    // (~36px per i bottoni circolari). La width segue automaticamente per
+    // mantenere l'aspect ratio originale 545:153 (~3.56:1).
+    height: 32px;
+    width: auto;
+    // Border-radius leggero in caso l'asset cambi e diventi rettangolare
+    // senza i suoi propri corner.
+    border-radius: 6px;
+    // L'asset PNG-8 ha bordi un filo "scalettati" se ingrandito; manteniamo
+    // l'altezza piccola per crisp rendering, ma aggiungiamo image-rendering
+    // come safety per browser che fanno upscaling.
+    image-rendering: auto;
+  }
 
   &:hover {
-    background: #ffe833; // un filo più chiaro per dare feedback
     transform: translateY(-1px);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-    color: #000 !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
   }
 
-  & svg {
-    flex: 0 0 auto;
-    width: 18px;
-    height: 18px;
-    stroke: #000;
-  }
-
-  // Mobile stretto (≤480px): solo l'icona, niente testo — per non occupare
-  // spazio nella topbar già affollata.
+  // Mobile stretto (≤480px): bottone leggermente più piccolo per non
+  // affollare la topbar.
   @media (max-width: 480px) {
-    padding: 0.4rem 0.55rem;
-    gap: 0;
-
-    .bmc-text {
-      display: none;
+    & img {
+      height: 28px;
     }
   }
-}
-
-// Dark mode: il giallo resta uguale (è il branding di BMC), ma teniamo
-// stroke nero della icona per leggibilità.
-html[saved-theme="dark"] .bmc-button {
-  color: #000 !important;
-  border-color: #000;
 }
