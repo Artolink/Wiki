@@ -536,17 +536,24 @@ html[saved-theme="dark"] .page .page-header > header .search > .search-button {
 // SIDEBAR DESTRA — stile syselement (solo TOC pulita, no card beige)
 // ──────────────────────────────────────────────────────────────────────────────
 
-.page > #quartz-body > .sidebar.right {
-  background: transparent;
-  border: none !important;
-  border-radius: 0;
-  margin: 0 !important;
-  padding: calc(#{$navH} + 1rem) 2rem 1rem 1rem !important;
-  // Altezza naturale + niente scrollbar (vedi sidebar.left)
-  height: auto !important;
-  top: 0 !important;
-  box-sizing: border-box;
-  overflow: visible !important;
+// Su DESKTOP (≥1101px) la sidebar.right è inline nel grid: altezza naturale,
+// niente scroll interno (scrolla con la pagina). Su MOBILE invece la sidebar
+// diventa drawer fisso (vedi mobileSidebarRightToggle.scss) con scroll
+// interno via `overflow-y: auto` — wrappiamo questa regola in min-width
+// per non sovrascrivere il drawer mobile.
+@media (min-width: 1101px) {
+  .page > #quartz-body > .sidebar.right {
+    background: transparent;
+    border: none !important;
+    border-radius: 0;
+    margin: 0 !important;
+    padding: calc(#{$navH} + 1rem) 2rem 1rem 1rem !important;
+    // Altezza naturale + niente scrollbar (vedi sidebar.left)
+    height: auto !important;
+    top: 0 !important;
+    box-sizing: border-box;
+    overflow: visible !important;
+  }
 }
 
 // ── Grafo: più piccolo e discreto, senza sfondo card ──────────────────────────
