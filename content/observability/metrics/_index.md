@@ -1,5 +1,10 @@
 ---
 title: 📈 Metrics (Grafana stack)
+series:
+  - observability/metrics/exporters/node-exporter
+  - observability/metrics/TSDB/victoriametrics
+  - observability/metrics/scrapers/vmagent
+  - observability/metrics/dashboard/grafana
 ---
 Here you'll find a few observability notions concerning metrics, along with my personal metrics stack for the VPS hosting `farnetiandrea.it`. 
 

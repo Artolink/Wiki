@@ -1,11 +1,6 @@
 ---
 title: 📊 Observability
 tags:
-series:
-  - observability/metrics/exporters/node-exporter
-  - observability/metrics/TSDB/victoriametrics
-  - observability/metrics/scrapers/vmagent
-  - observability/metrics/dashboard/grafana
 ---
 ##  What is observability?
 
