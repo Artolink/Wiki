@@ -127,12 +127,12 @@ export default ((opts?: Partial<FolderContentOptions>) => {
           {isSeries ? (
             <>
               <p>
-                Here you can follow the detailed pages in their suggested
+                Here you can follow the individual guides in their suggested
                 reading order.
               </p>
               <p>
-                Start from the first one and continue! (you'll find back-forth
-                buttons at the end of the page)
+                Start from the first one and continue! You'll find back and
+                forth navigation buttons at the end of each page.
               </p>
               <p class="series-toc-heading">Index</p>
             </>
