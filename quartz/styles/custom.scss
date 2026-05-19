@@ -743,10 +743,13 @@ html[saved-theme="dark"] .graph .graph-outer {
 //   - Content pages (.md normali, vedi components/pages/Content.tsx):
 //     <article class="popover-hint"> figlio diretto di .center
 //   - List pages (_index e tags, vedi components/pages/FolderContent.tsx
-//     e TagContent.tsx): <div class="popover-hint"><article> — l'article
-//     è NIPOTE di .center, non figlio
+//     e TagContent.tsx): <div class="popover-hint"><article><div class="page-listing">
+//     — sia l'article che il page-listing sono NIPOTI di .center.
 .page > #quartz-body > .center > article,
-.page > #quartz-body > .center > .popover-hint > article {
+.page > #quartz-body > .center > .popover-hint > article,
+// Listing automatico ("N items under this folder") e series-list numerata:
+// vivono accanto all'article, non dentro. Devono scalare insieme al testo.
+.page > #quartz-body > .center > .popover-hint > .page-listing {
   font-size: calc(1rem * var(--font-scale, 1));
 }
 
