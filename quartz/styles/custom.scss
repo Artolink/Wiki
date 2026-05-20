@@ -632,7 +632,10 @@ body[data-slug="graph"] .info-graph-popup {
   border: none;
   border-radius: 4px;
   color: var(--dark);
-  opacity: 0.5;
+  // Opacity più bassa per restare "in punta di piedi" come il
+  // .global-graph-icon (anche lui sfumato a 0.5). Lo SVG ha stroke-width
+  // 1.5 invece di 2 per essere più "sottile".
+  opacity: 0.35;
   cursor: pointer;
   z-index: 5;
   transition:
