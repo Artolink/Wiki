@@ -1,4 +1,4 @@
 ---
-title: 📜 6. Logging
+title: 6. 📜 Logging
 tags:
 ---
