@@ -607,13 +607,16 @@ html[saved-theme="dark"] .graph .graph-outer {
   margin-bottom: 0.5rem;
 }
 
-// Icona "info" in alto a sinistra del mini-graph — speculare al
-// .global-graph-icon che sta a destra. Click apre .info-graph-popup
-// (gestito da setupInfoButton in graph.inline.ts).
+// Icona "info" in alto a destra del mini-graph, immediatamente a sinistra
+// del .global-graph-icon (che è ancorato a right: 0 con margin 0.3rem,
+// icona 24×24px + padding 0.2rem = ~28px di "ingombro").
+// Posizioniamo l'info a `right: 2rem` per stare alla sua sinistra con
+// un piccolo gap. Click apre .info-graph-popup (gestito da setupInfoButton
+// in graph.inline.ts).
 .sidebar.right .graph .graph-outer > .info-graph-icon {
   position: absolute;
   top: 0;
-  left: 0;
+  right: 2rem;
   margin: 0.3rem;
   padding: 0.2rem;
   width: 24px;
@@ -641,12 +644,13 @@ html[saved-theme="dark"] .graph .graph-outer {
   }
 }
 
-// Popup connessioni — appare sotto al bottone info, ancorato dentro al
-// .graph-outer (che è position: relative). Nascosto di default.
+// Popup connessioni — appare sotto al bottone info (top-right), ancorato
+// al bordo destro del .graph-outer (che è position: relative). Nascosto
+// di default.
 .sidebar.right .graph .graph-outer > .info-graph-popup {
   position: absolute;
   top: 2.2rem;
-  left: 0.4rem;
+  right: 0.4rem;
   z-index: 10;
   width: calc(100% - 0.8rem);
   max-width: 280px;
