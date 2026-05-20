@@ -4,6 +4,7 @@ import script from "./scripts/graph.inline"
 import style from "./styles/graph.scss"
 import { i18n } from "../i18n"
 import { classNames } from "../util/lang"
+import { simplifySlug } from "../util/path"
 
 export interface D3Config {
   drag: boolean
@@ -77,9 +78,32 @@ const defaultOptions: GraphOptions = {
 }
 
 export default ((opts?: Partial<GraphOptions>) => {
-  const Graph: QuartzComponent = ({ displayClass, cfg }: QuartzComponentProps) => {
+  const Graph: QuartzComponent = ({
+    displayClass,
+    cfg,
+    fileData,
+    allFiles,
+  }: QuartzComponentProps) => {
     const localGraph = { ...defaultOptions.localGraph, ...opts?.localGraph }
     const globalGraph = { ...defaultOptions.globalGraph, ...opts?.globalGraph }
+
+    // Conteggio delle "connessioni" della pagina corrente per il mini-graph:
+    // unione dei vicini a distanza 1 = outgoing links (cosa linko io) +
+    // backlinks (chi linka me). Set per deduplicare quando un'altra nota
+    // mi linka e io linko lei (link reciproci).
+    // Match flessibile su slug: `fileData.links` e `file.links` contengono
+    // SimpleSlug (senza il suffisso /index), quindi simplifySlug del current.
+    const currentSlug = fileData.slug ? simplifySlug(fileData.slug) : ""
+    const outgoing = new Set<string>(fileData.links ?? [])
+    const incoming = new Set<string>(
+      allFiles
+        .filter((f) => f.links?.includes(currentSlug))
+        .map((f) => (f.slug ? simplifySlug(f.slug) : ""))
+        .filter(Boolean),
+    )
+    const allConnected = new Set<string>([...outgoing, ...incoming])
+    const connectionsCount = allConnected.size
+
     return (
       <div class={classNames(displayClass, "graph")}>
         <h3>{i18n(cfg.locale).components.graph.title}</h3>
@@ -134,6 +158,16 @@ export default ((opts?: Partial<GraphOptions>) => {
             </svg>
           </button>
         </div>
+        {/* Contatore connessioni — mostrato sotto al mini-graph nella sidebar.
+            Si gestisce singolare/plurale + caso "nessuna connessione" per
+            non lasciare la pagina muta su note isolate. */}
+        <p class="graph-connections-count">
+          {connectionsCount === 0
+            ? "No connections to this topic yet"
+            : connectionsCount === 1
+              ? "There is 1 connection to this topic"
+              : `There are ${connectionsCount} connections to this topic`}
+        </p>
         <div class="global-graph-outer">
           <div class="global-graph-container" data-cfg={JSON.stringify(globalGraph)}></div>
         </div>

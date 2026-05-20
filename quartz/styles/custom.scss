@@ -607,6 +607,16 @@ html[saved-theme="dark"] .graph .graph-outer {
   margin-bottom: 0.5rem;
 }
 
+// "There are X connections to this topic" sotto al mini-graph.
+// Stile discreto, allineato come una caption.
+.sidebar.right .graph .graph-connections-count {
+  font-size: 0.78rem;
+  color: var(--gray);
+  text-align: center;
+  margin: 0.5rem 0 0;
+  font-style: italic;
+}
+
 // ── TOC: "ON THIS PAGE" style ─────────────────────────────────────────────────
 
 .sidebar.right .toc {
