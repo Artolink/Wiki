@@ -1,4 +1,4 @@
 ---
-title: 7. 🔒 Security & Hardening
+title: 🔒 7. Security & Hardening
 tags:
 ---

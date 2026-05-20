@@ -1,4 +1,4 @@
 ---
-title: " 0. 🔌 Hardware layer"
+title: 🔌 0. Hardware layer
 tags:
 ---

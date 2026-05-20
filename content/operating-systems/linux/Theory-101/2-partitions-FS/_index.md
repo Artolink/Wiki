@@ -1,4 +1,4 @@
 ---
-title: " 2. 💾 FileSystem & Partitions"
+title: 💾 2. FileSystem & Partitions
 tags:
 ---

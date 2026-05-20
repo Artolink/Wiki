@@ -1,4 +1,4 @@
 ---
-title: 5. ⌨️ CLI commands
+title: ⌨️ 5. CLI commands
 tags:
 ---

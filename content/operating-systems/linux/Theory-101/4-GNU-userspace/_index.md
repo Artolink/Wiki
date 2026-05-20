@@ -1,4 +1,4 @@
 ---
-title: 4. 🦬 GNU / User-Space
+title: 🦬 4. GNU / User-Space
 tags:
 ---
