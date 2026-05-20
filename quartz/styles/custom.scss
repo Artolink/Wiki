@@ -644,25 +644,30 @@ html[saved-theme="dark"] .graph .graph-outer {
 }
 
 // Popup connessioni — appare sotto la coppia di icone (top:2rem + height
-// 24px + gap = ~4rem) e si ancora al bordo destro. Cresce verso sinistra
-// fino al 100% del graph-outer (cap 280px).
+// 24px + gap = ~4rem). Ancorato a ENTRAMBI i lati (left + right) così
+// occupa sempre lo spazio interno del graph-outer senza poter uscire dai
+// bordi (bug noto: con solo right+max-width, su graph-outer < max-width il
+// popup andava in negativo a sinistra e veniva tagliato da overflow:hidden).
 .sidebar.right .graph .graph-outer > .info-graph-popup {
   position: absolute;
   top: 4.2rem;
+  left: 0.4rem;
   right: 0.4rem;
   z-index: 10;
-  width: calc(100% - 0.8rem);
-  max-width: 280px;
   max-height: 240px;
   overflow-y: auto;
   overscroll-behavior: contain;
 
-  background: var(--light);
-  border: 1px solid var(--lightgray);
+  // Bg con leggera trasparenza + backdrop-filter blur: effetto "vetro
+  // smerigliato" più morbido del bianco puro precedente.
+  background: rgba(255, 255, 255, 0.88);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 8px;
   box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.08),
-    0 1px 3px rgba(0, 0, 0, 0.05);
+    0 4px 12px rgba(0, 0, 0, 0.06),
+    0 1px 3px rgba(0, 0, 0, 0.04);
   padding: 0.7rem 0.85rem;
 
   opacity: 0;
@@ -716,10 +721,10 @@ html[saved-theme="dark"] .graph .graph-outer {
   }
 }
 
-// Dark mode: popup con shadow più marcata + border armonizzato
+// Dark mode: bg stone con alpha + bordo armonizzato + shadow più marcata
 html[saved-theme="dark"] .sidebar.right .graph .graph-outer > .info-graph-popup {
-  background: var(--code-bg);
-  border-color: var(--code-border);
+  background: rgba(41, 37, 36, 0.88); // var(--code-bg) con alpha
+  border-color: rgba(255, 255, 255, 0.08);
   box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.4),
     0 1px 4px rgba(0, 0, 0, 0.3);
