@@ -64,17 +64,30 @@ export default ((opts?: Partial<Options>) => {
             // Solo gli item con figli mostrano il caret di collapse.
             const nextEntry = fileData.toc![idx + 1]
             const hasChildren = !!nextEntry && nextEntry.depth > tocEntry.depth
+
+            // Conta i figli DIRETTI (depth + 1, fermandosi al primo item
+            // di depth pari o minore = fine del sub-tree). Serve per
+            // decidere se l'item è collapsed di default.
+            let directChildrenCount = 0
+            for (let i = idx + 1; i < fileData.toc!.length; i++) {
+              const e = fileData.toc![i]
+              if (e.depth <= tocEntry.depth) break // uscito dal sub-tree
+              if (e.depth === tocEntry.depth + 1) directChildrenCount++
+            }
+
+            // Default state:
+            //   - più di 2 figli diretti → collapsed (riduci rumore visivo)
+            //   - 1 o 2 figli diretti → espanso (sono pochi, mostriamoli)
+            //   - nessun figlio → niente data-collapsed (no caret)
+            const collapsedByDefault = directChildrenCount > 2
             return (
               <li
                 key={tocEntry.slug}
                 class={`depth-${tocEntry.depth}`}
                 data-depth={tocEntry.depth}
-                // data-collapsed presente solo sugli item che possono essere
-                // collapsati. Lo script JS leggerà questo attributo per
-                // calcolare la visibilità. Default: "true" (chiuso), così
-                // l'utente vede solo il top-level all'apertura della pagina
-                // e può espandere ciò che gli interessa con un click.
-                data-collapsed={hasChildren ? "true" : undefined}
+                data-collapsed={
+                  hasChildren ? (collapsedByDefault ? "true" : "false") : undefined
+                }
               >
                 {hasChildren && (
                   <button
