@@ -35,7 +35,7 @@ As the names suggest, you have to keep your private key secret, while you can sh
 
 They're mathematically linked, but you cannot derive the private key from the public: it's extremely hard computationally (in mathematics, it's a one-way function).
 
-> [!tip] The padlock analogy
+> [!Example] The padlock analogy
 > Think of the **public key** as an open padlock you hand out to anyone. 
 > The **private key** is the only key that opens it, so anyone can lock a box with your padlock (encrypt something for you), but only you can open it.
 
