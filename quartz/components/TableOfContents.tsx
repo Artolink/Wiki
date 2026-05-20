@@ -71,8 +71,10 @@ export default ((opts?: Partial<Options>) => {
                 data-depth={tocEntry.depth}
                 // data-collapsed presente solo sugli item che possono essere
                 // collapsati. Lo script JS leggerà questo attributo per
-                // calcolare la visibilità.
-                data-collapsed={hasChildren ? "false" : undefined}
+                // calcolare la visibilità. Default: "true" (chiuso), così
+                // l'utente vede solo il top-level all'apertura della pagina
+                // e può espandere ciò che gli interessa con un click.
+                data-collapsed={hasChildren ? "true" : undefined}
               >
                 {hasChildren && (
                   <button
