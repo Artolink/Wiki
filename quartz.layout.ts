@@ -27,7 +27,16 @@ const explorerSortFn = (a: FileTrieNode, b: FileTrieNode): number => {
   if (ai !== -1) return -1
   if (bi !== -1) return 1
   if ((!a.isFolder && !b.isFolder) || (a.isFolder && b.isFolder)) {
-    return a.displayName.localeCompare(b.displayName, undefined, { numeric: true, sensitivity: "base" })
+    // I titoli del wiki tipicamente hanno un'emoji prima del numero o del
+    // testo (es. "🚀 1. Boot sequence", "🦬 4. GNU / User-Space"). Senza
+    // strip, localeCompare confronta prima i code point Unicode delle emoji
+    // (arbitrari) e l'ordine risulta casuale. `^[^\w]+` rimuove i caratteri
+    // non-word (emoji, spazi, punteggiatura) all'inizio prima del confronto,
+    // così "🚀 1. Boot" diventa "1. Boot" e numeric:true dell'localeCompare
+    // ordina correttamente 0, 1, 2, … 10, 11.
+    const aName = a.displayName.replace(/^[^\w]+/u, "")
+    const bName = b.displayName.replace(/^[^\w]+/u, "")
+    return aName.localeCompare(bName, undefined, { numeric: true, sensitivity: "base" })
   }
   return a.isFolder ? -1 : 1
 }
