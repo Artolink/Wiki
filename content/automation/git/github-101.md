@@ -30,12 +30,12 @@ From the home page, click the green **New** button (or visit https://github.com/
 ![[Pasted image 20260506111440.png]]
 
 Fields that matter:
-- **Repository name** — keep it short and descriptive. Hyphens are fine, spaces aren't.
-- **Description** — one line, optional but useful.
-- **Public vs Private** — see below.
-- **Initialize with README** — tick it for a brand-new project; leave it unticked if you already have local files to push (otherwise the first push will conflict).
-- **.gitignore template** — pick the one matching the language (Node, Python, …); GitHub adds a sensible default ignore list.
-- **License** — only relevant if the repo is public. MIT is the safe default if unsure.
+- **Repository name**: keep it short and descriptive. Hyphens are fine, spaces aren't.
+- **Description**: one line, optional but useful.
+- **Public vs Private**: see below.
+- **Initialize with README**: tick it for a brand-new project; leave it unticked if you already have local files to push (otherwise the first push will conflict).
+- **.gitignore template**: pick the one matching the language (Node, Python, …); GitHub adds a sensible default ignore list.
+- **License**: only relevant if the repo is public. MIT is the safe default if unsure.
 
 Click **Create repository**. The repo URL is now `https://github.com/<username>/<repo>`.
 
@@ -67,7 +67,7 @@ git merge upstream/main
 ```
 
 
-## 3. Set up SSH access
+## 3. Set up SSH access (works for any SSH key access)
 
 By default, Git over HTTPS asks for credentials every time. 
 
@@ -76,16 +76,16 @@ The clean alternative is SSH: generate a key pair once, drop the public key into
 ### 1. Generate the key pair
 
 ```bash
-ssh-keygen -t ed25519 -C "your_email@example.com"
+ssh-keygen -t ed25519 -C "<COMMENT>"
 ```
 
 When prompted:
-- **File location**: accept the default (`~/.ssh/id_ed25519`) unless you already have a key there.
+- **File location**: accept the default name (`~/.ssh/id_ed25519`) unless you already have an existing key there. If you use multiple SSH keys, you'll also need to create a `~/.ssh/config` file to explicitly associate each key with a specific hostname (in our example, `github.com`), I'll show you how to do it in a second.
 - **Passphrase**: empty is fine for a personal laptop.
 
 Two files appear:
-- `~/.ssh/id_ed25519` — the **private** key. Never share, never push, never paste anywhere.
-- `~/.ssh/id_ed25519.pub` — the **public** key. This is the one to give to GitHub.
+- `~/.ssh/id_ed25519`: the **private** key. Never share, never push, never paste anywhere.
+- `~/.ssh/id_ed25519.pub`: the **public** key. This is the one to give to GitHub.
 
 ### 2. Add the public key to GitHub
 
@@ -104,6 +104,7 @@ Copy the output (starts with `ssh-ed25519 …` and ends with the email). On GitH
 
 ### 3. Verify it works
 
+If the key you generated is the only one you have under `~/.ssh/`, then you can do:
 ```bash
 ssh -T git@github.com
 ```
@@ -114,7 +115,16 @@ Expected response:
 Hi <username>! You've successfully authenticated, but GitHub does not provide shell access.
 ```
 
-That message is the success case: GitHub never gives a shell, the `ssh -T` is only checking the handshake.
+But if you have multiple keys defined, you'll have to specify a `~/.ssh/config` file, like this: 
+```bash
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519_github
+    IdentitiesOnly yes
+```
+
+And then try `ssh -T git@github.com`.
 
 ## 4. Your first commit
 
