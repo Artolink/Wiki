@@ -813,6 +813,49 @@ function cleanupGlobalGraphs() {
   globalGraphCleanups = []
 }
 
+// Toggle del popup "info connessioni" sopra il mini-graph della sidebar.
+// Click sull'icona info → toggle classe .open sul .info-graph-popup adiacente.
+// Click ovunque fuori dall'icona/popup → chiudi tutti i popup aperti.
+// Esc → idem.
+function setupInfoButton() {
+  const buttons = document.querySelectorAll<HTMLElement>(".info-graph-icon")
+  if (buttons.length === 0) return
+
+  const closeAll = () => {
+    for (const popup of document.querySelectorAll<HTMLElement>(".info-graph-popup.open")) {
+      popup.classList.remove("open")
+      popup.setAttribute("aria-hidden", "true")
+    }
+  }
+
+  for (const btn of buttons) {
+    const popup = btn.nextElementSibling as HTMLElement | null
+    if (!popup || !popup.classList.contains("info-graph-popup")) continue
+    const onClick = (e: Event) => {
+      e.stopPropagation()
+      const isOpen = popup.classList.toggle("open")
+      popup.setAttribute("aria-hidden", isOpen ? "false" : "true")
+    }
+    btn.addEventListener("click", onClick)
+    window.addCleanup(() => btn.removeEventListener("click", onClick))
+  }
+
+  const onDocClick = (e: MouseEvent) => {
+    const t = e.target as Element
+    if (!t.closest(".info-graph-icon") && !t.closest(".info-graph-popup")) {
+      closeAll()
+    }
+  }
+  document.addEventListener("click", onDocClick)
+  window.addCleanup(() => document.removeEventListener("click", onDocClick))
+
+  const onKey = (e: KeyboardEvent) => {
+    if (e.key === "Escape") closeAll()
+  }
+  document.addEventListener("keydown", onKey)
+  window.addCleanup(() => document.removeEventListener("keydown", onKey))
+}
+
 document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
   const slug = e.detail.url
   addToVisited(simplifySlug(slug))
@@ -826,6 +869,7 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
   }
 
   await renderLocalGraph()
+  setupInfoButton()
   const handleThemeChange = () => {
     void renderLocalGraph()
   }

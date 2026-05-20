@@ -607,14 +607,119 @@ html[saved-theme="dark"] .graph .graph-outer {
   margin-bottom: 0.5rem;
 }
 
-// "There are X connections to this topic" sotto al mini-graph.
-// Stile discreto, allineato come una caption.
-.sidebar.right .graph .graph-connections-count {
-  font-size: 0.78rem;
-  color: var(--gray);
-  text-align: center;
-  margin: 0.5rem 0 0;
-  font-style: italic;
+// Icona "info" in alto a sinistra del mini-graph — speculare al
+// .global-graph-icon che sta a destra. Click apre .info-graph-popup
+// (gestito da setupInfoButton in graph.inline.ts).
+.sidebar.right .graph .graph-outer > .info-graph-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0.3rem;
+  padding: 0.2rem;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--dark);
+  opacity: 0.5;
+  cursor: pointer;
+  z-index: 5;
+  transition:
+    background-color 0.3s ease,
+    opacity 0.3s ease;
+
+  &:hover {
+    background-color: var(--lightgray);
+    opacity: 1;
+  }
+
+  & > svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// Popup connessioni — appare sotto al bottone info, ancorato dentro al
+// .graph-outer (che è position: relative). Nascosto di default.
+.sidebar.right .graph .graph-outer > .info-graph-popup {
+  position: absolute;
+  top: 2.2rem;
+  left: 0.4rem;
+  z-index: 10;
+  width: calc(100% - 0.8rem);
+  max-width: 280px;
+  max-height: 240px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  background: var(--light);
+  border: 1px solid var(--lightgray);
+  border-radius: 8px;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 0.7rem 0.85rem;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease,
+    visibility 0.15s ease;
+
+  &.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .info-graph-popup-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin: 0 0 0.5rem;
+    line-height: 1.3;
+  }
+
+  .info-graph-popup-list {
+    list-style: disc outside;
+    margin: 0;
+    padding-left: 1.1rem;
+
+    & > li {
+      margin: 0.2rem 0;
+      font-size: 0.82rem;
+      line-height: 1.4;
+
+      & > a {
+        color: var(--dark);
+        opacity: 0.85;
+        background: none;
+        transition:
+          opacity 0.2s ease,
+          color 0.2s ease;
+
+        &:hover {
+          opacity: 1;
+          color: var(--secondary);
+        }
+      }
+    }
+  }
+}
+
+// Dark mode: popup con shadow più marcata + border armonizzato
+html[saved-theme="dark"] .sidebar.right .graph .graph-outer > .info-graph-popup {
+  background: var(--code-bg);
+  border-color: var(--code-border);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.4),
+    0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
 // ── TOC: "ON THIS PAGE" style ─────────────────────────────────────────────────

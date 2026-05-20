@@ -4,7 +4,8 @@ import script from "./scripts/graph.inline"
 import style from "./styles/graph.scss"
 import { i18n } from "../i18n"
 import { classNames } from "../util/lang"
-import { simplifySlug } from "../util/path"
+import { resolveRelative, simplifySlug, FullSlug } from "../util/path"
+import { QuartzPluginData } from "../plugins/vfile"
 
 export interface D3Config {
   drag: boolean
@@ -87,12 +88,11 @@ export default ((opts?: Partial<GraphOptions>) => {
     const localGraph = { ...defaultOptions.localGraph, ...opts?.localGraph }
     const globalGraph = { ...defaultOptions.globalGraph, ...opts?.globalGraph }
 
-    // Conteggio delle "connessioni" della pagina corrente per il mini-graph:
-    // unione dei vicini a distanza 1 = outgoing links (cosa linko io) +
-    // backlinks (chi linka me). Set per deduplicare quando un'altra nota
-    // mi linka e io linko lei (link reciproci).
-    // Match flessibile su slug: `fileData.links` e `file.links` contengono
-    // SimpleSlug (senza il suffisso /index), quindi simplifySlug del current.
+    // "Connessioni" della pagina corrente = vicini a distanza 1 nel grafo,
+    // unione di outgoing (cosa linko io) e incoming/backlinks (chi linka me).
+    // Set per deduplicare i link reciproci. Tutti gli slug sono SimpleSlug
+    // (senza /index suffix), match flessibile via simplifySlug.
+    const currentFullSlug = fileData.slug ?? ("" as FullSlug)
     const currentSlug = fileData.slug ? simplifySlug(fileData.slug) : ""
     const outgoing = new Set<string>(fileData.links ?? [])
     const incoming = new Set<string>(
@@ -101,8 +101,20 @@ export default ((opts?: Partial<GraphOptions>) => {
         .map((f) => (f.slug ? simplifySlug(f.slug) : ""))
         .filter(Boolean),
     )
-    const allConnected = new Set<string>([...outgoing, ...incoming])
-    const connectionsCount = allConnected.size
+    const allConnectedSlugs = Array.from(new Set<string>([...outgoing, ...incoming]))
+    // Mappiamo gli slug agli oggetti file per avere titolo + slug pieno
+    // (lo slug "pieno" serve a resolveRelative; lo SimpleSlug del Set NON
+    // include il /index suffix, quindi cerchiamo per simplifySlug match).
+    const connectedFiles: QuartzPluginData[] = allConnectedSlugs
+      .map((s) => allFiles.find((f) => f.slug && simplifySlug(f.slug) === s))
+      .filter((f): f is QuartzPluginData => f !== undefined)
+      // Ordina alfabeticamente per titolo
+      .sort((a, b) => {
+        const at = (a.frontmatter?.title ?? a.slug ?? "").toLowerCase()
+        const bt = (b.frontmatter?.title ?? b.slug ?? "").toLowerCase()
+        return at.localeCompare(bt)
+      })
+    const connectionsCount = connectedFiles.length
 
     return (
       <div class={classNames(displayClass, "graph")}>
@@ -130,6 +142,49 @@ export default ((opts?: Partial<GraphOptions>) => {
           </div>
         )}
         <div class="graph-outer">
+          {/* Info icon in alto a sinistra: speculare al global-graph-icon
+              che sta in alto a destra. Click → apre il popup .info-graph-popup
+              sotto, gestito da setupInfoButton() in graph.inline.ts. */}
+          <button class="info-graph-icon" type="button" aria-label="Show connections">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" x2="12" y1="16" y2="12" />
+              <line x1="12" x2="12.01" y1="8" y2="8" />
+            </svg>
+          </button>
+          <div class="info-graph-popup" role="dialog" aria-hidden="true">
+            <p class="info-graph-popup-title">
+              {connectionsCount === 0
+                ? "No connections to this topic yet"
+                : connectionsCount === 1
+                  ? "There is 1 connection to this topic:"
+                  : `There are ${connectionsCount} connections to this topic:`}
+            </p>
+            {connectionsCount > 0 && (
+              <ul class="info-graph-popup-list">
+                {connectedFiles.map((f) => (
+                  <li>
+                    <a
+                      class="internal"
+                      href={resolveRelative(currentFullSlug, f.slug as FullSlug)}
+                    >
+                      {f.frontmatter?.title ?? f.slug}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
           <div class="graph-container" data-cfg={JSON.stringify(localGraph)}></div>
           <button class="global-graph-icon" aria-label="Global Graph">
             <svg
@@ -158,16 +213,6 @@ export default ((opts?: Partial<GraphOptions>) => {
             </svg>
           </button>
         </div>
-        {/* Contatore connessioni — mostrato sotto al mini-graph nella sidebar.
-            Si gestisce singolare/plurale + caso "nessuna connessione" per
-            non lasciare la pagina muta su note isolate. */}
-        <p class="graph-connections-count">
-          {connectionsCount === 0
-            ? "No connections to this topic yet"
-            : connectionsCount === 1
-              ? "There is 1 connection to this topic"
-              : `There are ${connectionsCount} connections to this topic`}
-        </p>
         <div class="global-graph-outer">
           <div class="global-graph-container" data-cfg={JSON.stringify(globalGraph)}></div>
         </div>
