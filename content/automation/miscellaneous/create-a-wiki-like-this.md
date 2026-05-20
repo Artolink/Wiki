@@ -85,8 +85,8 @@ If you want to use the same setup, I recommend:
 - A VPS with **Ubuntu 22.04+** (or any recent Debian-like distro)
 - A non-root user with `sudo` privileges (the correct way to handle privileges in Linux)
 - A public IPv4 address (e.g. `123.456.0.100`)
-- A [domain and its DNS](DNS-domains) pointed to the VPS (e.g. `wiki.yourdomain.com`--> `123.456.0.100`)
-- [Nginx](nginx-web-server-setup) + [Certbot](certbot-setup-guide.md) for publishing the domain via HTTPS
+- A [domain and its DNS](DNS-domains.md) pointed to the VPS (e.g. `wiki.yourdomain.com`--> `123.456.0.100`)
+- [Nginx](nginx-web-server-setup.md) + [Certbot](certbot-setup-guide.md) for publishing the domain via HTTPS
 
 ***
 
@@ -132,7 +132,7 @@ This is essential so that `deploy.sh`, the script that we'll create for automati
 
 Nginx is the web-server that allows you to publish the site you just created with Quartz.
 
-You can see a detailed explanation of Nginx and the configuration I use [here](nginx-web-server-setup).
+You can see a detailed explanation of Nginx and the configuration I use [here](nginx-web-server-setup.md).
 
 > [!tldr] TL;DR:
  >You just need to point Nginx `root` at `~/wiki/public/`
