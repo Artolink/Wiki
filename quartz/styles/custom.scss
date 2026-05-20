@@ -607,6 +607,15 @@ html[saved-theme="dark"] .graph .graph-outer {
   margin-bottom: 0.5rem;
 }
 
+// Sulla pagina /graph (full-page graph view) il graph è renderato in
+// .page-footer > .graph, non nella sidebar destra. Lì il contatore
+// "connessioni" non ha senso (è il grafo globale di tutto il sito) →
+// nascondi il bottone info e il suo popup.
+body[data-slug="graph"] .info-graph-icon,
+body[data-slug="graph"] .info-graph-popup {
+  display: none !important;
+}
+
 // Icona "info" SOTTO il .global-graph-icon, entrambe ancorate al bordo
 // destro del mini-graph. Il global-graph-icon è 24×24px + padding 0.2rem
 // + margin 0.3rem = occupa circa 32px verticali da top:0. Posizioniamo
