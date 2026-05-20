@@ -51,7 +51,7 @@ Public/private key cryptography provides:
 2. **Confidentiality**
 3. **Integrity**
 
-
+***
 ## How SSH key authentication works
 
 In SSH, the roles are slightly different but the idea is the same:
