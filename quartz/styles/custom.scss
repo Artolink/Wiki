@@ -616,14 +616,13 @@ body[data-slug="graph"] .info-graph-popup {
   display: none !important;
 }
 
-// Icona "info" SOTTO il .global-graph-icon, entrambe ancorate al bordo
-// destro del mini-graph. Il global-graph-icon è 24×24px + padding 0.2rem
-// + margin 0.3rem = occupa circa 32px verticali da top:0. Posizioniamo
-// l'info a `top: 2rem` per scendere sotto con un piccolo gap.
-// Click apre .info-graph-popup (gestito da setupInfoButton in graph.inline.ts).
+// Icona "info" in basso a destra del mini-graph. Il .global-graph-icon
+// resta in alto a destra (top:0, right:0) e l'info si parcheggia
+// nell'angolo opposto. Click apre .info-graph-popup (gestito da
+// setupInfoButton in graph.inline.ts).
 .sidebar.right .graph .graph-outer > .info-graph-icon {
   position: absolute;
-  top: 2rem;
+  bottom: 0;
   right: 0;
   margin: 0.3rem;
   padding: 0.2rem;
@@ -652,14 +651,12 @@ body[data-slug="graph"] .info-graph-popup {
   }
 }
 
-// Popup connessioni — appare sotto la coppia di icone (top:2rem + height
-// 24px + gap = ~4rem). Ancorato a ENTRAMBI i lati (left + right) così
-// occupa sempre lo spazio interno del graph-outer senza poter uscire dai
-// bordi (bug noto: con solo right+max-width, su graph-outer < max-width il
-// popup andava in negativo a sinistra e veniva tagliato da overflow:hidden).
+// Popup connessioni — appare SOPRA il bottone (che è in basso) ancorato a
+// entrambi i lati per non uscire mai dal graph-outer. La transform al
+// momento del .open è da translateY(+4px) → 0 (cresce verso l'alto).
 .sidebar.right .graph .graph-outer > .info-graph-popup {
   position: absolute;
-  top: 4.2rem;
+  bottom: 2.2rem;
   left: 0.4rem;
   right: 0.4rem;
   z-index: 10;
@@ -682,7 +679,9 @@ body[data-slug="graph"] .info-graph-popup {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translateY(-4px);
+  // Cresce verso l'alto: parte da +4px (sotto la posizione finale) e
+  // sale, coerente col fatto che si apre da un bottone IN BASSO.
+  transform: translateY(4px);
   transition:
     opacity 0.15s ease,
     transform 0.15s ease,
