@@ -59,63 +59,72 @@ export default ((opts?: Partial<Options>) => {
           id={id}
           class={fileData.collapseToc ? "collapsed toc-content" : "toc-content"}
         >
-          {fileData.toc.map((tocEntry, idx) => {
-            // Un item ha figli se l'item successivo è a depth maggiore.
-            // Solo gli item con figli mostrano il caret di collapse.
-            const nextEntry = fileData.toc![idx + 1]
-            const hasChildren = !!nextEntry && nextEntry.depth > tocEntry.depth
-
-            // Conta i figli DIRETTI (depth + 1, fermandosi al primo item
-            // di depth pari o minore = fine del sub-tree). Serve per
-            // decidere se l'item è collapsed di default.
-            let directChildrenCount = 0
-            for (let i = idx + 1; i < fileData.toc!.length; i++) {
-              const e = fileData.toc![i]
-              if (e.depth <= tocEntry.depth) break // uscito dal sub-tree
-              if (e.depth === tocEntry.depth + 1) directChildrenCount++
+          {(() => {
+            // Pre-pass globale: c'è ALMENO UN item della TOC con più di 2
+            // figli diretti? Se sì → TUTTI gli item con figli partono
+            // collapsed (regola "all or nothing"). Se no → tutti espansi.
+            // Idea: se anche solo un ramo è "ramificato", riduciamo a
+            // tappeto il rumore visivo iniziale; se la TOC è già piccola
+            // (max 2 figli ovunque) lasciamo tutto aperto.
+            let anyHasManyChildren = false
+            for (let i = 0; i < fileData.toc!.length; i++) {
+              const parent = fileData.toc![i]
+              let count = 0
+              for (let j = i + 1; j < fileData.toc!.length; j++) {
+                const e = fileData.toc![j]
+                if (e.depth <= parent.depth) break
+                if (e.depth === parent.depth + 1) count++
+              }
+              if (count > 2) {
+                anyHasManyChildren = true
+                break
+              }
             }
+            const collapsedByDefault = anyHasManyChildren
 
-            // Default state:
-            //   - più di 2 figli diretti → collapsed (riduci rumore visivo)
-            //   - 1 o 2 figli diretti → espanso (sono pochi, mostriamoli)
-            //   - nessun figlio → niente data-collapsed (no caret)
-            const collapsedByDefault = directChildrenCount > 2
-            return (
-              <li
-                key={tocEntry.slug}
-                class={`depth-${tocEntry.depth}`}
-                data-depth={tocEntry.depth}
-                data-collapsed={
-                  hasChildren ? (collapsedByDefault ? "true" : "false") : undefined
-                }
-              >
-                {hasChildren && (
-                  <button
-                    class="toc-fold"
-                    type="button"
-                    aria-label="Toggle subsections"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+            return fileData.toc!.map((tocEntry, idx) => {
+              // Un item ha figli se l'item successivo è a depth maggiore.
+              // Solo gli item con figli mostrano il caret di collapse.
+              const nextEntry = fileData.toc![idx + 1]
+              const hasChildren = !!nextEntry && nextEntry.depth > tocEntry.depth
+
+              return (
+                <li
+                  key={tocEntry.slug}
+                  class={`depth-${tocEntry.depth}`}
+                  data-depth={tocEntry.depth}
+                  data-collapsed={
+                    hasChildren ? (collapsedByDefault ? "true" : "false") : undefined
+                  }
+                >
+                  {hasChildren && (
+                    <button
+                      class="toc-fold"
+                      type="button"
+                      aria-label="Toggle subsections"
                     >
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </button>
-                )}
-                <a href={`#${tocEntry.slug}`} data-for={tocEntry.slug}>
-                  {tocEntry.text}
-                </a>
-              </li>
-            )
-          })}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </button>
+                  )}
+                  <a href={`#${tocEntry.slug}`} data-for={tocEntry.slug}>
+                    {tocEntry.text}
+                  </a>
+                </li>
+              )
+            })
+          })()}
         </OverflowList>
       </div>
     )
