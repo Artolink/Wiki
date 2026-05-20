@@ -658,18 +658,17 @@ body[data-slug="graph"] .info-graph-popup {
 // entrambi i lati per non uscire mai dal graph-outer. La transform al
 // momento del .open è da translateY(+4px) → 0 (cresce verso l'alto).
 //
-// max-height: `calc(100% - 3rem)` invece di valore fisso. Così il popup
-// è sempre cappato all'altezza interna del graph-outer (che è ~250px in
-// sidebar), lasciando spazio per il bottone info (~2.2rem) + un piccolo
-// gap top (~0.8rem). Con tante voci attiva lo scroll interno invece di
-// sforare sopra l'header "GRAPH VIEW".
+// max-height: `calc(100% - 4rem)` lascia spazio per il bottone info in
+// basso (~2.2rem) + un gap top più generoso (~1.8rem) così il popup non
+// arriva mai attaccato al bordo superiore del graph-outer. Quando le
+// connessioni sono molte attiva lo scroll interno (overflow-y: auto).
 .sidebar.right .graph .graph-outer > .info-graph-popup {
   position: absolute;
   bottom: 2.2rem;
   left: 0.4rem;
   right: 0.4rem;
   z-index: 10;
-  max-height: calc(100% - 3rem);
+  max-height: calc(100% - 4rem);
   overflow-y: auto;
   overscroll-behavior: contain;
 
