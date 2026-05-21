@@ -16,7 +16,7 @@ Here are some scenarios to help you out:
 - **Major distro upgrade?** start at `Pre-upgrade checks`, then `Release upgrade`, then `Post-upgrade checks`.
 - **Something went wrong** → jump to `Upgrade rollback`.
 
-> [!Warning] IMPORTANT
+> [!Important] IMPORTANT
 > **These guides are generic and cover the OS-level upgrade only.** 
 > 
 > There are also many specific cases where additional steps are required, for example:
