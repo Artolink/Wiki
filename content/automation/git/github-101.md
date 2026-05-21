@@ -75,17 +75,8 @@ The clean alternative is SSH: generate a key pair once, drop the public key into
 
 ### 1. Generate the key pair
 
-```bash
-ssh-keygen -t ed25519 -C "<COMMENT>"
-```
-
-When prompted:
-- **File location**: accept the default name (`~/.ssh/id_ed25519`) unless you already have an existing key there. If you use multiple SSH keys, you'll also need to create a `~/.ssh/config` file to explicitly associate each key with a specific hostname (in our example, `github.com`), I'll show you how to do it in a second.
-- **Passphrase**: empty is fine for a personal laptop.
-
-Two files appear:
-- `~/.ssh/id_ed25519`: the **private** key. Never share, never push, never paste anywhere.
-- `~/.ssh/id_ed25519.pub`: the **public** key. This is the one to give to GitHub.
+Here's the procedure:
+![[SSH-Linux#Generate a key pair]]
 
 ### 2. Add the public key to GitHub
 
@@ -105,26 +96,25 @@ Copy the output (starts with `ssh-ed25519 …` and ends with the email). On GitH
 ### 3. Verify it works
 
 If the key you generated is the only one you have under `~/.ssh/`, then you can do:
-```bash
-ssh -T git@github.com
-```
 
-Expected response:
+![[SSH-Linux#Connect]]
 
-```
-Hi <username>! You've successfully authenticated, but GitHub does not provide shell access.
-```
+So in our case:
+> [!example]
+> ```bash
+> ssh -T git@github.com
+> ```
+> 
+> Expected response:
+> 
+> ```
+> Hi <username>! You've successfully authenticated, but GitHub does not provide shell access.
+> ```
 
-But if you have multiple keys defined, you'll have to specify a `~/.ssh/config` file, like this: 
-```bash
-Host github.com
-    HostName github.com
-    User git
-    IdentityFile ~/.ssh/id_ed25519_github
-    IdentitiesOnly yes
-```
+And if we have multiple keys, we can use the `ssh -i` option, or set up an alias like this (see the GitHub example):
+![[SSH-Linux#Aliases `~/.ssh/config`]]
 
-And then try `ssh -T git@github.com`.
+And then we can try again with `ssh -T git@github.com`.
 
 ## 4. Your first commit
 

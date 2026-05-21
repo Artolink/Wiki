@@ -136,19 +136,13 @@ ssh-keygen -t ed25519 -C "<COMMENT>" #The comment is simply a label used to iden
 > Always prefer `ed25519` (faster, shorter, safer) over RSA for new keys: RSA still works everywhere but produces much longer keys and is slower. 
 > Only use `-t rsa -b 4096` if you have to connect to ancient systems that don't support ed25519 (very rare today).
 
-You'll be asked three things:
+When prompted:
+- **File location**: accept the default name (`~/.ssh/id_ed25519`) unless you already have an existing key there. If you use multiple SSH keys, you'll also need to create a `~/.ssh/config` file to explicitly associate each key with a specific hostname (for example, `github.com`), I'll show you how to do it in a second.
+- **Passphrase**: empty is fine for a personal laptop.
 
-1. **File location** (default: `~/.ssh/id_ed25519`). 
-   Override if you want a custom name, e.g. `~/.ssh/id_ed25519_vps`
-2. **Passphrase** (optional but recommended): encrypts the private key on disk, so a stolen laptop doesn't immediately give attackers access to your servers.
-3. **Confirm passphrase**.
-
-Result: two files created.
-
-```
-~/.ssh/id_ed25519_vps        <-- private (secret)
-~/.ssh/id_ed25519_vps.pub    <-- public (share)
-```
+Two files appear:
+- `~/.ssh/id_ed25519`: the **private** key. Never share, never push, never paste anywhere.
+- `~/.ssh/id_ed25519.pub`: the **public** key. This is the one you can give around.
 
 > [!tip] About `-C "comment"`
 > The `-C` flag adds a human-readable comment to the **end** of the public key. It has no security meaning — it's a label so you remember whose key this is. Common conventions: `name@machine`, an email, or `service-purpose`.
@@ -197,7 +191,7 @@ There are two ways: the easy one, and the manual one.
 
 ### Connect
 
-After the public key is on the server:
+Once the other side has received our public key, we can try connecting:
 
 ```bash
 ssh user@server.example.com
@@ -205,7 +199,7 @@ ssh user@server.example.com
 
 SSH will look in `~/.ssh/` for a matching private key automatically. 
 
-If you have multiple keys and want to force one though, you have to use `-i`:
+If you have multiple keys and want to force one though, you'll have to specify it with `-i`:
 
 ```bash
 ssh -i ~/.ssh/id_ed25519_vps user@server.example.com
@@ -257,8 +251,10 @@ git clone git@my-vps:repo.git
 >
 > # GitHub
 > Host github.com
+> 	HostName github.com
 >     User git
 >     IdentityFile ~/.ssh/id_ed25519_github
+>     IdentitiesOnly yes
 > ```
 
 ### `known_hosts` and host key verification
