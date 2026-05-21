@@ -9,7 +9,7 @@ Linux systems need to be kept up to date.
 
 This section covers **how to do it safely** in production: from the daily security patches all the way to a full distribution release upgrade, plus verification and rollback procedures.
 
-Here are some scenarios to help you out:
+Here are some scenarios to help you navigate:
 
 - **It's your first time updating a production server?** Read all of them in order.
 - **Weekly security patches on a normal server?** start at `Pre-upgrade checks`, then `Patch management`, then `Post-upgrade checks`.
