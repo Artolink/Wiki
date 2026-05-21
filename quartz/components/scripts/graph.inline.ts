@@ -768,7 +768,11 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     if (stopAnimation) return
     for (const n of nodeRenderData) {
       const { x, y } = n.simulationData
-      if (!x || !y) continue
+      // Bug fix: `!x || !y` saltava i nodi con coordinate esattamente 0
+      // (es. l'unico nodo di una pagina senza connessioni, che il forceCenter
+      // di d3 piazza in (0, 0) come centroide dell'unico nodo). Controllo
+      // esplicito per undefined/null così zero passa attraverso.
+      if (x == null || y == null) continue
       n.gfx.position.set(x + width / 2, y + height / 2)
       if (n.label) {
         n.label.position.set(x + width / 2, y + height / 2)
