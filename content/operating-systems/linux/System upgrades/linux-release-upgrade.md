@@ -87,49 +87,32 @@ Now that we've said that, let's actually see the 3 procedures.
 
 ## A: `do-release-upgrade` (Ubuntu)
 
-The Ubuntu-supported path. The tool handles `sources.list` rewrite, EOL/incompatible PPA disable, removed-package cleanup, and asks about config conflicts that *really* need a decision.
+The Ubuntu-supported path. 
+
+The tool handles `sources.list` rewrite, EOL/incompatible PPA disable, removed-package cleanup, and asks about config conflicts that *really* need a decision.
 
 ###  <input type="checkbox"> 1. Start inside a `screen`
 
-If SSH drops mid-upgrade, the process keeps running and you reconnect to it. **Never run a release upgrade without one.**
+If SSH drops mid-upgrade, the process keeps running and you reconnect to it. 
+
+**Never run a release upgrade without one.**
 
 ```sh
 screen -S upgrade
 # (later: detach with Ctrl+A then D; reattach with `screen -r upgrade`)
 ```
 
-###  <input type="checkbox"> 2. Belt-and-braces config backups
+###  <input type="checkbox"> 2. Bring the current release fully up to date
 
-The pre-upgrade snapshot script already covers `/etc`, but a release upgrade is heavy: a few duplicate backups of the files most likely to be rewritten cost nothing.
+`do-release-upgrade` refuses to run if the current release has pending updates. 
 
-```sh
-mkdir -p /root/backup-release-upgrade
-cp -a /etc/netplan/        /root/backup-release-upgrade/   # network config gets rewritten more often than you'd expect
-cp -a /etc/ssh/            /root/backup-release-upgrade/   # never lose sshd_config
-cp -a /etc/fstab           /root/backup-release-upgrade/
-cp -a /etc/apt/            /root/backup-release-upgrade/   # in case the upgrade leaves a broken sources.list
-```
+Patch first, then upgrade the release: check out [[linux-patch-management]].
 
-###  <input type="checkbox"> 3. Bring the current release fully up to date
+###  <input type="checkbox"> 3. Tell dpkg to keep your existing configs
 
-`do-release-upgrade` refuses to run if the current release has pending updates. Patch first, then upgrade the release.
+By default, the release upgrade will prompt you for every customised config file it finds. 
 
-```sh
-apt update
-apt upgrade -y
-apt autoremove -y
-apt clean
-
-# If a reboot is now required (new kernel installed), do it first.
-[ -f /var/run/reboot-required ] && reboot
-```
-
-> [!TIP]
-> If your normal patch flow is already a script (see [Patch management](linux-patch-management)), run it here. Same outcome, same safety gates.
-
-###  <input type="checkbox"> 4. Tell dpkg to keep your existing configs
-
-By default, the release upgrade will prompt you for every customised config file it finds. We want it to **silently keep what we have**, except where conflicts genuinely need a human.
+We want it to **silently keep what we have**, except where conflicts genuinely need a human.
 
 ```sh
 cat > /etc/apt/apt.conf.d/local-keep-configs <<'EOF'
@@ -143,7 +126,17 @@ What these do:
 
 The new upstream version is preserved alongside as `*.dpkg-dist` so you can diff and merge later (see the [post-upgrade checks](linux-post-upgrade-checks)).
 
-###  <input type="checkbox"> 5. Run the release upgrade
+> [!WARNING]- Warning: remember to delete the file after the upgrade
+> This file is **persistent**: every future `apt upgrade` will silently keep your customised configs without even warning you if an upstream default changes. That's behaviour you want **only for this release upgrade**, not forever.
+>
+> Remove it right after the upgrade finishes:
+>
+> ```sh
+> rm /etc/apt/apt.conf.d/local-keep-configs
+> ```
+
+
+###  <input type="checkbox"> 4. Run the release upgrade
 
 Non-interactive mode answers default-yes on any prompt the tool considers safe:
 
@@ -159,7 +152,8 @@ This will:
 4. Calculate the upgrade plan and run `apt dist-upgrade`.
 5. Remove packages obsolete in the new release.
 
-Expect **1-3 hours** depending on the server. Watch it from a **second SSH session** (open *before* you start), tailing logs:
+
+Watch it from a **second SSH session** (open *before* you start), tailing logs:
 
 ```sh
 # In the second session:
@@ -167,9 +161,11 @@ tail -f /var/log/dist-upgrade/main.log
 journalctl -f
 ```
 
-###  <input type="checkbox"> 6. Reboot, then verify
+###  <input type="checkbox"> 5. Reboot, then verify
 
-The tool prints `System upgrade is complete.` at the end. Reboot once, then jump straight to verification.
+The tool prints `System upgrade is complete.` at the end. 
+
+Reboot once, then jump straight to verification.
 
 ```sh
 reboot
@@ -188,72 +184,50 @@ The "expert" path.
 
 Works on Debian (where `do-release-upgrade` doesn't exist) or when you want full visibility into what runs.
 
-You're doing manually what `do-release-upgrade` automates: rewrite `sources.list`, then upgrade. The risk is **missing cleanup steps** (deprecated PPAs, `cloud-archive`, Snap-only packages on Ubuntu...) — the tool would have caught them.
+You're doing manually what `do-release-upgrade` automates: rewrite `sources.list`, then upgrade. 
 
-###  <input type="checkbox"> 1. Same boilerplate as Option A
+The risk is **missing cleanup steps** (deprecated PPAs, `cloud-archive`, Snap-only packages on Ubuntu...) that the tool would have caught.
 
+###  <input type="checkbox"> 1. Same as Option A
+
+Start inside a screen 
 ```sh
 screen -S upgrade
-
-# Belt-and-braces backups
-mkdir -p /root/backup-release-upgrade
-cp -a /etc/netplan/  /root/backup-release-upgrade/
-cp -a /etc/ssh/      /root/backup-release-upgrade/
-cp -a /etc/fstab     /root/backup-release-upgrade/
-cp -a /etc/apt/      /root/backup-release-upgrade/
-
-# Patch the current release first
-apt update && apt upgrade -y && apt autoremove -y && apt clean
-[ -f /var/run/reboot-required ] && reboot
+# (later: detach with Ctrl+A then D; reattach with `screen -r upgrade`)
 ```
+
+And [[linux-patch-management|patch before upgrading]].
 
 ###  <input type="checkbox"> 2. Rewrite `sources.list` to the new release
 
-Replace the codename **everywhere** apt looks: the main `sources.list`, every `.list` file under `/etc/apt/sources.list.d/`, and (on Ubuntu 24.04+) the `.sources` files in the new DEB822 format.
+Replace the codename everywhere you need.
 
 Example for Ubuntu 20.04 (`focal`) → 22.04 (`jammy`):
 
 ```sh
-# Replace the codename in every *.list file (handles both /etc/apt/sources.list and /etc/apt/sources.list.d/*.list)
 find /etc/apt/ -type f -name "*.list" -print0 | xargs -0 sed -i 's/focal/jammy/g'
 
 # Same idea for *.sources (DEB822 format, used since Ubuntu 24.04)
 find /etc/apt/sources.list.d/ -type f -name "*.sources" -print0 2>/dev/null | xargs -0r sed -i 's/focal/jammy/g'
 ```
 
-For Debian (e.g. `bullseye` → `bookworm`):
-
-```sh
-find /etc/apt/ -type f \( -name "*.list" -o -name "*.sources" \) -print0 | xargs -0 sed -i 's/bullseye/bookworm/g'
-# Also remove security suffix differences if any: bullseye-security → bookworm-security is handled above.
-```
+> [!Note]
+> This replaces the codename in **every** .list file (handles both /etc/apt/sources.list and /etc/apt/sources.list.d/.list), and you probably don't want it if you choose this method!
 
 > [!WARNING]
 > Verify the result before continuing: `grep -r '<new-codename>' /etc/apt/`. If you still see the **old** codename somewhere, the upgrade will pull a mix of old and new packages.
 
-###  <input type="checkbox"> 3. Drop incompatible third-party repos
 
-If you have `cloud-archive` (Ubuntu cloud images) or other PPAs pinned to the old release that haven't been rebuilt for the new one, **remove them now** — they'll either 404 on `apt update` or pull broken dependencies.
-
-```sh
-# Common Ubuntu offender:
-rm -v /etc/apt/sources.list.d/cloud-archive.list 2>/dev/null
-
-# Inspect everything else: anything still pointing at the old codename or to a project that hasn't released for the new distro yet?
-ls /etc/apt/sources.list.d/
-```
-
-Re-add them only **after** the upgrade, once the maintainer publishes a build for the new release.
-
-###  <input type="checkbox"> 4. Refresh the index against the new repos
+###  <input type="checkbox"> 3. Refresh the index against the new repos
 
 ```sh
 apt update
 ```
 
-If this errors out (404 on a repo, signature mismatch...), don't proceed: fix the source first.
+If this errors out (the usual 404 on a repo, signature mismatch...), don't proceed: you have to fix the source first.
 
-###  <input type="checkbox"> 5. Run the non-interactive distribution upgrade
+
+###  <input type="checkbox"> 4. Run the non-interactive distribution upgrade
 
 The two key flags:
 
@@ -264,12 +238,12 @@ The two key flags:
 export DEBIAN_FRONTEND=noninteractive
 apt -o Dpkg::Options::="--force-confold" \
     -o Dpkg::Options::="--force-confdef" \
-    dist-upgrade -y
+    dist-upgrade -y # or full-upgrade, its just an alias
 ```
 
 `dist-upgrade` (vs `upgrade`) accepts **package removals and dependency changes**, which is exactly what a release upgrade requires.
 
-###  <input type="checkbox"> 6. Cleanup, reboot, verify
+###  <input type="checkbox"> 5. Cleanup, reboot, verify
 
 ```sh
 apt autoremove --purge -y
