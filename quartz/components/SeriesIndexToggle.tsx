@@ -1,6 +1,7 @@
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import { resolveRelative, FullSlug } from "../util/path"
 import { classNames } from "../util/lang"
+import { findSeriesForPage } from "../util/series"
 import style from "./styles/seriesIndexToggle.scss"
 // @ts-ignore
 import script from "./scripts/seriesIndexToggle.inline"
@@ -16,8 +17,7 @@ const SeriesIndexToggle: QuartzComponent = ({
   const currentSlug = fileData.slug
   if (!currentSlug) return null
 
-  // Stesso pattern di SeriesIndex / PageSequenceNav: match flessibile slug
-  // pubblico ↔ slug interno con `/index`.
+  // Lookup centralizzato (esplicito o fullseries) — vedi util/series.ts.
   const publicSlug = currentSlug.replace(/\/index$/, "")
   const matchSlug = (s: string) => s === currentSlug || s === publicSlug
 
@@ -25,20 +25,7 @@ const SeriesIndexToggle: QuartzComponent = ({
     allFiles.find((f) => f.slug === slug) ??
     allFiles.find((f) => f.slug === `${slug}/index`)
 
-  let series: string[] | null = null
-  const ownSeries = fileData.frontmatter?.series as unknown
-  if (Array.isArray(ownSeries) && (ownSeries as string[]).length > 0) {
-    series = ownSeries as string[]
-  } else {
-    for (const f of allFiles) {
-      const s = f.frontmatter?.series as unknown
-      if (Array.isArray(s) && (s as string[]).some(matchSlug)) {
-        series = s as string[]
-        break
-      }
-    }
-  }
-
+  const series = findSeriesForPage(fileData, allFiles)
   if (!series) return null
 
   return (

@@ -10,6 +10,7 @@ import { ComponentChildren } from "preact"
 import { concatenateResources } from "../../util/resources"
 import { trieFromAllFiles } from "../../util/ctx"
 import { isFolderPath } from "../../util/path"
+import { findSeriesForPage } from "../../util/series"
 
 // Ordinamento alfabetico per titolo, con cartelle in cima (stessa convenzione
 // di `byDateAndAlphabeticalFolderFirst` in PageList.tsx). `numeric: true`
@@ -52,39 +53,27 @@ export default ((opts?: Partial<FolderContentOptions>) => {
       return null
     }
 
-    // Modalità "series": se il frontmatter dell'_index dichiara un array
-    // `series: [...]` con gli slug delle pagine della serie, mostra QUELLA
-    // lista (nell'ordine dichiarato) invece dell'auto-listing dei figli
-    // della cartella. Le pagine non trovate (slug obsoleti) vengono silenziosamente
-    // skippate. Utile per pagine di indice che curano un percorso di lettura
-    // ordinato (es. la stack di Grafana: exporter → tsdb → scraper → grafana).
-    const seriesSlugs = fileData.frontmatter?.series as string[] | undefined
-    const isSeries = Array.isArray(seriesSlugs) && seriesSlugs.length > 0
+    // "Series" — questa pagina può essere:
+    //   - HUB esplicito: ha `series: [...]` nel frontmatter
+    //   - HUB auto-discovery: ha `fullseries:` (presente, valore irrilevante).
+    //     Tutte le note sotto la cartella diventano membri.
+    //   - MEMBRO: è linkata da un'altra pagina hub (esplicito o auto).
+    // La utility findSeriesForPage centralizza la logica per tutti e 4 i
+    // componenti che usano il meccanismo (vedi quartz/util/series.ts).
+    const series = findSeriesForPage(fileData, allFiles)
+    const fmHasSeries =
+      Array.isArray(fileData.frontmatter?.series) &&
+      (fileData.frontmatter?.series as unknown[]).length > 0
+    const fmHasFullseries =
+      fileData.frontmatter !== undefined && "fullseries" in fileData.frontmatter
+    const isHub = fmHasSeries || fmHasFullseries
+    const isSeries = isHub && Array.isArray(series) && series.length > 0
+    const isMemberOfSeries = !isHub && series !== null
 
-    // "Membro di una serie altrui": questa _index è ELENCATA in un'altra
-    // pagina con `series:` (es. l'_index della cartella `exporters` è
-    // menzionato nella series dell'_index di `metrics`). In quel caso il
-    // listing automatico della cartella non serve — la pagina ha già i
-    // bottoni Prev/Next a fondo pagina (vedi PageSequenceNav) e il listing
-    // delle children è ridondante / fuorviante (suggerisce un percorso
-    // diverso da quello della series).
-    const currentSlug = fileData.slug
-    const publicSlug = currentSlug?.replace(/\/index$/, "")
-    const isMemberOfSeries =
-      !!currentSlug &&
-      allFiles.some((f) => {
-        if (f.slug === currentSlug) return false // skip self
-        const series = f.frontmatter?.series as unknown
-        if (!Array.isArray(series)) return false
-        return (series as string[]).some((s) => s === currentSlug || s === publicSlug)
-      })
-    // Match flessibile: lo slug del frontmatter può essere il "public" slug
-    // (es. `observability/metrics/exporters`, come appare nell'URL del sito)
-    // mentre Quartz internamente registra l'_index.md come
-    // `observability/metrics/exporters/index`. Tentiamo entrambe le forme,
-    // così l'utente può scrivere quello che vede nel browser senza pensarci.
+    // Hub mode: risolvi gli slug "public-style" (senza /index) ad oggetti file.
+    // Match flessibile: prova prima as-is, poi appende /index per gli _index.
     const seriesPages: QuartzPluginData[] = isSeries
-      ? seriesSlugs!
+      ? series!
           .map(
             (slug) =>
               allFiles.find((f) => f.slug === slug) ??

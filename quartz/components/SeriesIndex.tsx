@@ -1,6 +1,7 @@
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import { resolveRelative, FullSlug } from "../util/path"
 import { classNames } from "../util/lang"
+import { findSeriesForPage } from "../util/series"
 import style from "./styles/seriesIndex.scss"
 // @ts-ignore
 import script from "./scripts/seriesIndex.inline"
@@ -19,9 +20,8 @@ const SeriesIndex: QuartzComponent = ({
   const currentSlug = fileData.slug
   if (!currentSlug) return null
 
-  // Same flexible-slug logic come PageSequenceNav e FolderContent: lo slug
-  // del frontmatter può essere "public" (es. `foo/bar`) o "interno"
-  // (`foo/bar/index`). Match e lookup tollerano entrambe le forme.
+  // Lookup della series (esplicita o auto-discovery via fullseries)
+  // centralizzato in quartz/util/series.ts. Vedi la doc lì per il contratto.
   const publicSlug = currentSlug.replace(/\/index$/, "")
   const matchSlug = (s: string) => s === currentSlug || s === publicSlug
 
@@ -29,25 +29,7 @@ const SeriesIndex: QuartzComponent = ({
     allFiles.find((f) => f.slug === slug) ??
     allFiles.find((f) => f.slug === `${slug}/index`)
 
-  // Trova la series rilevante per questa pagina:
-  // 1) Se la pagina è HUB (ha `series:` nel suo frontmatter) → usa quello
-  // 2) Altrimenti cerca in tutti gli altri file un `series:` che contenga
-  //    il currentSlug.
-  let series: string[] | null = null
-
-  const ownSeries = fileData.frontmatter?.series as unknown
-  if (Array.isArray(ownSeries) && (ownSeries as string[]).length > 0) {
-    series = ownSeries as string[]
-  } else {
-    for (const f of allFiles) {
-      const s = f.frontmatter?.series as unknown
-      if (Array.isArray(s) && (s as string[]).some(matchSlug)) {
-        series = s as string[]
-        break
-      }
-    }
-  }
-
+  const series = findSeriesForPage(fileData, allFiles)
   if (!series) return null
 
   return (

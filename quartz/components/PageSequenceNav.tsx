@@ -1,48 +1,49 @@
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import { resolveRelative, FullSlug } from "../util/path"
+import { findSeriesForPage } from "../util/series"
 import style from "./styles/pageSequenceNav.scss"
 
-// Navigazione "Previous / Next" stile syselement — opt-in via frontmatter:
+// Navigazione "Previous / Next" stile syselement — opt-in via frontmatter.
+// Vedi quartz/util/series.ts per la logica di lookup della series.
 //
-//   Pagina hub (es. _index.md o my-grafana-stack.md):
-//     ---
-//     series:
-//       - my-grafana-stack
-//       - observability/metrics/exporters/node-exporter
-//       - observability/metrics/tsdb/victoriametrics
-//       - ...
-//     ---
+// Due meccanismi:
+//   `series: [a, b, c, ...]` — esplicito, ordine controllato a mano
+//   `fullseries:`           — auto-discovery: tutte le note sotto la cartella
+//                              dell'_index hostante, in ordine alfabetico
 //
-// Le pagine elencate nell'array vedranno i bottoni Prev/Next basati sulla
-// loro posizione. Le pagine non elencate non vedono nulla.
-//
-// Una pagina può apparire in più serie (raro): viene usata la PRIMA serie
-// trovata iterando `allFiles`. L'ordine dei file è quello di build di
-// Quartz — di solito alfabetico per slug.
+// Tre stati possibili per il rendering:
+//   - HUB esplicito (la pagina ha `series` array)                → solo bottone "Start the series" verso il primo membro
+//   - HUB auto-discovery (la pagina è _index con `fullseries`)   → idem
+//   - MEMBRO di una series                                       → Prev + Next basati sui vicini nell'array
+//   - non-membro                                                  → null
 const PageSequenceNav: QuartzComponent = ({ fileData, allFiles }: QuartzComponentProps) => {
   const currentSlug = fileData.slug
   if (!currentSlug) return null
 
-  // Quartz internamente usa `<path>/index` come slug per gli _index.md di
-  // cartella, ma l'URL pubblico è `<path>` (senza /index). L'utente
-  // probabilmente scrive lo slug pubblico nel frontmatter `series:`, quindi
-  // facciamo match flessibile su entrambe le forme. Vedi anche FolderContent.tsx.
   const publicSlug = currentSlug.replace(/\/index$/, "")
   const matchSlug = (s: string) => s === currentSlug || s === publicSlug
 
-  // findPage: stesso fallback `/index` di FolderContent — accetta sia slug
-  // "pubblico" che slug "interno" Quartz.
+  // findPage: stesso fallback `/index` di FolderContent — accetta slug
+  // "pubblico" o "interno" Quartz.
   const findPage = (slug: string) =>
     allFiles.find((f) => f.slug === slug) ??
     allFiles.find((f) => f.slug === `${slug}/index`)
 
-  // CASO 1 — Questa pagina è l'HUB di una series (ha `series: [...]` nel suo
-  // frontmatter). Mostra un solo bottone Next che porta alla prima pagina
-  // della series. Nessun Previous perché l'hub è il "punto di ingresso".
-  const ownSeries = fileData.frontmatter?.series as unknown
-  if (Array.isArray(ownSeries) && (ownSeries as string[]).length > 0) {
-    const firstSlug = (ownSeries as string[])[0]
-    const firstPage = findPage(firstSlug)
+  // È la pagina un HUB? (esplicito o auto-discovery)
+  const fmHasSeries =
+    Array.isArray(fileData.frontmatter?.series) &&
+    (fileData.frontmatter?.series as unknown[]).length > 0
+  const fmHasFullseries =
+    fileData.frontmatter !== undefined && "fullseries" in fileData.frontmatter
+  const isHub = fmHasSeries || fmHasFullseries
+
+  const series = findSeriesForPage(fileData, allFiles)
+  if (!series) return null
+
+  // CASO 1 — HUB: solo Next verso il primo membro della series.
+  if (isHub) {
+    const firstSlug = series[0]
+    const firstPage = firstSlug ? findPage(firstSlug) : null
     if (!firstPage) return null
 
     return (
@@ -64,29 +65,15 @@ const PageSequenceNav: QuartzComponent = ({ fileData, allFiles }: QuartzComponen
     )
   }
 
-  // CASO 2 — Questa pagina è MEMBRO di una series (il suo slug compare nel
-  // `series:` di un'altra pagina). Trova quell'hub, calcola la posizione,
-  // mostra Prev + Next basati sui vicini nell'array.
-  let hubSeries: string[] | null = null
-  for (const f of allFiles) {
-    const series = f.frontmatter?.series as unknown
-    if (Array.isArray(series) && (series as string[]).some(matchSlug)) {
-      hubSeries = series as string[]
-      break
-    }
-  }
-  if (!hubSeries) return null
-
-  // Cerca la posizione con entrambe le forme; vince la prima che trova
-  const idx = hubSeries.findIndex(matchSlug)
+  // CASO 2 — MEMBRO: Prev + Next basati sulla posizione nella series.
+  const idx = series.findIndex(matchSlug)
   if (idx < 0) return null
 
-  const prevSlug = idx > 0 ? hubSeries[idx - 1] : null
-  const nextSlug = idx < hubSeries.length - 1 ? hubSeries[idx + 1] : null
+  const prevSlug = idx > 0 ? series[idx - 1] : null
+  const nextSlug = idx < series.length - 1 ? series[idx + 1] : null
   const prevPage = prevSlug ? findPage(prevSlug) : null
   const nextPage = nextSlug ? findPage(nextSlug) : null
 
-  // Se nessuna delle due, niente da mostrare (es. serie con un solo elemento).
   if (!prevPage && !nextPage) return null
 
   return (
