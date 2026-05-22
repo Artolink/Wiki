@@ -4,6 +4,7 @@ tags:
   - WebsiteCreation
   - Projects
 ---
+![[Pasted image 20260522152449.png]]
 
 > [!INFO] Live preview
 > The live deployment of this stack is publicly browsable (read-only) at [farnetiandrea.it/logs](https://farnetiandrea.it/logs).

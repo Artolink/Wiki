@@ -229,7 +229,138 @@ ES refuses the write because the `log_viewer` role does not grant any of the `ma
 | Admin opens `farnetiandrea.it/logs`   | Same chooser. Picks "Login with credentials", enters `elastic` + the password, gets full UI.  |
 | Visitor tries to save a search        | UI surfaces a 403 from ES; the action fails clearly with no data loss.                        |
 | Admin saves a search                  | Works normally — `elastic` has `superuser` and can write to `.kibana_*`.                      |
+## Step 9 — Hardening: redact at the Logstash layer
 
+The anonymous role only restricts *what fields exist in Kibana terms* (e.g. only Discover/Dashboard/Visualize, no management). It does **not** redact the *content* of the fields. If your raw events contain client IPs, JWT tokens, email addresses, or app-internal stack traces, the anonymous user can see them all by clicking into any document in Discover.
+
+Two ways to deal with this on a Basic license (Field-Level Security would solve it elegantly but needs Platinum):
+
+1. **Redact at ingest** — Logstash strips and anonymizes sensitive patterns before events ever reach Elasticsearch. Simple, low-overhead, applies to all consumers uniformly.
+2. **Dual-index split** — Logstash writes to `logs-internal-*` (full data, admin-only) and `logs-public-*` (sanitized, anonymous-readable). More flexible but doubles the storage and adds pipeline complexity.
+
+This page walks through option 1.
+
+### What the redaction does
+
+A `filter {}` block on each Logstash worker, applied to every event in flight:
+
+1. **`gsub` regex on `event.original` and `message`** — replaces:
+   - IPv4 addresses with their `/24` form (`1.2.3.42` → `1.2.3.0`). Enough to keep geographic / netblock context, not enough to identify a single visitor.
+   - JWTs (the `eyJ...` prefix is unmistakable) → `[JWT]`.
+   - Email addresses → `[EMAIL]`.
+   - `Bearer <anything>` headers → `Bearer [TOKEN]`.
+   - AWS access key IDs (`AKIA<16chars>`) → `[AWS_KEY]`.
+2. **`remove_field`** — drops fields that have no value for a public viewer but reveal infrastructure:
+   - `host.ip`, `host.mac`, `host.id`, `host.architecture`, `host.containerized`, `host.os.kernel`
+   - `agent.id`, `agent.ephemeral_id`
+   - `log.file.device_id`, `log.file.inode`, `log.file.path`
+
+### The filter block
+
+Add this between the `input {}` and `output {}` blocks in `/opt/observability-logs/pipeline/main.conf` on **every** Logstash worker:
+
+```ruby
+filter {
+  # 1) Anonymize patterns in the raw event text
+  if [event][original] {
+    mutate {
+      gsub => [
+        "[event][original]", "\b(\d{1,3}\.\d{1,3}\.\d{1,3})\.\d{1,3}\b", "\1.0",
+        "[event][original]", "eyJ[A-Za-z0-9_=-]+\.[A-Za-z0-9_=-]+\.[A-Za-z0-9_=-]+", "[JWT]",
+        "[event][original]", "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", "[EMAIL]",
+        "[event][original]", "(?i)bearer\s+[A-Za-z0-9._=-]+", "Bearer [TOKEN]",
+        "[event][original]", "AKIA[0-9A-Z]{16}", "[AWS_KEY]"
+      ]
+    }
+  }
+
+  if [message] {
+    mutate {
+      gsub => [
+        "message", "\b(\d{1,3}\.\d{1,3}\.\d{1,3})\.\d{1,3}\b", "\1.0",
+        "message", "eyJ[A-Za-z0-9_=-]+\.[A-Za-z0-9_=-]+\.[A-Za-z0-9_=-]+", "[JWT]",
+        "message", "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", "[EMAIL]",
+        "message", "(?i)bearer\s+[A-Za-z0-9._=-]+", "Bearer [TOKEN]",
+        "message", "AKIA[0-9A-Z]{16}", "[AWS_KEY]"
+      ]
+    }
+  }
+
+  # 2) Drop topology / fleet-revealing fields
+  mutate {
+    remove_field => [
+      "[host][ip]",
+      "[host][mac]",
+      "[host][id]",
+      "[host][architecture]",
+      "[host][containerized]",
+      "[host][os][kernel]",
+      "[agent][ephemeral_id]",
+      "[agent][id]",
+      "[log][file][device_id]",
+      "[log][file][inode]",
+      "[log][file][path]"
+    ]
+  }
+}
+```
+
+### Restart
+
+Apply on each worker with `down + up -d`, not `restart`. The Beats input on `:5044` doesn't release the socket within the default 10-second grace, so `docker compose restart` consistently fails with `Address already in use` on the second startup:
+
+```bash
+cd /opt/observability-logs
+sudo docker compose down
+sudo docker compose up -d
+
+# Wait ~60s, then verify
+sleep 60
+sudo docker compose logs --tail=20 logstash | grep -iE "pipeline|started"
+```
+
+You want to see `Pipeline started {"pipeline.id"=>"main"}` and `Starting input listener {:address=>"0.0.0.0:5044"}` with no errors.
+
+### Verify on Elasticsearch
+
+From the VPS:
+
+```bash
+ELASTIC=$(sudo grep '^ELASTIC_PASSWORD=' /opt/observability-logs/.env | cut -d= -f2-)
+
+# Sneak peek of a recent event
+curl -s -u "elastic:$ELASTIC" \
+  "http://localhost:9200/logs-*/_search?size=1&sort=@timestamp:desc" \
+  -H "Content-Type: application/json" \
+  -d '{"query":{"range":{"@timestamp":{"gte":"now-2m"}}}}' \
+  | python3 -m json.tool | head -50
+```
+
+Check that the dropped fields (`host.ip`, `log.file.path`, ...) are absent and that any IPs in `event.original` end in `.0`.
+
+### Wipe pre-redaction history (optional)
+
+The redaction only affects events ingested *after* the restart. Older indices still contain the un-redacted versions. If you want a clean slate:
+
+```bash
+ELASTIC=$(sudo grep '^ELASTIC_PASSWORD=' /opt/observability-logs/.env | cut -d= -f2-)
+curl -sX POST -u "elastic:$ELASTIC" \
+  "http://localhost:9200/logs-*/_delete_by_query?conflicts=proceed" \
+  -H "Content-Type: application/json" \
+  -d '{"query": {"match_all": {}}}' | python3 -m json.tool
+```
+
+New events will repopulate the index pattern within seconds.
+
+### Trade-offs
+
+| Aspect                    | This approach (Logstash redact)                       | Alternative: dual-index split                                                        |
+| ------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Admin sees raw data?      | **No** — same redacted view everyone else gets        | Yes — `logs-internal-*` is admin-only with full data                                  |
+| Storage                   | 1× (just one index per day)                            | 2× (two indices per day, raw + sanitized)                                            |
+| Pipeline complexity       | One `filter {}` block, easy to reason about          | Two `output {}` blocks with conditionals, more moving parts                          |
+| Public viewer trust       | Implicit — what's in ES is already safe              | Implicit — role only grants `read` on `logs-public-*`                                |
+| Forensics on raw events   | Source files on the VPS (`tail`, `journalctl`)        | `logs-internal-*` via admin login                                                    |
 ## Where to go next
 
 - Once Filebeat is shipping events ([[observability/logs/filebeat/filebeat-setup|filebeat-setup]]), the `logs-*` data view created in [[observability/logs/kibana/kibana-setup#Step 7 — create a Data View|kibana-setup]] will show live data to the anonymous viewer.
