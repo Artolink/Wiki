@@ -1,169 +1,241 @@
 ---
-title: Logstash setup
+title: Logstash — Setup
 ---
 
-## What is Logstash
+This page is a complete, self-contained reference to Logstash — what it is, what each part of a pipeline does, the knobs you'll actually turn, and the pitfalls that bite first-timers. The **final section** ("In this lab") shows the exact config running on `logstash01` and `logstash02` in this deployment, with line-by-line commentary.
 
-**Logstash** is the "L" of the ELK stack: a server-side event-processing engine that **ingests events from many sources, transforms them, and ships them to a destination**. Think of it as a programmable ETL pipeline specialised for log/event data.
+## 1. What is Logstash?
 
-Where Filebeat is intentionally light (read a file, ship a line, almost no logic), Logstash is **heavy**: it runs on the JVM, supports hundreds of plugins, and exists precisely to do the work Filebeat refuses to do — parsing, enriching, conditional routing, multi-destination output.
+Logstash is a data-collection pipeline engine, written in JRuby on the JVM. You feed it events from one or more **inputs**, optionally transform them through **filters**, and ship the result out through one or more **outputs**. Every event is a JSON-shaped document with arbitrary fields, plus a few metadata fields (`@timestamp`, `@version`, `host`, etc.).
 
-Typical responsibilities of Logstash:
-- **Parse** unstructured log lines (e.g. nginx access logs) into structured fields (status, response_time, client_ip, …).
-- **Enrich** events (GeoIP lookup from an IP, hostname resolution, tag based on patterns).
-- **Filter** unwanted events (drop noisy debug-level lines from one service).
-- **Route** to multiple destinations (e.g. errors also go to a separate index or to Slack).
-- **Convert** between formats (CSV → JSON, syslog → ECS, …).
+Logstash is **stateful per pipeline**, **multi-threaded**, and **batch-oriented**: it pulls events from its inputs in batches (default 125), runs them through the filter chain in parallel worker threads, and then ships them out. Throughput is roughly `batch_size × pipeline.workers × filters_efficiency`, capped by the slowest output.
 
-Logstash is **stateful at the connection level** (it buffers events in memory or on disk) but **stateless at the event level** (every event is independent: no joins across events natively). For correlated events you need an upstream of Logstash (Kafka with stream processing) or you do it downstream (Elasticsearch aggregations).
+## 2. Core concepts
 
-## Core concepts
+### 2.1 Inputs
 
-### The pipeline: input → filter → output
+The most common input plugins:
 
-A Logstash configuration is one or more **pipelines**. Each pipeline has three stages, in order:
+| Plugin     | What it does                                                                                                  |
+| ---------- | ------------------------------------------------------------------------------------------------------------- |
+| `beats`    | Accepts events pushed by Filebeat / Winlogbeat / Metricbeat over the Lumberjack protocol on port 5044.        |
+| `syslog`   | Listens on UDP/TCP 514 for RFC3164 / RFC5424 syslog messages.                                                 |
+| `tcp` / `udp` | Generic socket listener — useful for custom log shippers or app-level sinks.                              |
+| `file`     | Tails files locally (mostly for testing or for single-host setups).                                          |
+| `kafka`    | Pulls from a Kafka topic. Standard pattern when you want a durable buffer in front of Logstash.              |
+| `http`     | HTTP endpoint that accepts POST'd events. Handy for webhook ingestion.                                       |
 
+### 2.2 Filters
+
+Where the real work happens. The big ones:
+
+| Plugin     | What it does                                                                                                        |
+| ---------- | ------------------------------------------------------------------------------------------------------------------- |
+| `grok`     | Pattern-matches a string field against a regex-with-named-captures DSL. The canonical tool for unstructured logs.    |
+| `dissect`  | Faster than grok for **fixed-position** parsing — no regex backtracking, just delimiter splitting.                 |
+| `json`     | Parse a field that contains a JSON string into structured nested fields.                                           |
+| `mutate`   | Rename, convert types, lowercase/uppercase, gsub, split, strip, remove.                                            |
+| `date`     | Parse a string timestamp into the canonical `@timestamp` field. Critical — without this, ES indexes by ingest time. |
+| `geoip`    | Look up an IP address in a MaxMind DB and add `country`, `city`, `lat`, `lon` fields.                              |
+| `kv`       | Parse `key1=val1 key2=val2` style fields.                                                                          |
+| `useragent` | Parse a User-Agent string into `os`, `browser`, `device` fields.                                                  |
+
+Filters can be wrapped in `if` / `else if` blocks to route conditionally:
+
+```ruby
+filter {
+  if [type] == "nginx-access" {
+    grok { match => { "message" => "%{COMBINEDAPACHELOG}" } }
+  } else if [type] == "journald" {
+    # already structured, skip parsing
+  }
+}
 ```
-inputs           filters            outputs
-   │                │                  │
-[source(s)] ──> [transformations] ──> [destination(s)]
+
+### 2.3 Outputs
+
+| Plugin           | What it does                                                                                |
+| ---------------- | ------------------------------------------------------------------------------------------- |
+| `elasticsearch`  | The canonical destination. Bulk-writes events into an index pattern of your choice.        |
+| `kafka`          | Publish to a Kafka topic. Used for fan-out to multiple downstream consumers.               |
+| `file`           | Append events to a local file. Useful for archival or debugging.                            |
+| `stdout`         | Print events to stdout. Indispensable while developing a pipeline (`codec => rubydebug`).  |
+| `dead_letter_queue` | Implicit sink for events the main output couldn't accept (see §4).                       |
+
+### 2.4 Performance knobs
+
+In `config/logstash.yml`:
+
+- `pipeline.workers: <N>` — number of worker threads per pipeline. Default: number of CPU cores. Each worker pulls a batch and runs it through the filter chain in isolation.
+- `pipeline.batch.size: 125` — events per batch. Larger batches improve throughput but increase end-to-end latency.
+- `pipeline.batch.delay: 50` — max ms to wait for a batch to fill before flushing. Smaller = lower latency, more overhead.
+- `queue.type: memory | persisted` — in-memory (default, fast, lossy on crash) or on-disk (durable, slightly slower).
+- `queue.max_bytes: 1gb` — only relevant for `persisted` queues.
+
+### 2.5 Dead Letter Queue (DLQ)
+
+When Elasticsearch rejects an event (mapping conflict, malformed JSON, too-big document), the default behavior is to log a warning and drop it. Enable the DLQ to capture those events on disk for later inspection:
+
+```yaml
+# config/logstash.yml
+dead_letter_queue.enable: true
+dead_letter_queue.max_bytes: 1024mb
 ```
 
-Each stage uses **plugins**. The input plugin receives events; filter plugins mutate them; output plugins deliver them. Plugins are configurable via blocks in a Logstash config file.
+Events in the DLQ can be replayed once you've fixed the mapping. Highly recommended in production.
 
-A minimal pipeline that takes beats events, adds a tag, and ships to Elasticsearch:
+## 3. Common patterns
 
-```logstash
+- **Filebeat (push) → Logstash (parse) → Elasticsearch**: the canonical ELK flow.
+- **Multiple shippers behind a load balancer → Logstash pool → ES**: the production-grade variant. Lets you roll Logstash, absorb spikes.
+- **Kafka in front of Logstash**: when you have so many events that a momentary ES outage would overwhelm Logstash's memory queue. Kafka buffers for hours / days.
+- **Two-stage Logstash**: a first cheap-and-fast stage that just routes (`if/else if`), a second stage per category that does heavy parsing. Reduces grok contention.
+
+## 4. Pitfalls
+
+> [!WARNING]
+> **`@timestamp` defaults to ingest time, not event time.** If you don't have a `date {}` filter parsing the actual log timestamp, every event lands with `@timestamp = now()`, and Kibana's time filters will lie to you.
+
+> [!WARNING]
+> **Grok is fast — until it isn't.** Backtracking on misaligned patterns can blow the CPU. Always pin patterns with anchors (`^...$`), prefer `dissect` when fields are fixed-position, and benchmark with the Kibana Grok Debugger.
+
+> [!IMPORTANT]
+> **Mapping conflicts are the #1 silent failure.** The first event that writes a field pins its type forever in that index. If event #2 has the same field name but a different type (string vs number), it gets rejected. Either use **typed grok captures** (`%{NUMBER:port:int}`) or use **rollover-per-day indices** so a bad field only contaminates one day.
+
+> [!INFO]
+> **Logstash is slow to start.** ~45–60 s on a small VM is normal. Healthchecks should be patient (`interval: 30s`, `retries: 5+`), otherwise Docker keeps restarting it before it has a chance to come up.
+
+## 5. In this lab
+
+Two identical workers, one per VM (`logstash01` and `logstash02`), each on its own Tailscale-only IP. Both write to the same Elasticsearch on the VPS, using a **least-privilege** ES user (`logstash_writer`) created specifically for this purpose. The Beats input on `:5044` will be reached by Filebeat through the HAProxy VIP once the load-balancer layer is deployed; until then, Filebeat can target either worker directly.
+
+### 5.1 Prerequisites on each VM
+
+- Ubuntu 24.04 VM, joined to the Tailscale tailnet.
+- Docker CE installed (same recipe as in [[observability/logs/elasticsearch/elasticsearch-setup#Prerequisites|elasticsearch-setup]]).
+- Network reachability from the VM to the VPS Tailscale IP (`100.114.84.48:9200`).
+
+### 5.2 Generate the `logstash_writer` password (on the VPS)
+
+The workers don't need ES superuser. We'll create a dedicated `logstash_writer` user, with a role scoped to writing into our log indices and nothing else. First, generate the password on the VPS and append it to the central `.env`:
+
+```bash
+# On the VPS, /opt/observability-logs/
+echo "LOGSTASH_WRITER=$(openssl rand -hex 24)"
+
+sudo tee -a /opt/observability-logs/.env > /dev/null <<'EOF'
+LOGSTASH_WRITER_PASSWORD=<paste hex value here>
+EOF
+```
+
+### 5.3 Create the ES role and user (once, from the VPS)
+
+```bash
+cd /opt/observability-logs
+ELASTIC=$(grep '^ELASTIC_PASSWORD=' .env | cut -d= -f2-)
+LSW=$(grep '^LOGSTASH_WRITER_PASSWORD=' .env | cut -d= -f2-)
+
+# Role: write to logs indices + minimal cluster operations needed for templates/ILM
+curl -sX PUT -u "elastic:$ELASTIC" \
+  -H "Content-Type: application/json" \
+  http://localhost:9200/_security/role/logstash_writer \
+  -d '{
+    "cluster": ["monitor", "manage_index_templates", "manage_ilm"],
+    "indices": [{
+      "names": ["filebeat-*", "logstash-*", "logs-*"],
+      "privileges": ["write", "create", "create_index", "manage",
+                     "view_index_metadata", "auto_configure"]
+    }]
+  }' && echo
+
+# User: the workers will authenticate with this
+curl -sX PUT -u "elastic:$ELASTIC" \
+  -H "Content-Type: application/json" \
+  http://localhost:9200/_security/user/logstash_writer \
+  -d "{
+    \"password\": \"$LSW\",
+    \"roles\": [\"logstash_writer\"],
+    \"full_name\": \"Logstash worker writer\"
+  }" && echo
+```
+
+Verify:
+
+```bash
+curl -s -o /dev/null -w "HTTP %{http_code}\n" \
+  -u "logstash_writer:$LSW" http://localhost:9200/_cluster/health
+# HTTP 200
+```
+
+> [!TIP]
+> The `monitor` cluster privilege is enough for Logstash to ask ES for version info, template state, ILM policies. Don't grant `all` or `superuser` to a worker — every extra privilege is a future blast-radius problem.
+
+### 5.4 `.env` — credentials only
+
+On each worker VM, paste the `logstash_writer` password (taken from the VPS `.env`) into a local `.env` using a quoted heredoc so bash doesn't expand anything:
+
+```bash
+cat > /opt/observability-logs/.env <<'EOF'
+LOGSTASH_WRITER_PASSWORD=<paste hex value from VPS .env here>
+EOF
+chmod 600 /opt/observability-logs/.env
+```
+
+Verify the length (must be 48 hex chars):
+
+```bash
+PW=$(grep '^LOGSTASH_WRITER_PASSWORD=' /opt/observability-logs/.env | cut -d= -f2-)
+echo "Length: ${#PW}"
+# Length: 48
+```
+
+### 5.5 `config/logstash.yml`
+
+```yaml
+# /opt/observability-logs/config/logstash.yml
+http.host: "0.0.0.0"
+pipeline.workers: 2
+pipeline.batch.size: 125
+pipeline.batch.delay: 50
+```
+
+`http.host: 0.0.0.0` is required so the monitoring API on `:9600` is reachable from outside the container (used by the healthcheck and by future Prometheus scraping).
+
+### 5.6 `pipeline/main.conf`
+
+The pipeline itself — Beats in, Elasticsearch out. No filters yet; grok for nginx and journald lands in Phase 6.
+
+```ruby
+# /opt/observability-logs/pipeline/main.conf
 input {
-    beats {
-        port => 5044
-    }
+  beats {
+    port => 5044
+  }
 }
 
 filter {
-    mutate {
-        add_tag => [ "ingested-by-logstash" ]
-    }
+  # Phase 6 will add grok for nginx access logs + journald passthrough
 }
 
 output {
-    elasticsearch {
-        hosts => [ "http://elasticsearch.example.com:9200" ]
-        index => "logs-%{+YYYY.MM.dd}"
-    }
+  elasticsearch {
+    hosts    => [ "http://100.114.84.48:9200" ]
+    user     => "logstash_writer"
+    password => "${LOGSTASH_WRITER_PASSWORD}"
+    index    => "logs-%{+YYYY.MM.dd}"
+  }
 }
 ```
 
-### The event
+A couple of details:
 
-Inside Logstash, every log line becomes an **event**: a structured object with named fields. The Beats input automatically populates `@timestamp`, `host`, `message`, `agent.*`, etc. Filters add or modify fields; the output plugin serialises the final event for the destination (JSON for Elasticsearch, plaintext for `file`, etc.).
+- **`${LOGSTASH_WRITER_PASSWORD}`** is interpolated by Logstash at startup from its environment. The variable will be injected into the container by docker-compose (next section).
+- **Daily indices** (`logs-%{+YYYY.MM.dd}`) — easy to roll, easy to delete with ILM later. One day per index means a mapping conflict is contained to a single day.
+- **No TLS** on the ES output: all traffic stays inside Tailscale's WireGuard mesh.
 
-You access fields with the `%{fieldname}` syntax in plugin configurations, and with `[fieldname]` in `if` conditions.
-
-### Codecs
-
-A **codec** is a plugin that runs at the boundary of an input or output to decode/encode the byte stream. Defaults usually do the right thing: the `json` codec on the input parses incoming JSON into fields; `plain` on the output writes plain text.
-
-## Common patterns
-
-### Input plugins
-
-| Plugin     | Receives from                                                          |
-| ---------- | ---------------------------------------------------------------------- |
-| `beats`    | Filebeat, Metricbeat, etc. — the canonical input.                      |
-| `syslog`   | RFC 3164/5424 syslog over UDP or TCP. For appliances and legacy hosts. |
-| `tcp`      | Raw TCP socket. Pair with a codec to parse the payload.                |
-| `file`     | Tails a local file. Used when Logstash itself sits on the source host. |
-| `kafka`    | A Kafka topic. Standard in production for backpressure.                |
-| `http`     | An HTTP endpoint. Webhook receivers.                                   |
-| `stdin`    | For testing / one-shot pipelines from the CLI.                         |
-
-### Filter plugins (the brain)
-
-| Plugin        | What it does                                                                                                                  |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `grok`        | Regex-based pattern matching to extract fields from unstructured text. Powerful, slow on complex patterns.                    |
-| `dissect`     | Positional, faster alternative to grok when the input has a fixed structure (delimiter-based, not free text).                 |
-| `mutate`      | Catch-all for field manipulation: rename, gsub, lowercase, convert types, add/remove tags or fields.                          |
-| `date`        | Parse a timestamp string out of a field into `@timestamp`. Without this, ES uses ingestion time, not event time.              |
-| `geoip`       | Look up an IP and add country/city/lat/lon fields. Useful for nginx access logs.                                              |
-| `json`        | Decode a JSON string field into structured nested fields.                                                                     |
-| `kv`          | Parse "key=value key=value" strings into fields. Common in legacy app logs.                                                   |
-| `drop`        | Discard the event entirely. Used in `if` blocks to filter noise.                                                              |
-| `ruby`        | Run arbitrary Ruby code. Escape hatch when no plugin does what you need. Use sparingly: hard to maintain.                     |
-
-### Conditionals
-
-Filter and output blocks support `if/else if/else`, matching on event fields:
-
-```logstash
-filter {
-    if [log][file][path] =~ /nginx/ {
-        grok { match => { "message" => "%{COMBINEDAPACHELOG}" } }
-        geoip { source => "clientip" }
-        date { match => [ "timestamp", "dd/MMM/yyyy:HH:mm:ss Z" ] }
-    } else if [systemd][unit] {
-        # journald event — already structured by Filebeat
-        mutate { add_tag => [ "systemd" ] }
-    } else {
-        # everything else: leave alone
-        mutate { add_tag => [ "raw" ] }
-    }
-}
-```
-
-### Output plugins
-
-| Plugin           | Sends to                                                          |
-| ---------------- | ----------------------------------------------------------------- |
-| `elasticsearch`  | The canonical destination. ILM-aware, index template-aware.       |
-| `kafka`          | A Kafka topic. For downstream fan-out or further processing.      |
-| `file`           | A local file. Backup, audit, or pre-Elasticsearch staging.        |
-| `stdout`         | The console. Indispensable for debugging — use the `rubydebug` codec to see events as JSON. |
-| `email`/`slack`  | Notifications. Pair with `if [tags] == "alert"` style routing.   |
-
-### Performance knobs
-
-| Setting                  | What it does                                                                              | Sensible default                |
-| ------------------------ | ----------------------------------------------------------------------------------------- | ------------------------------- |
-| `pipeline.workers`       | Threads processing filter+output. Default: CPU count.                                     | Leave default unless tuning.    |
-| `pipeline.batch.size`    | Events bundled into one filter+output cycle. Larger = better throughput, more memory.     | 125 (default) ok for most cases. |
-| `pipeline.batch.delay`   | Max wait (ms) before flushing a partial batch.                                            | 50ms.                            |
-| `queue.type`             | `memory` (fast, lost on crash) or `persisted` (disk, survives crash).                     | `persisted` in production.      |
-| `queue.max_bytes`        | Disk cap for the persistent queue.                                                        | 1024mb (1GB).                   |
-| JVM heap (`Xms` / `Xmx`) | Set both to the same value, e.g. `-Xms2g -Xmx2g`. Don't exceed 50% of host RAM.           | Start with 2 GB, monitor.       |
-
-### Dead-letter queue (DLQ)
-
-If an event fails to be delivered to the output (e.g. Elasticsearch rejects it because of a mapping conflict), by default Logstash retries forever, blocking the pipeline. Enable the DLQ in `logstash.yml`:
+### 5.7 `docker-compose.yml`
 
 ```yaml
-dead_letter_queue.enable: true
-path.dead_letter_queue: /usr/share/logstash/dlq
-```
-
-Now failed events go to the DLQ instead of blocking. You can later replay or inspect them with the `dead_letter_queue` input plugin.
-
-## Pitfalls
-
-> [!WARNING] Things that will bite you
-> - **Grok is regex**: every grok pattern compiles to a regex, and regex backtracking can explode. A pattern that takes 50ms on simple input can take 5s on a malicious one. Use `dissect` if the data is delimiter-based; profile your grok with `logstash --node.name test --pipeline.workers 1` and watch CPU.
-> - **`date` filter is not optional**: without it, `@timestamp` is the ingestion time. When you replay old logs or backfill, every event lands "now". You then look at Discover and wonder why "yesterday's outage" doesn't show up.
-> - **JVM heap = RAM trap**: Logstash is a JVM app. `Xms = Xmx`, never more than 50% of host RAM, never more than ~30 GB (above that pointer compression flips off and you actually get less usable memory).
-> - **`rubydebug` codec in production**: writes every event to stdout as multi-line JSON. Useful for one minute of debug, catastrophic if left on under load (disk fills, journal explodes).
-> - **Stateless = no joins**: if you need "match request log line A with response log line B", Logstash alone can't. You need an upstream Kafka with stream processing, or you join in Elasticsearch.
-> - **Field naming pollution**: every typo in a field name creates a new field in the Elasticsearch mapping. After a few mistakes you have `client_IP`, `clientip`, `client.ip` all coexisting. Lock the schema with an ES index template + ECS-aligned fields.
-> - **Persistent queue + small disk**: `persisted` queue is great until it fills the partition. Always set `queue.max_bytes` and monitor `/var/lib/logstash/queue` (or wherever you mounted it).
-
-## In this lab
-
-Two identical Logstash instances run in Docker on logstash01 and logstash02. Both listen on `:5044` for Beats input (load-balanced by HAProxy), parse a minimal set of events, and ship to Elasticsearch on the VPS over Tailscale.
-
-### docker-compose.yml (identical on logstash01 and logstash02)
-
-```yaml
-# ~/logstash/docker-compose.yml
-
 services:
   logstash:
     image: docker.elastic.co/logstash/logstash:8.15.0
@@ -171,119 +243,68 @@ services:
     user: "1000:1000"
     environment:
       LS_JAVA_OPTS: "-Xms1g -Xmx1g"
+      # Passed through from the local .env so pipeline/main.conf can use ${LOGSTASH_WRITER_PASSWORD}
+      LOGSTASH_WRITER_PASSWORD: "${LOGSTASH_WRITER_PASSWORD}"
     volumes:
-      - ./pipeline:/usr/share/logstash/pipeline:ro
-      - ./config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
-      - logstash-queue:/usr/share/logstash/data       # persistent queue + DLQ
+      - /opt/observability-logs/pipeline:/usr/share/logstash/pipeline:ro
+      - /opt/observability-logs/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - /opt/observability-logs/data:/usr/share/logstash/data
     ports:
-      - "5044:5044"        # Beats input (HAProxy forwards here)
-      - "9600:9600"        # Logstash monitoring API (over Tailscale)
+      - "5044:5044"        # Beats input — HAProxy VIP reaches here in Phase 5
+      - "9600:9600"        # Monitoring API — over Tailscale only, not publicly exposed
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:9600 || exit 1"]
       interval: 30s
-      retries: 3
-
-volumes:
-  logstash-queue:
+      retries: 5
 ```
 
-### config/logstash.yml
+> [!WARNING]
+> **Never hardcode the password in `docker-compose.yml`.** Special characters trigger bash history expansion and docker-compose's own variable substitution, both of which silently mangle the value. Always reference it via `${VAR}` and keep the actual value in a `.env` written with a single-quoted heredoc.
 
-```yaml
-http.host: "0.0.0.0"
-http.port: 9600
+### 5.8 Start it
 
-queue.type: persisted
-queue.max_bytes: 1024mb
+```bash
+cd /opt/observability-logs
+sudo docker compose up -d
 
-dead_letter_queue.enable: true
-path.dead_letter_queue: /usr/share/logstash/data/dlq
+# Wait ~60s for Logstash to come up, then tail the logs
+sudo docker compose logs -f logstash
 ```
 
-### pipeline/main.conf — minimal first pipeline
+Look for:
 
-The first iteration of the pipeline takes everything from Beats, applies a sensible `date` filter so `@timestamp` is the event's actual time, tags by source, and ships to Elasticsearch on the VPS.
-
-```logstash
-# ~/logstash/pipeline/main.conf
-
-input {
-    beats {
-        port => 5044
-    }
-}
-
-filter {
-    # nginx access logs: parse the combined format
-    if [log][file][path] =~ "/var/log/nginx/access" {
-        grok {
-            match => { "message" => "%{COMBINEDAPACHELOG}" }
-            tag_on_failure => [ "_grok_nginx_failed" ]
-        }
-        date {
-            match => [ "timestamp", "dd/MMM/yyyy:HH:mm:ss Z" ]
-            target => "@timestamp"
-        }
-        mutate { add_tag => [ "nginx-access" ] }
-    }
-
-    # journald events: Filebeat already structured them, just tag
-    else if [systemd] {
-        mutate { add_tag => [ "systemd" ] }
-    }
-
-    # docker container logs: tag by container name
-    else if [container] {
-        mutate {
-            add_tag => [ "docker" ]
-            add_field => { "[@metadata][container_name]" => "%{[container][name]}" }
-        }
-    }
-
-    # everything else: pass through
-    else {
-        mutate { add_tag => [ "raw" ] }
-    }
-}
-
-output {
-    elasticsearch {
-        hosts => [ "http://vps.tailscale-domain:9200" ]
-        index => "logs-%{+YYYY.MM.dd}"
-        # In single-node lab mode no auth; in prod set user/password or api_key.
-    }
-
-    # Optional: also print to stdout while developing. Comment out in steady state.
-    # stdout { codec => rubydebug }
-}
+```
+[INFO ][logstash.outputs.elasticsearch] Restored connection to ES instance {:url=>"http://logstash_writer:xxxxxx@100.114.84.48:9200/"}
+[INFO ][logstash.javapipeline ][main] Pipeline started {"pipeline.id"=>"main"}
+[INFO ][logstash.agent          ] Successfully started Logstash API endpoint {:port=>9600, :ssl_enabled=>false}
 ```
 
-### Start, verify, debug
+If you see `Got response code '401' contacting Elasticsearch`, the password in `.env` doesn't match the one in ES — re-check it from the VPS `.env`.
 
-```sh
-# On logstash01 and logstash02:
-docker compose up -d
-docker compose logs -f logstash
+### 5.9 Sanity check from the VPS
 
-# Verify the monitoring API is reachable over Tailscale:
-curl http://logstash01.tailscale-domain:9600/?pretty
-# Expected: JSON with "status": "green" and pipeline info.
+After both workers are up, send a test event from the VPS through one of them and check that ES received it:
 
-# Once HAProxy is in front and Filebeat ships, watch events flow:
-docker compose logs logstash | grep -i 'beats\|pipeline\|sending'
+```bash
+# Quick TCP event via netcat — Beats protocol won't work but a raw line lands in
+# Logstash's logs if we temporarily add a tcp input. For a real end-to-end test,
+# use Filebeat (see filebeat-setup, once that's deployed).
 ```
 
-### Iteration plan
+For now, the cleanest end-to-end test is to watch the indices in ES once Filebeat is configured to ship to a worker.
 
-The pipeline above is the bare minimum to get events into Elasticsearch with reasonable parsing for the three biggest sources on the VPS (nginx, systemd, docker). Iteratively, you'll want to:
+### 5.10 Repeat on logstash02
 
-1. Add **GeoIP enrichment** for the `clientip` field on nginx events.
-2. Add **conditional drops** for very noisy lines you don't want to index.
-3. Add a **`stdout { codec => rubydebug }`** output while developing a new filter, then remove it.
-4. Move to an **ECS-aligned schema** (rename fields to `event.*`, `source.*`, etc.) for consistency with the wider Elastic Stack ecosystem.
+Steps **5.3 → 5.8** are identical on the second VM. Same image, same `.env` (same password, same role), same pipeline, same ports. The point of running two is horizontal capacity and fault isolation — they're peers, not primary/secondary.
 
-## Where to go next
+## 6. Where to go next
 
-- Next in the series: **[[elasticsearch/_index|Elasticsearch]]** — the store the Logstash output writes to.
-- Logstash's plugin ecosystem is huge and the language has subtleties this page doesn't cover (multiline codec, persistent queue tuning, JVM GC tuning, monitoring with the X-Pack monitoring plugin). The official Logstash Reference is the canonical resource when you need more.
+- [[observability/logs/elasticsearch/elasticsearch-setup|elasticsearch-setup]] — the ES instance these workers write to.
+- [[observability/logs/kibana/kibana-setup|kibana-setup]] — UI on top of the data Logstash indexes.
+
+Coming up next in the deploy:
+
+- **Filebeat** on the VPS — the producer that will push events into these workers. (`filebeat-setup`, Phase 4.)
+- **HAProxy + Keepalived** on `lb01` / `lb02` — the HA load-balancer pair that fronts these workers. (`haproxy-for-logs`, `keepalived-vrrp`, Phase 5.)
+- **Grok parsing** for nginx access logs + journald — added to the empty `filter {}` block above. (Phase 6.)
