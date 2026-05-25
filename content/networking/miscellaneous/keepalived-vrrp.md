@@ -1,9 +1,7 @@
 ---
 title: "Keepalived and VRRP: make HA real"
 ---
----
-
-This page is the companion to [[observability/logs/load-balancers/haproxy-for-logs|haproxy-for-logs]]. 
+This page is the companion to [[networking/miscellaneous/haproxy|haproxy]].
 
 HAProxy gives us horizontal scaling of the worker pool behind it; it does **not** make the load balancer itself redundant. A single HAProxy is still a single point of failure. The standard fix is to run **two HAProxy hosts** sharing a **Virtual IP (VIP)** that migrates between them automatically. The mechanism is Keepalived, implementing the VRRP protocol.
 
@@ -339,6 +337,6 @@ sudo systemctl start haproxy
 
 ## Where to go next
 
-- [[observability/logs/load-balancers/haproxy-for-logs|haproxy-for-logs]] — the load balancer that sits inside this VRRP pair.
+- [[networking/miscellaneous/haproxy|haproxy]] — the load balancer that sits inside this VRRP pair.
 - [[observability/logs/logstash/logstash-setup|logstash-setup]] — the workers that HAProxy distributes traffic to.
 - Tighten the failover detection time by lowering `advert_int` to `0.5` (fractional seconds) if your network can tolerate 2× the VRRP heartbeat traffic.

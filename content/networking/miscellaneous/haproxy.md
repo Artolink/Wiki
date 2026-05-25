@@ -112,7 +112,7 @@ This is the **most common source of bugs** in HAProxy setups that forward long-l
 
 ## 9. The HA layer above HAProxy
 
-A single HAProxy is itself a single point of failure. The canonical solution: run **two HAProxy instances on two hosts**, share a Virtual IP between them, manage the VIP with Keepalived (VRRP). The clients always target the VIP; whichever HAProxy currently owns it serves the traffic; if it dies, the VIP migrates to the standby within ~3 seconds. This layer is covered in [[observability/logs/load-balancers/keepalived-vrrp|keepalived-vrrp]].
+A single HAProxy is itself a single point of failure. The canonical solution: run **two HAProxy instances on two hosts**, share a Virtual IP between them, manage the VIP with Keepalived (VRRP). The clients always target the VIP; whichever HAProxy currently owns it serves the traffic; if it dies, the VIP migrates to the standby within ~3 seconds. This layer is covered in [[networking/miscellaneous/keepalived-vrrp|keepalived-vrrp]].
 
 ---
 
@@ -245,6 +245,6 @@ A clean reload doesn't drop existing connections — HAProxy spawns the new proc
 
 ## Where to go next
 
-- [[observability/logs/load-balancers/keepalived-vrrp|keepalived-vrrp]] — the VRRP layer that owns the VIP and migrates it between loglb01 and loglb02 on failure.
+- [[networking/miscellaneous/keepalived-vrrp|keepalived-vrrp]] — the VRRP layer that owns the VIP and migrates it between loglb01 and loglb02 on failure.
 - [[observability/logs/logstash/logstash-setup|logstash-setup]] — the worker pool that sits behind this LB.
 - [[observability/logs/filebeat/filebeat-setup|filebeat-setup]] — the producer that sends Beats traffic into the VIP.

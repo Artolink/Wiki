@@ -15,6 +15,15 @@ Three reasons:
 
 On the VMs that run Logstash (`logstash01`, `logstash02`) we use Docker because they need *Logstash* (a heavyweight JVM application that benefits from the consistent runtime). Here we use native because Filebeat is a Go binary, no JVM, no friction.
 
+## Prerequisites
+
+- A working Logstash worker pool (see [[observability/logs/logstash/logstash-setup|logstash-setup]]).
+
+- A working HAProxy + Keepalived HA pair with a VIP (see [[networking/miscellaneous/haproxy|haproxy]] and [[networking/miscellaneous/keepalived-vrrp|keepalived-vrrp]]). In this guide the VIP is `10.0.0.10:5044`.
+
+- A user with sudo on the host whose logs you want to collect (in this lab: the VPS).
+- 
+
 ## Step 1 — install Filebeat 8.x from the official Elastic APT repo
 
 ```bash
@@ -83,7 +92,7 @@ processors:
 # Phase 4: ship directly to logstash01 over Tailscale.
 # Phase 5 will replace this with the HAProxy VIP for HA + load balancing.
 output.logstash:
-  hosts: ["100.101.11.3:5044"]
+  hosts: ["10.0.0.10:5044"]
 
 # ============================== Setup ===================================
 # Output is Logstash, which writes to logs-* with its own index pattern.
@@ -131,11 +140,11 @@ sudo filebeat test output
 Expected output for the second one:
 
 ```
-logstash: 100.101.11.3:5044...
+logstash: 10.0.0.10:5044...
   connection...
     parse host... OK
     dns lookup... OK
-    addresses: 100.101.11.3
+    addresses: 10.0.0.10
     dial up... OK
   TLS... WARN secure connection disabled
   talk to server... OK
@@ -146,8 +155,8 @@ logstash: 100.101.11.3:5044...
 If the dial-up step fails, the path between Filebeat and Logstash is broken. Quick reachability checks:
 
 ```bash
-ping -c 2 100.101.11.3
-nc -zv 100.101.11.3 5044
+ping -c 2 10.0.0.10
+nc -zv 10.0.0.10 5044
 ```
 
 ## Step 4 — enable and start
@@ -167,29 +176,14 @@ sudo journalctl -u filebeat -n 30 --no-pager
 What you want to see:
 
 ```
-Connecting to backoff(async(tcp://100.101.11.3:5044))
+Connecting to backoff(async(tcp://10.0.0.10:5044))
 Connection to backoff(...) established
 ```
 
 If you see `Failed to connect to backoff`, the output isn't reachable — re-run `filebeat test output`, fix the network, and Filebeat will reconnect on its own (it backoff-retries forever).
 
-## Step 5 — verify the pipeline end to end
 
-From the VPS, ask Elasticsearch what indices it has and how many events landed:
-
-```bash
-ELASTIC=$(sudo grep '^ELASTIC_PASSWORD=' /opt/observability-logs/.env | cut -d= -f2-)
-
-# New indices showing up?
-curl -s -u "elastic:$ELASTIC" "http://localhost:9200/_cat/indices?v" | grep "logs-"
-
-# Event count
-curl -s -u "elastic:$ELASTIC" "http://localhost:9200/logs-*/_count" | python3 -m json.tool
-```
-
-The count should be positive and grow each time you re-run it.
-
-## Step 6 — verify end-to-end from Elasticsearch
+## Step 5 — verify end-to-end from Elasticsearch
 
 The pipeline is Filebeat → Logstash → Elasticsearch. We can confirm each hop without touching Kibana:
 
@@ -220,7 +214,3 @@ If the count is positive and grows each time you re-run it, Filebeat → Logstas
 > [!INFO]
 > To see this data in **Kibana Discover**, you need a Data View pointed at `logs-*`. Create it from Stack Management as described in [[observability/logs/kibana/kibana-setup#Step 7 — create a Data View|kibana-setup]] — the same view is automatically usable by the public anonymous viewer once it exists.
 
-## Where to go next
-
-- Once the load-balancer pair is up (`haproxy-for-logs`, `keepalived-vrrp`), the single `output.logstash.hosts: ["100.101.11.3:5044"]` becomes `output.logstash.hosts: ["<VIP>:5044"]`. Same Filebeat, same config — just a different target IP.
-- **Phase 6** adds proper parsing: a `grok {}` filter on the Logstash side to break the nginx access logs into structured fields (status, request_time, remote_ip, ...), and a `date {}` filter to align `@timestamp` with the real event time rather than the ingest time.

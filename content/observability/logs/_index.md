@@ -1,7 +1,19 @@
 ---
 title: 🔍 Logs (ELK Stack)
+series:
+  - observability/logs/my-elk-stack
+  - observability/logs/filebeat
+  - observability/logs/filebeat/filebeat-setup
+  - networking/miscellaneous/haproxy
+  - networking/miscellaneous/keepalived-vrrp
+  - observability/logs/logstash
+  - observability/logs/logstash/logstash-setup
+  - observability/logs/elasticsearch
+  - observability/logs/elasticsearch/elasticsearch-setup
+  - observability/logs/kibana
+  - observability/logs/kibana/kibana-setup
+  - observability/logs/kibana/kibana-viewer-mode
 ---
-
 This is the "logs" half of my observability setup: the complementary half of the [Grafana stack](../metrics/my-grafana-stack) project for metrics. 
 
 Same idea, different data model: instead of *how much* something is happening (metrics), here we want to know *what exactly* happened and *when* (logs).

@@ -88,14 +88,19 @@ The three layers each solve one specific problem:
 
 ## Deployment order
 
-The series walks the components in **data-flow order**, but the actual deploy order is the **reverse** (store first, viewer last makes no sense — you can't see anything; UI first means you have nothing to query). So I deploy from the receiving end backwards:
+The series walks the components in **data-flow order** for readability, but the actual deploy order is the **reverse**: store first, viewer next, then the parsing layer, the LB pair, and the producer last. From the receiving end backwards:
 
 1. **Elasticsearch** — the store. Once this is up and queryable, everything else has somewhere to send events.
+
 2. **Kibana** — the UI. Connect to ES, expose via nginx, verify the empty Discover loads.
-3. **Logstash workers** — the parsers. One minimal pipeline (beats input → ES output) is enough for the first end-to-end test.
-4. **Filebeat** — the shipper. First targets a single LS directly (bypass LB for the first verification), then we'll switch to the VIP.
-5. **HAProxy + Keepalived** — the LB layer. Two LBs, active/standby VIP, Filebeat reconfigured to ship to the VIP. Failover tests.
-6. **Enrichment & polish** — grok parsing, Kibana dashboard, ILM retention, anonymous read-only role.
+
+3. **Logstash workers** — the parsers. One minimal pipeline (beats input → ES output) is enough.
+
+4. **HAProxy + Keepalived** — the LB layer. Two LBs, active/standby VIP, failover tests.
+
+5. **Filebeat** — the shipper. Targets the VIP directly. End-to-end verification in Kibana Discover.
+
+6. **Enrichment & polish** — grok parsing, dashboards, ILM retention, anonymous read-only role.
 
 Each step has its own page in this series. Hit *Start the series* below and you'll be walked through one piece at a time.
 
