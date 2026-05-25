@@ -1,173 +1,344 @@
 ---
 title: "Keepalived and VRRP: make HA real"
 ---
+---
 
-## What is Keepalived
+This page is the companion to [[observability/logs/load-balancers/haproxy-for-logs|haproxy-for-logs]]. 
 
-**Keepalived** is a Linux daemon that implements **VRRP** (Virtual Router Redundancy Protocol) and a health-check engine, so you can build active/standby (or active/active with multiple VIPs) high availability for any IP-based service.
+HAProxy gives us horizontal scaling of the worker pool behind it; it does **not** make the load balancer itself redundant. A single HAProxy is still a single point of failure. The standard fix is to run **two HAProxy hosts** sharing a **Virtual IP (VIP)** that migrates between them automatically. The mechanism is Keepalived, implementing the VRRP protocol.
 
-In plain words: it takes two or more identical Linux boxes, picks one as the active node, gives it an **extra IP address** (the *virtual IP* or VIP), and keeps the others in standby. If the active node disappears, one of the standbys takes over the VIP within seconds, and clients reach the service at the same address as before.
+Same shape as the HAProxy page: generic reference first, the exact lab configuration last.
 
-What you get from Keepalived (vs. a custom failover script):
-- A **standards-based protocol** (VRRP, RFC 5798) for the election: well-understood, multicast or unicast, fast.
-- **Health checks** (`vrrp_script`) that automatically lower a node's priority when something is wrong (e.g. HAProxy is down on this node), triggering a graceful failover.
-- **Notify hooks** that run scripts on state transitions (`master`, `backup`, `fault`), so you can run extra cleanup or notification logic.
+## 1. What is Keepalived?
 
-In our setup, Keepalived sits beside HAProxy on lb01 and lb02. HAProxy provides backend-side HA (multiple Logstash workers behind one VIP); Keepalived provides frontend-side HA (the VIP itself survives if a whole LB box dies).
+Keepalived is an open-source daemon that does two related jobs:
 
-## Core concepts
+1. **VRRP** (RFC 5798) — election and ownership of a Virtual IP shared across a group of hosts. Exactly one host in the group "owns" the VIP at any moment; if that host dies, ownership migrates to another within a few seconds.
+2. **Health-check + automatic failover** — periodic probes of local services (HAProxy in our case). If the local service is unhealthy, Keepalived lowers its priority so that ownership of the VIP migrates to the standby.
 
-### Virtual Router
+The combination gives a transparent active/standby HA pair: clients hit the VIP, and the underlying instance answering them changes invisibly.
 
-A "virtual router" in VRRP terms is a group of physical hosts that collectively own a single IP (the VIP). At any moment, exactly one host in the group is the **master** and serves traffic on the VIP; the rest are **backups** standing by.
+## 2. VRRP, in 60 seconds
 
-The group is identified by a numeric `virtual_router_id` (1-255), which **must be unique on the LAN segment** (if two unrelated VRRP groups share the same id, they'll interfere — frequent cause of "weird failover").
+VRRP is a protocol that runs between routers (or generic hosts) on a shared layer-2 segment. Each VRRP "instance" defines:
 
-### Master election
+- A **Virtual Router ID** (VRID) — a number 1-255 that identifies the group on the segment
+- A set of participating hosts (routers), each with a **priority** value
+- A **Virtual IP** that the group collectively owns
 
-Each node has a `priority` (1-254). The node with the highest priority becomes master. If the master goes silent (no VRRP adverts for ~3× `advert_int`), the next-highest-priority backup takes over.
+The participating hosts send periodic **VRRP advertisements** to each other (multicast group 224.0.0.18, IP protocol 112). The host with the highest priority wins the election and becomes **MASTER** — it claims the VIP, responds to ARP for it, and serves traffic. The others sit in **BACKUP** state, listening for the master's heartbeat. If the master stops advertising for `3 × advert_int` seconds, the highest-priority backup promotes itself to MASTER, attaches the VIP to its own interface, and sends a **gratuitous ARP** so the switch fabric updates its MAC tables.
 
-By default, **preemption is on**: if a higher-priority node comes back, it takes over from a lower-priority master. You can turn this off with `nopreempt` to avoid flapping.
+The whole failover takes **~3 seconds** on a healthy LAN.
 
-### Adverts and timing
+## 3. Core configuration concepts
 
-The master sends VRRP advertisement packets at every `advert_int` seconds (default: 1s). The backup considers the master dead if it misses ~3 in a row. So failover latency is `~3 * advert_int = 3s` by default.
+### 3.1 `vrrp_instance` block
 
-### Multicast vs unicast
+The heart of the config. One block per VIP being managed.
 
-VRRP traditionally uses **multicast** (224.0.0.18). On Tailscale and many cloud networks multicast doesn't work, so you must use **unicast** mode: every peer is listed explicitly with `unicast_peer { ... }`. Slower to configure, more reliable in modern networks.
-
-### Tracking scripts
-
-A `vrrp_script` is a small command that runs periodically. If it exits non-zero, Keepalived decreases the node's priority by `weight`. So you can wire "is HAProxy alive on this node?" to the election: if HAProxy crashes on the master, its priority drops below the backup's, the backup takes over.
-
-```
-vrrp_script chk_haproxy {
-    script "killall -0 haproxy"      # exit 0 if process exists
-    interval 2
-    weight  -20                       # drop priority by 20 if check fails
+```text
+vrrp_instance VI_NAME {
+    state         MASTER       # initial role on this host
+    interface     eth0         # interface where the VIP lives
+    virtual_router_id 51       # VRID (1-255, must match on all peers)
+    priority      110          # election weight
+    advert_int    1            # heartbeat period (seconds)
+    authentication { ... }
+    virtual_ipaddress { ... }
+    track_script { ... }
 }
 ```
 
-### Notify hooks
+### 3.2 `state` and `priority`
 
-`notify_master`, `notify_backup`, `notify_fault` run a script when the node enters that state. Common uses: send an alert, page on-call, restart a dependent service, log the event somewhere persistent.
+- `state MASTER` on the active host, `state BACKUP` on the standby. This is just the **initial** state — election happens at startup and may reassign roles based on `priority`.
+- `priority` is what really decides who wins. Highest priority host becomes MASTER. A common convention: **110 on the active, 100 on the standby** (10-point gap to allow `weight` tracking adjustments without flapping).
 
-## Common patterns
+### 3.3 `virtual_router_id`
 
-### Active/standby (most common)
+A number 1-255 that identifies this VRRP group on the segment. **All peers in the same group MUST use the same VRID**, and the VRID **MUST be unique among VRRP groups on the same L2 segment**. Collisions cause two unrelated groups to silently fight over the same VIP.
 
-Two nodes, same VRID, one with higher priority. The high-priority node is always master under normal conditions; the other is in standby. Default behaviour, suitable for any service that doesn't benefit from being run on multiple nodes simultaneously.
+### 3.4 `advert_int`
 
-### Active/active with two VIPs
+Heartbeat period in seconds (default 1). Failover detection time is `3 × advert_int` (~3 s by default). Lowering to fractions (`advert_int 0.5`) tightens failover at the cost of more CPU/bandwidth.
 
-Two VRRP groups (two VRIDs), two VIPs. Node A is master for VRID 1, backup for VRID 2; node B is master for VRID 2, backup for VRID 1. Both nodes serve traffic, but each VIP is on exactly one node. If A fails, B takes over both VIPs. Doubles the throughput in steady state.
+### 3.5 `authentication`
 
-### Authenticated VRRP
+VRRP supports two auth modes:
 
-Set `authentication { auth_type PASS; auth_pass <shared-secret>; }`. Protects against random hosts joining the VRRP group on the same LAN. Considered insecure cryptographically (it's a plaintext password) but blocks accidents.
+- **`PASS`**: a shared password (max 8 chars). Weak, but enough to prevent accidental cross-group collisions.
+- **`AH`**: IPsec-style auth header. Stronger but rarely used; many implementations don't support it well.
 
-### Sync groups
+Always set authentication, even on private networks — it prevents an accidental misconfigured neighbor from joining your VRRP group.
 
-Multiple `vrrp_instance` blocks bound together in a `vrrp_sync_group`. They all transition together: if one becomes master, the others do too. Useful when several VIPs must live on the same node (e.g. an external VIP and an internal VIP for the same service).
+### 3.6 `virtual_ipaddress`
 
-## Pitfalls
+The VIP itself, with CIDR. The MASTER attaches this to the configured `interface` when it claims ownership; the BACKUP doesn't have it. Multiple VIPs per instance are allowed.
 
-> [!WARNING] Things that will bite you
-> - **`virtual_router_id` clash on the same LAN**: if two unrelated Keepalived setups use the same VRID on the same broadcast domain, they think they're the same group. They start fighting for the VIP. Pick a unique VRID per LAN.
-> - **Multicast on cloud/overlay networks**: most cloud VPCs and overlay networks (Tailscale, WireGuard mesh, Docker bridge networks) don't forward multicast. Use `unicast_peer` everywhere. If you see "I'm master" on both nodes simultaneously, multicast is the first suspect.
-> - **Preemption flapping**: with `preempt` on (default) and a flaky master node, you can get rapid back-and-forth. If the master keeps coming and going, set `nopreempt` and a higher `preempt_delay`.
-> - **Tracking script returning unexpectedly**: a `vrrp_script` that fails because of a typo or transient issue (e.g. DNS hiccup) will trigger an unintended failover. Keep scripts simple, idempotent, and fast.
-> - **Split-brain on network partition**: if lb01 and lb02 can't see each other but both are still reachable by clients, both think they're master and both take the VIP. Clients see ARP confusion. Single-LAN setups rarely hit this; over WAN/VPN it's a real risk. Mitigate with witness nodes or quorum-based tools (Pacemaker) when stakes are high.
-> - **Notify scripts and Keepalived's environment**: notify hooks run as the user Keepalived runs as (often root), with a very minimal environment. Hardcode full paths, set `PATH` explicitly, redirect output to a log so you can debug.
-> - **VIP must be in the host's subnet**: the VIP doesn't have to be configured on any interface in the OS, but it must be **routable** from clients. Cloud providers usually require you to pre-reserve the VIP as a "secondary IP" or "alias IP" on the instance, otherwise the network silently drops traffic to it.
-
-## In this lab
-
-We run Keepalived on lb01 (priority 100) and lb02 (priority 90), unicast mode (Tailscale doesn't multicast), single VRID, single VIP. The VIP is the address Filebeat is configured to ship to. A tracking script checks HAProxy health and drops priority if HAProxy is missing on a node.
-
-```keepalived
-# /etc/keepalived/keepalived.conf on lb01
-
-global_defs {
-    router_id LB01
-    enable_script_security
-    script_user keepalived_script
+```text
+virtual_ipaddress {
+    10.0.0.10/24
 }
+```
 
+### 3.7 `track_script`
+
+A reference to a `vrrp_script` block that periodically runs a command and adjusts priority based on its exit code. The standard pattern: track whether HAProxy is running on the local host. If `pgrep haproxy` fails, drop priority by N and the standby takes over.
+
+```text
 vrrp_script chk_haproxy {
-    script "/usr/bin/killall -0 haproxy"
-    interval 2
-    fall 2
-    rise 2
-    weight -20
+    script    "/usr/bin/pgrep -x haproxy"
+    interval  2      # run every 2s
+    weight   -20     # subtract 20 from priority on failure
+    fall      2      # need 2 consecutive failures to count
+    rise      2      # need 2 consecutive successes to recover
 }
 
-vrrp_instance VI_BEATS {
-    state MASTER                # initial state hint
-    interface tailscale0        # the interface the VIP will live on
-    virtual_router_id 51        # unique on this Tailscale network
-    priority 100                # higher than lb02 → lb01 is the preferred master
-    advert_int 1
-    nopreempt                   # don't flap if lb02 is currently master and lb01 comes back
-
-    unicast_src_ip 100.x.x.10   # lb01's Tailscale IP
-    unicast_peer {
-        100.x.x.11              # lb02's Tailscale IP
+vrrp_instance VI_LOGS {
+    ...
+    priority 110
+    track_script {
+        chk_haproxy
     }
+}
+```
+
+With `priority 110` on the active and `priority 100` on the standby: if HAProxy on the active dies, weight `-20` drops the effective priority to 90 → standby (100) wins → VIP migrates.
+
+## 4. Multicast vs unicast
+
+The default VRRP transport is **multicast** on `224.0.0.18`. This works on any L2 segment that allows multicast — i.e. almost any physical LAN, almost no cloud VPC.
+
+If multicast is unavailable (most public cloud networks filter it), Keepalived supports **unicast mode**: each peer sends advertisements as plain unicast to the others' IPs.
+
+```text
+vrrp_instance VI_LOGS {
+    ...
+    unicast_src_ip 10.0.0.11
+    unicast_peer {
+        10.0.0.12
+    }
+}
+```
+
+Same protocol, same election logic — just `224.0.0.18` replaced by direct peer IPs. Slightly higher per-peer config (you have to list each peer explicitly) but works in routed environments where multicast doesn't.
+
+## 5. Common pitfalls
+
+> [!IMPORTANT]
+> **VRID must be unique on the L2 segment.** If another VRRP group on the same broadcast domain (some other application, a router redundancy pair, a colleague's lab) uses the same VRID, the two groups silently merge and you get unpredictable VIP ownership. Always check `tcpdump -i eth0 vrrp` to confirm no foreign advertisements before picking a VRID.
+
+> [!WARNING]
+> **`auth_pass` is limited to 8 characters** for the PASS method. Longer passwords are silently truncated — and asymmetric truncation across peers causes them to ignore each other's adverts entirely, leading to a split-brain.
+
+> [!INFO]
+> **Interface names matter.** `interface eth0` must be the actual interface where the L2 segment lives. On modern Ubuntu/Debian with predictable names (`enp1s0`, `enx12345...`) the name will differ from `eth0`. Mismatches between peers cause one node to send VRRP on the wrong NIC and never see the other's heartbeats.
+
+> [!TIP]
+> **Always set `enable_script_security` + `script_user`** in `global_defs`. Without these, Keepalived 2.0+ refuses to run user-defined `vrrp_script` (security default). The minimum block looks like:
+> ```
+> global_defs {
+>     enable_script_security
+>     script_user root
+> }
+> ```
+
+> [!WARNING]
+> **Preemption is on by default.** When the original MASTER recovers, it takes the VIP back from the BACKUP, causing a second failover. If your service can't tolerate the brief glitch, add `nopreempt` to the `vrrp_instance` to make the standby keep the VIP until it itself fails.
+
+## 6. Verification commands
+
+The classics:
+
+```bash
+# State of each VRRP instance on this host (Keepalived 2.x exposes /tmp/keepalived.data on SIGUSR1)
+sudo killall -SIGUSR1 keepalived
+sudo cat /tmp/keepalived.data | grep -A2 "VRRP Instance"
+
+# Or via journal: every state transition is logged
+journalctl -u keepalived --no-pager -n 20 | grep -E "STATE|MASTER|BACKUP"
+
+# Does the host have the VIP attached right now?
+ip addr show | grep 10.0.0.10
+
+# tcpdump the heartbeat
+sudo tcpdump -i eth0 -n vrrp
+```
+
+---
+
+## 7. In this lab
+
+Two HAProxy hosts: `loglb01` (`10.0.0.11`, the default MASTER) and `loglb02` (`10.0.0.12`, the BACKUP). Both run Keepalived. They share a VIP `10.0.0.10/24`. Clients (Filebeat producers) target the VIP; whichever HAProxy currently owns it serves them. A `vrrp_script` checks that the local HAProxy process is alive — if it dies, Keepalived lowers the local priority so the peer wins the election.
+
+VRID `51`, authentication password is 8 hex chars (generated with `openssl rand -hex 4`).
+
+### 7.1 Master config — loglb01
+
+`/etc/keepalived/keepalived.conf` on `loglb01`:
+
+```text
+global_defs {
+    enable_script_security
+    script_user root
+    router_id loglb01
+}
+
+# Health check: kill the local priority if HAProxy stops running
+vrrp_script chk_haproxy {
+    script "/usr/bin/pgrep -x haproxy"
+    interval 2
+    weight  -20
+    fall     2
+    rise     2
+}
+
+vrrp_instance VI_LOGS {
+    state MASTER
+    interface eth0
+    virtual_router_id 51
+    priority 110
+    advert_int 1
 
     authentication {
         auth_type PASS
-        auth_pass <change-me-shared>
+        auth_pass <8-char-secret>
     }
 
     virtual_ipaddress {
-        100.x.x.50/32 dev tailscale0   # the VIP Filebeat targets
+        10.0.0.10/24
     }
 
     track_script {
         chk_haproxy
     }
-
-    notify_master "/etc/keepalived/notify.sh master"
-    notify_backup "/etc/keepalived/notify.sh backup"
-    notify_fault  "/etc/keepalived/notify.sh fault"
 }
 ```
 
-The lb02 config is **identical except**: `state BACKUP`, `priority 90`, `unicast_src_ip` is lb02's Tailscale IP, `unicast_peer` lists lb01.
+### 7.2 Backup config — loglb02
 
-The notify script logs every state change (so you can grep `journalctl` for failover events):
+`/etc/keepalived/keepalived.conf` on `loglb02`. **Identical** to loglb01 with two changes: `state BACKUP`, `priority 100`, and `router_id loglb02`.
+
+```text
+global_defs {
+    enable_script_security
+    script_user root
+    router_id loglb02
+}
+
+vrrp_script chk_haproxy {
+    script "/usr/bin/pgrep -x haproxy"
+    interval 2
+    weight  -20
+    fall     2
+    rise     2
+}
+
+vrrp_instance VI_LOGS {
+    state BACKUP
+    interface eth0
+    virtual_router_id 51
+    priority 100
+    advert_int 1
+
+    authentication {
+        auth_type PASS
+        auth_pass <same-8-char-secret>
+    }
+
+    virtual_ipaddress {
+        10.0.0.10/24
+    }
+
+    track_script {
+        chk_haproxy
+    }
+}
+```
+
+### 7.3 Line-by-line commentary
+
+- **`global_defs`**: `enable_script_security` + `script_user root` are required for `vrrp_script` to execute under modern Keepalived. `router_id` is a string used only for logging — useful to distinguish which host is logging what.
+- **`vrrp_script chk_haproxy`**: checks the local process every 2 s. `weight -20` says "subtract 20 from priority while the check fails". With master = 110 and backup = 100, a HAProxy crash on the master lowers it to 90 → backup (100) wins.
+- **`state MASTER` / `BACKUP`**: just the initial role, doesn't actually decide who wins.
+- **`virtual_router_id 51`**: chosen arbitrarily, must match on both peers, must not collide with any other VRRP group on this L2.
+- **`priority 110` / `100`**: the real election weights. 10-point gap leaves headroom for the `-20` track-script adjustment.
+- **`auth_pass`**: same 8-char value on both peers. Set with `openssl rand -hex 4` to get a clean ASCII secret.
+- **`virtual_ipaddress 10.0.0.10/24`**: the VIP. Note the `/24` matches the LAN's CIDR — important for ARP resolution to work correctly.
+- **`track_script { chk_haproxy }`**: ties the health-check to the priority adjustment.
+
+### 7.4 Install and bring it up
 
 ```bash
-#!/bin/bash
-# /etc/keepalived/notify.sh
+# Both loglb01 and loglb02
+sudo apt update
+sudo apt install -y keepalived
 
-logger -t keepalived "Node became $1 for VI_BEATS at $(date)"
+# Drop the config above into /etc/keepalived/keepalived.conf
+sudo nano /etc/keepalived/keepalived.conf
+sudo chmod 600 /etc/keepalived/keepalived.conf
+
+# Validate before applying
+sudo keepalived -t -f /etc/keepalived/keepalived.conf
+# Silent output = valid
+
+# Enable + start
+sudo systemctl enable --now keepalived
+sleep 3
+sudo systemctl status keepalived --no-pager | head -6
 ```
 
-After `sudo systemctl restart keepalived` on both nodes, you should see:
+### 7.5 Verify election and VIP ownership
 
-```sh
-# On lb01:
-ip -br addr show tailscale0
-# tailscale0 ... 100.x.x.10/32 100.x.x.50/32   ← VIP is here
+```bash
+# On loglb01 — should be MASTER, owns the VIP
+journalctl -u keepalived -n 10 --no-pager | grep -E "STATE|MASTER|BACKUP"
+ip addr show eth0 | grep 10.0.0.10
+
+# On loglb02 — should be BACKUP, no VIP attached
+journalctl -u keepalived -n 10 --no-pager | grep -E "STATE|MASTER|BACKUP"
+ip addr show eth0 | grep 10.0.0.10 && echo "✗ VIP attached on BACKUP (split-brain)" || echo "✓ no VIP on BACKUP (correct)"
 ```
 
-```sh
-# On lb02:
-ip -br addr show tailscale0
-# tailscale0 ... 100.x.x.11/32                  ← no VIP (it's on lb01)
+Expected journal lines:
+
+```
+loglb01 Keepalived_vrrp: (VI_LOGS) Entering BACKUP STATE (init)
+loglb01 Keepalived_vrrp: (VI_LOGS) Entering MASTER STATE
+loglb02 Keepalived_vrrp: (VI_LOGS) Entering BACKUP STATE (init)
 ```
 
-> [!TIP]
-> Verify failover end-to-end:
-> 1. On lb01, `systemctl stop haproxy`. The tracking script fails, priority drops to 80, lb02 wins the election (still at 90).
-> 2. On lb02: `ip -br addr show tailscale0` now shows the VIP.
-> 3. `journalctl -t keepalived` on both nodes records the transition.
-> 4. Filebeat keeps shipping (the destination IP hasn't changed, just the host serving it).
+(Both nodes start in BACKUP, then loglb01 promotes itself within 3 s because it sees no MASTER with higher priority.)
+
+### 7.6 Test failover
+
+Stop HAProxy on the master and confirm the VIP migrates:
+
+```bash
+# On loglb01
+sudo systemctl stop haproxy
+date -u +%T
+
+# Check ~5 s later on loglb02
+ip addr show eth0 | grep 10.0.0.10   # should now show the VIP
+journalctl -u keepalived -n 5 --no-pager | grep "MASTER STATE"
+```
+
+Expected: loglb02 enters MASTER STATE within ~5 s of the HAProxy stop, attaches `10.0.0.10/24` to `eth0`, sends gratuitous ARP. Clients on the L2 segment see no interruption beyond the brief gap.
+
+Recover:
+
+```bash
+# On loglb01
+sudo systemctl start haproxy
+
+# Within ~5 s, loglb01 wins the election back (priority 110 vs 100)
+# and the VIP migrates back. Add `nopreempt` to the loglb02 config
+# if you'd rather have it keep the VIP — saves one extra glitch.
+```
 
 ## Where to go next
 
-- Next in the series: **[[logstash/_index|Logstash]]** — the workers behind the load balancer.
-- Keepalived has more advanced features that we don't use here but are worth knowing: BGP-based VRRP, sync groups for multi-VIP setups, gratuitous ARP tuning, VRRPv3, IPv6 VIP. The official `keepalived.conf(5)` man page is the canonical reference.
+- [[observability/logs/load-balancers/haproxy-for-logs|haproxy-for-logs]] — the load balancer that sits inside this VRRP pair.
+- [[observability/logs/logstash/logstash-setup|logstash-setup]] — the workers that HAProxy distributes traffic to.
+- Tighten the failover detection time by lowering `advert_int` to `0.5` (fractional seconds) if your network can tolerate 2× the VRRP heartbeat traffic.

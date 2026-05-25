@@ -354,13 +354,13 @@ New events will repopulate the index pattern within seconds.
 
 ### Trade-offs
 
-| Aspect                    | This approach (Logstash redact)                       | Alternative: dual-index split                                                        |
-| ------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Admin sees raw data?      | **No** — same redacted view everyone else gets        | Yes — `logs-internal-*` is admin-only with full data                                  |
-| Storage                   | 1× (just one index per day)                            | 2× (two indices per day, raw + sanitized)                                            |
-| Pipeline complexity       | One `filter {}` block, easy to reason about          | Two `output {}` blocks with conditionals, more moving parts                          |
-| Public viewer trust       | Implicit — what's in ES is already safe              | Implicit — role only grants `read` on `logs-public-*`                                |
-| Forensics on raw events   | Source files on the VPS (`tail`, `journalctl`)        | `logs-internal-*` via admin login                                                    |
+| Aspect                  | This approach (Logstash redact)                | Alternative: dual-index split                               |
+| ----------------------- | ---------------------------------------------- | ----------------------------------------------------------- |
+| Admin sees raw data?    | **No** — same redacted view everyone else gets | Yes — `logs-internal-*` is admin-only with full data        |
+| Storage                 | 1× (just one index per day)                    | 2× (two indices per day, raw + sanitized)                   |
+| Pipeline complexity     | One `filter {}` block, easy to reason about    | Two `output {}` blocks with conditionals, more moving parts |
+| Public viewer trust     | Implicit — what's in ES is already safe        | Implicit — role only grants `read` on `logs-public-*`       |
+| Forensics on raw events | Source files on the VPS (`tail`, `journalctl`) | `logs-internal-*` via admin login                           |
 ## Where to go next
 
 - Once Filebeat is shipping events ([[observability/logs/filebeat/filebeat-setup|filebeat-setup]]), the `logs-*` data view created in [[observability/logs/kibana/kibana-setup#Step 7 — create a Data View|kibana-setup]] will show live data to the anonymous viewer.

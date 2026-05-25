@@ -2,183 +2,249 @@
 title: "HAProxy: a reliable TCP load balancer"
 ---
 
-## What is HAProxy
+This page is two things in one. 
 
-**HAProxy** is a fast, single-binary load balancer and reverse proxy used in production for everything from edge HTTPS termination to internal service-to-service traffic balancing. It's CPU-light, memory-light, written in C, and famously stable: a single instance routinely handles tens of thousands of connections per second on commodity hardware.
+The first half is a **complete reference to HAProxy** as it applies to log-shipping pipelines: what it is, how the configuration is structured, the knobs that matter, the pitfalls that bite first-timers. 
 
-What it gives you over a plain DNS round-robin:
-- **Active health checks**: backends marked DOWN are immediately removed from rotation.
-- **Layer-4 and layer-7 awareness**: you can balance bytes blindly (TCP mode) or inspect HTTP headers/paths/cookies (HTTP mode).
-- **Stats and observability**: a built-in admin page shows live throughput, error counts, per-backend status.
-- **Graceful reloads**: configuration changes apply without dropping in-flight connections.
+The second half is the **exact configuration** used in my Observability logs lab (ELK stack).
 
-For log ingestion in front of a Logstash pool, HAProxy operates in **TCP mode**: the Beats protocol is binary, not HTTP, so there is nothing to inspect at layer 7. We're just balancing TCP byte streams across a pool of identical backends.
+## 1. What is HAProxy?
 
-## Core concepts
+HAProxy (High Availability Proxy) is the de-facto open-source load balancer. Born in 2001, written in C, runs as a single event-driven process, comfortably handles tens of thousands of concurrent connections on commodity hardware. The same binary fronts a huge share of HTTPS traffic at large cloud providers, but it's just as comfortable balancing plain TCP — which is exactly what we need for log shipping.
 
-A HAProxy configuration is built from four section types:
+For an ELK pipeline, HAProxy plays a focused role: accept incoming Beats / Syslog / Kafka traffic from many producers and distribute it across a pool of Logstash workers. No L7 inspection, no header rewriting, no content-based routing. Just "spread these TCP connections fairly across N upstreams".
 
-| Section      | What it represents                                                                                          |
-| ------------ | ----------------------------------------------------------------------------------------------------------- |
-| `global`     | Process-wide settings: user/group, log target, max connections, tuning. One per config.                     |
-| `defaults`   | Default values inherited by `frontend` and `backend` blocks below it. Reduces repetition.                   |
-| `frontend`   | A listening socket: which IP, which port, in which mode (TCP/HTTP), and which backend to forward to.        |
-| `backend`    | The pool of upstream servers HAProxy can send traffic to, plus health checks and balance algorithm.         |
+## 2. Configuration anatomy
 
-You can also have:
-- `listen`: shorthand for `frontend + backend` collapsed in one block. Common for the stats page.
-- `resolvers`: DNS resolution configuration for backends specified by hostname (re-resolves periodically).
+An `haproxy.cfg` has a fixed structure with four kinds of sections:
 
-A request goes: client → **frontend** (matches the listener) → optional ACL routing → **backend** (server pool, picked by the balance algorithm) → actual `server` line.
+| Section     | Purpose                                                                                       |
+| ----------- | --------------------------------------------------------------------------------------------- |
+| `global`    | Process-wide settings — user/group, log destination, max connections, stats socket, daemon mode |
+| `defaults`  | Default values inherited by all `frontend`/`backend` blocks unless overridden                 |
+| `frontend`  | How clients connect — which port to bind, which mode (TCP/HTTP), default backend             |
+| `backend`   | A pool of upstream servers with a balance algorithm and health checks                         |
 
-### Server entries
+There's also `listen` (combined frontend+backend) and `resolvers` (DNS service discovery), but for log shipping the four above are enough.
 
-Inside a backend, each `server` line declares a target:
+## 3. TCP vs HTTP mode
 
+HAProxy can operate in two modes per frontend/backend:
+
+- **`mode http`**: HAProxy parses every request, understands URL/method/headers/cookies. Can route based on URL, rewrite headers, terminate TLS, do sticky sessions.
+- **`mode tcp`**: HAProxy treats traffic as opaque bytes — pure L4 forwarding. No parsing, lower CPU, works for any protocol.
+
+For log shippers (Beats, Syslog, Kafka) the answer is always **TCP mode**: the wire protocols aren't HTTP, and we don't need any L7 features. Just distribute connections.
+
+## 4. Load-balancing algorithms
+
+The `balance` directive in a backend block decides which server gets the next connection:
+
+| Algorithm    | Behavior                                                              | When to use                                              |
+| ------------ | --------------------------------------------------------------------- | -------------------------------------------------------- |
+| `roundrobin` | Each new connection goes to the next server in the list               | Default. Works when workers are equally powerful.        |
+| `leastconn`  | New connection goes to the server with the fewest active connections  | When session duration varies a lot                       |
+| `source`     | Hash client IP → consistent server (stickiness without cookies)       | When you need affinity but the protocol is plain TCP     |
+| `random`     | Pure random pick                                                      | Rare — useful when you want to spread without state      |
+
+For Beats traffic, **`roundrobin`** is the textbook choice. Beats connections are long-lived (a single TCP socket stays open for minutes), and Logstash workers are stateless — any worker can process any event. There's no upside to anything fancier here.
+
+## 5. Health checks
+
+A backend server is only used if HAProxy considers it healthy. Two probe styles:
+
+- **TCP**: open a TCP connection to `server:port`, close it. If it accepts, the server is up. Enabled with `option tcp-check`.
+- **HTTP**: `GET /health` (or any URL you choose), expect a 2xx. Enabled with `option httpchk`.
+
+For Beats backends, TCP is enough — Logstash either listens on `:5044` or it doesn't; there's no separate health endpoint to query.
+
+The probe cadence is tuned with `default-server`:
+
+```haproxy
+default-server inter 5s fall 3 rise 2
 ```
-server logstash01 10.0.0.10:5044 check
-```
 
-- Name (`logstash01`): label for stats and logs.
-- Address + port: where to forward to.
-- `check`: enable health checking (TCP connect by default; you can specify HTTP, etc.).
+Reads as: probe every `5s`, mark a server DOWN after `3` consecutive failures (15 s), mark it UP again after `2` consecutive successes (10 s).
 
-### Mode: TCP vs HTTP
+## 6. The stats endpoint
 
-- `mode tcp`: HAProxy treats traffic as opaque bytes. No HTTP header inspection, no path-based routing. Required for non-HTTP protocols (Beats, MySQL, SSH, raw sockets).
-- `mode http`: HAProxy parses HTTP. You can match on `Host`, path, headers, cookies; you can log per-request status codes; you can add headers; you can do session affinity by cookie.
+HAProxy ships with a built-in HTML/CSV stats UI that shows every frontend/backend's connection count, byte counters, server status, error rates, and per-session response time histograms. Enable it on a dedicated frontend:
 
-A frontend and its backend(s) must agree on the mode.
-
-## Common patterns
-
-### Balance algorithms
-
-| Algorithm     | When to use it                                                                                                     |
-| ------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `roundrobin`  | The default. Each new connection goes to the next server in line. Fine for stateless ingest like log shipping.     |
-| `leastconn`   | New connections go to the backend with the fewest active connections. Better for long-lived sessions (DBs, etc.).  |
-| `source`      | Hash of client source IP picks the backend. Pseudo-stickiness without cookies (useful for stateful TCP services).  |
-| `uri`         | HTTP only: hash of the request URI picks the backend. Good for cache-friendliness (same URL → same cache node).    |
-| `random`      | Picks at random, weighted by `weight`. Surprisingly good when backends have varying capacity.                      |
-
-For log ingest the typical answer is `roundrobin`: events are independent, backends are identical, fairness > affinity.
-
-### Health checks
-
-Two flavours, very different cost and meaning:
-
-- **TCP check** (`check` on the `server` line, in TCP mode): HAProxy opens a TCP connection to the backend port. If the handshake completes, the backend is UP. Cheap (~milliseconds), but only tells you the port is open: the process behind might be deadlocked or its queues full.
-- **HTTP check** (`option httpchk GET /health`, in HTTP mode): HAProxy issues an HTTP GET and inspects the response. Far more meaningful (you can wire it to an app-level liveness endpoint), but obviously HTTP-only.
-
-For TCP-mode balancing of opaque protocols, TCP check is your only option. Tune `inter` (check interval), `rise` (consecutive successes to mark UP), `fall` (consecutive failures to mark DOWN) to your tolerance.
-
-### Stats page
-
-A built-in real-time dashboard you can expose on a separate port (and behind auth):
-
-```
-listen stats
+```haproxy
+frontend stats
     bind *:8404
     mode http
     stats enable
-    stats uri /stats
-    stats refresh 5s
-    stats auth admin:secret-please
+    stats uri /
+    stats refresh 10s
 ```
 
-Shows live throughput, per-server status, sessions count, error rate. The first thing to open during an incident.
+Then `http://<haproxy-host>:8404/` (in a browser) or `curl http://<haproxy-host>:8404/;csv` (for programmatic checks) gives you live visibility into the LB layer. This page should exist in every HAProxy deployment — it's the first thing you'll look at when debugging.
 
-### ACLs (HTTP mode)
+## 7. Timeouts
 
-ACLs let you match HTTP attributes and pick a backend conditionally. Common patterns:
+This is the **most common source of bugs** in HAProxy setups that forward long-lived TCP. The relevant timeouts in the `defaults` section:
 
-```
-acl is_api  path_beg /api
-acl is_admin hdr(host) -i admin.example.com
-use_backend api_backend   if is_api
-use_backend admin_backend if is_admin
-default_backend public_backend
-```
+| Timeout           | Default | What it controls                                                       |
+| ----------------- | ------- | ---------------------------------------------------------------------- |
+| `timeout connect` | none    | TCP connect timeout to a backend server                                 |
+| `timeout client`  | none    | How long to keep an idle client connection                              |
+| `timeout server`  | none    | Same, for the upstream side                                             |
+| `timeout tunnel`  | larger of client/server | Maximum lifetime of a forwarded TCP tunnel              |
+| `timeout check`   | varies  | Cap on the duration of a single health check                            |
 
-Not relevant for our TCP-mode log ingest, but it's the bread and butter of HAProxy in HTTP edge deployments.
+> [!IMPORTANT]
+> For log shippers, **set client/server/tunnel to 24h**. The Debian/Ubuntu default `timeout client 1m` will kill long-lived Beats TCP sessions every 60 seconds, producing a constant reconnect storm in the producer logs. Hours can be spent debugging this exact symptom because the reconnects "work" — they just shouldn't be happening.
 
-### TLS termination vs passthrough
+## 8. Common pitfalls
 
-- **Termination**: HAProxy holds the certificate, decrypts incoming TLS, forwards plaintext to the backend. Lets HAProxy inspect HTTP (mode http) and route on it.
-- **Passthrough**: HAProxy treats TLS bytes as opaque (mode tcp), forwards them to a backend that holds the cert and terminates itself. Used when the cert must live on the backend or when you can't decrypt for compliance reasons.
+> [!WARNING]
+> **`mode tcp` without `option tcplog`** only logs a line when a session terminates — which for long-lived Beats sessions can be hours later. Always add `option tcplog` in a TCP frontend; it logs each session with byte counts and a state code, far more useful for diagnosing live traffic.
 
-For our beats traffic over Tailscale we don't TLS-wrap at all (Tailscale already encrypts), so this dimension doesn't apply here.
+> [!WARNING]
+> **`option dontlognull`** drops log lines for sessions that never sent/received bytes (probes, port scanners, broken clients). Without it, the log is full of noise.
 
-## Pitfalls
+> [!INFO]
+> **`server <name> <ip>:<port>` is hardcoded** — HAProxy resolves the hostname *once* at config-reload time, not at every connection. If your backends are DNS names with dynamic IPs (Kubernetes Service, Docker), you need a `resolvers` block to keep the resolution live. For static IPs (typical in this lab) this isn't a concern.
 
-> [!WARNING] Things that will bite you
-> - **`maxconn` and the kernel**: HAProxy's `maxconn` is a logical cap. The OS also has `net.core.somaxconn` (listen backlog) and `nofile` (open file descriptors). Crank both up if you expect to push past a few thousand concurrent connections, or HAProxy will silently refuse new connects.
-> - **Reload, don't restart**: `systemctl reload haproxy` does a hot reload (new instance picks up new config, old one drains in-flight connections). `systemctl restart haproxy` kills active connections. Always reload during a deploy.
-> - **Sticky sessions with stateless backends**: don't enable `cookie` stickiness or `source` hashing unless the backend really has session state. Otherwise you just lose load distribution for no reason.
-> - **TCP mode logs nothing about the payload**: in `mode tcp` you cannot see HTTP requests in the HAProxy log. If you need request-level logs, the proxied protocol must be HTTP and you must be in `mode http`. For Beats, all you'll see are connect/disconnect events and bytes transferred.
-> - **Backend specified by hostname**: HAProxy resolves the hostname ONCE at startup unless you configure `resolvers`. If a backend IP changes (DHCP, container restart), HAProxy keeps sending traffic to the old IP until reload.
-> - **`option redispatch` is your friend**: if HAProxy gets a 5xx from a backend it just picked, by default it doesn't try another. Enable redispatch and it will retry.
+> [!TIP]
+> **Validate the config before reloading.** `haproxy -c -f /etc/haproxy/haproxy.cfg` parses without applying. A syntax error during a live reload causes HAProxy to keep running the OLD config silently; you only notice when a `server` line drops mysteriously.
 
-## In this lab
+## 9. The HA layer above HAProxy
 
-We run **identical HAProxy instances** on lb01 and lb02, in TCP mode, balancing the Beats port across both Logstash workers with TCP health checks. Keepalived (see [[keepalived-vrrp|the next page]]) handles the VIP failover between the two.
+A single HAProxy is itself a single point of failure. The canonical solution: run **two HAProxy instances on two hosts**, share a Virtual IP between them, manage the VIP with Keepalived (VRRP). The clients always target the VIP; whichever HAProxy currently owns it serves the traffic; if it dies, the VIP migrates to the standby within ~3 seconds. This layer is covered in [[observability/logs/load-balancers/keepalived-vrrp|keepalived-vrrp]].
+
+---
+
+## 10. In this lab
+
+Two HAProxy instances on `loglb01` (`10.0.0.11`) and `loglb02` (`10.0.0.12`), behind a shared VIP at `10.0.0.10` managed by Keepalived. Each HAProxy listens on:
+
+- **`:5044`** — Beats input. Filebeat clients (on the producer side) send events here.
+- **`:8404`** — stats UI, private network only.
+
+The backend pool is the two Logstash workers, `logstash01` (`10.0.0.21`) and `logstash02` (`10.0.0.22`), distributed round-robin with TCP health checks.
+
+### 10.1 The configuration file
+
+`/etc/haproxy/haproxy.cfg` — **identical on both loglb01 and loglb02**:
 
 ```haproxy
-# /etc/haproxy/haproxy.cfg on lb01 and lb02 (identical)
-
 global
     log /dev/log local0
     log /dev/log local1 notice
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin
+    stats timeout 30s
     user haproxy
     group haproxy
     daemon
-    maxconn 8000
 
 defaults
-    log global
-    mode tcp                       # default to TCP for everything in this file
-    option tcplog                  # log connect/disconnect, useful for debugging
-    option dontlognull
-    timeout connect 5s             # how long we wait when opening a connection to a backend
-    timeout client  60s            # how long we tolerate an idle client (Filebeat keep-alive)
-    timeout server  60s            # idle server timeout (Logstash keep-alive)
-    retries 3
+    log     global
+    mode    tcp
+    option  dontlognull
+    timeout connect 5s
+    timeout client  24h
+    timeout server  24h
+    timeout tunnel  24h
+    timeout check   5s
 
-# ── Beats traffic ─────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────
+# Stats UI on :8404 — private network only
+# Browse http://<lb-ip>:8404/ to see live backend status
+# ─────────────────────────────────────────────────────────
+frontend stats
+    bind *:8404
+    mode http
+    stats enable
+    stats uri /
+    stats refresh 10s
+
+# ─────────────────────────────────────────────────────────
+# Beats input on :5044 — round-robin to Logstash workers
+# ─────────────────────────────────────────────────────────
 frontend beats_in
-    bind *:5044                    # the port Filebeat ships to (the VIP we'll set on Keepalived listens here)
+    bind *:5044
     mode tcp
+    option tcplog
     default_backend logstash_pool
 
 backend logstash_pool
     mode tcp
-    balance roundrobin             # log events are stateless, round-robin is fine
-    option tcp-check               # TCP health check (connect to the port, expect success)
-    default-server inter 3s fall 3 rise 2
-    server logstash01 logstash01:5044 check
-    server logstash02 logstash02:5044 check
-
-# ── Stats page (port 8404, basic auth) ────────────────────────────────────────
-listen stats
-    bind *:8404
-    mode http                      # stats is HTTP even when the rest of the config is TCP
-    stats enable
-    stats uri /
-    stats refresh 5s
-    stats auth admin:<change-me>
+    balance roundrobin
+    option tcp-check
+    default-server inter 5s fall 3 rise 2
+    server logstash01 10.0.0.21:5044 check
+    server logstash02 10.0.0.22:5044 check
 ```
 
-Reload with `sudo systemctl reload haproxy` after every change. Watch the stats page at `http://lb01.tailscale-domain:8404/` (over Tailscale, never expose it publicly) to confirm both backends show UP after starting Logstash on logstash01 and logstash02.
+### 10.2 Line-by-line commentary
 
-> [!TIP]
-> Test the failover before relying on it. With Filebeat shipping in the background:
-> 1. On lb01, watch the HAProxy stats page.
-> 2. On logstash01, `docker compose down`. Within `inter * fall = 9 seconds` you should see logstash01 go RED in stats.
-> 3. Check `lb01:8404`: incoming connections are now all on logstash02.
-> 4. Filebeat keeps shipping, Kibana keeps showing events, no events lost.
+- **`global`** block: standard daemon setup. Log forwarding to syslog via `/dev/log` (UNIX socket), chroot for isolation, drop privileges to the unprivileged `haproxy` user.
+- **`defaults` → `mode tcp`**: the entire instance defaults to TCP. The stats frontend later overrides this to `mode http` for the dashboard.
+- **`defaults` → `timeout client/server/tunnel 24h`**: the critical setting for long-lived Beats connections. With the package default of `1m` you'd see Filebeat reconnect every minute, polluting the logs.
+- **`frontend stats`** on `:8404`: the HTML/CSV stats UI. In TCP mode it would be opaque, so this single frontend overrides to `mode http`.
+- **`frontend beats_in`** on `:5044`: the actual Beats receiver. `option tcplog` ensures each session is logged with byte counts and a state code on close.
+- **`backend logstash_pool`**:
+  - `balance roundrobin` distributes connections one-by-one across `logstash01` and `logstash02`.
+  - `option tcp-check` says "probe by opening a TCP socket" — no Beats handshake, just a connect.
+  - `default-server inter 5s fall 3 rise 2` applies to both `server` lines: probe cadence is 5 s, mark DOWN after three failures (15 s), mark UP after two successes (10 s).
+  - The two `server` lines define the named upstreams. `check` enables health probing for each.
+
+### 10.3 Install and bring it up
+
+```bash
+# On both loglb01 and loglb02
+sudo apt update
+sudo apt install -y haproxy
+
+# Drop the config above into /etc/haproxy/haproxy.cfg
+sudo nano /etc/haproxy/haproxy.cfg
+
+# Validate before applying — never skip this
+sudo haproxy -c -f /etc/haproxy/haproxy.cfg
+# Output: "Configuration file is valid"
+
+# Enable + start
+sudo systemctl enable --now haproxy
+sudo systemctl status haproxy --no-pager | head -5
+```
+
+### 10.4 Verify the pool
+
+From any host on the private network:
+
+```bash
+curl -s "http://10.0.0.11:8404/;csv" | awk -F',' '
+  NR==1 { print "frontend/backend  svname        scur  bin       bout      status"; next }
+  $1=="beats_in" || $1=="logstash_pool" {
+    printf "%-17s %-13s %-5s %-9s %-9s %s\n", $1, $2, $5, $9, $10, $18
+  }'
+```
+
+Expected output once Logstash workers are up:
+
+```
+frontend/backend  svname        scur  bin       bout      status
+beats_in          FRONTEND      0     0         0         OPEN
+logstash_pool     logstash01    0     0         0         UP
+logstash_pool     logstash02    0     0         0         UP
+logstash_pool     BACKEND       0     0         0         UP
+```
+
+As Filebeat clients connect, `scur` (current sessions) and `bin/bout` (byte counters) start moving. If a Logstash worker dies, its row flips to `DOWN` within ~15 s and `scur` redistributes to the survivors.
+
+### 10.5 Reload after config changes
+
+```bash
+sudo haproxy -c -f /etc/haproxy/haproxy.cfg && sudo systemctl reload haproxy
+```
+
+A clean reload doesn't drop existing connections — HAProxy spawns the new process, drains the old one gracefully.
 
 ## Where to go next
 
-- Next in the series: **[[keepalived-vrrp|Keepalived and VRRP]]** — pairing HAProxy with Keepalived to get a VIP that floats between lb01 and lb02 so a whole-LB failure is also handled, not just a backend failure.
-- HAProxy is much deeper than this page (sticky sessions, queueing, advanced ACLs, Lua scripting, dynamic backend updates via the Runtime API): the official **HAProxy Configuration Manual** is the canonical reference when you need more.
+- [[observability/logs/load-balancers/keepalived-vrrp|keepalived-vrrp]] — the VRRP layer that owns the VIP and migrates it between loglb01 and loglb02 on failure.
+- [[observability/logs/logstash/logstash-setup|logstash-setup]] — the worker pool that sits behind this LB.
+- [[observability/logs/filebeat/filebeat-setup|filebeat-setup]] — the producer that sends Beats traffic into the VIP.
