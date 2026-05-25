@@ -107,13 +107,13 @@ Events in the DLQ can be replayed once you've fixed the mapping. Highly recommen
 
 ## 5. In this lab
 
-Two identical workers, one per VM (`logstash01` and `logstash02`), each on its own Tailscale-only IP. Both write to the same Elasticsearch on the VPS, using a **least-privilege** ES user (`logstash_writer`) created specifically for this purpose. The Beats input on `:5044` will be reached by Filebeat through the HAProxy VIP once the load-balancer layer is deployed; until then, Filebeat can target either worker directly.
+Two identical workers, one per VM (`logstash01` at `10.0.0.21` and `logstash02` at `10.0.0.22`), each on the private LAN. Both write to the same Elasticsearch on the VPS (`10.0.0.5:9200`), using a **least-privilege** ES user (`logstash_writer`) created specifically for this purpose. The Beats input on `:5044` is reached by Filebeat through the HAProxy VIP at `10.0.0.10` (see [[networking/miscellaneous/haproxy|haproxy]] and [[networking/miscellaneous/keepalived-vrrp|keepalived-vrrp]]).
 
 ### 5.1 Prerequisites on each VM
 
-- Ubuntu 24.04 VM, joined to the Tailscale tailnet.
+- Ubuntu 24.04 VM on the private network.
 - Docker CE installed (same recipe as in [[observability/logs/elasticsearch/elasticsearch-setup#Prerequisites|elasticsearch-setup]]).
-- Network reachability from the VM to the VPS Tailscale IP (`100.114.84.48:9200`).
+- Network reachability from the VM to the VPS at `10.0.0.5:9200`.
 
 ### 5.2 Generate the `logstash_writer` password (on the VPS)
 
@@ -203,23 +203,26 @@ pipeline.batch.delay: 50
 
 ### 5.6 `pipeline/main.conf`
 
-The pipeline itself — Beats in, Elasticsearch out. No filters yet; grok for nginx and journald lands in Phase 6.
+The pipeline itself — Beats in, Elasticsearch out.
 
 ```ruby
 # /opt/observability-logs/pipeline/main.conf
 input {
   beats {
     port => 5044
+    client_inactivity_timeout => 3600
   }
 }
 
 filter {
-  # Phase 6 will add grok for nginx access logs + journald passthrough
+  # Per-event parsing / enrichment goes here. Keep empty for the first
+  # end-to-end test; add grok / mutate / date filters once the pipeline
+  # is verified working with raw events.
 }
 
 output {
   elasticsearch {
-    hosts    => [ "http://100.114.84.48:9200" ]
+    hosts    => [ "http://10.0.0.5:9200" ]
     user     => "logstash_writer"
     password => "${LOGSTASH_WRITER_PASSWORD}"
     index    => "logs-%{+YYYY.MM.dd}"
@@ -230,8 +233,8 @@ output {
 A couple of details:
 
 - **`${LOGSTASH_WRITER_PASSWORD}`** is interpolated by Logstash at startup from its environment. The variable will be injected into the container by docker-compose (next section).
-- **Daily indices** (`logs-%{+YYYY.MM.dd}`) — easy to roll, easy to delete with ILM later. One day per index means a mapping conflict is contained to a single day.
-- **No TLS** on the ES output: all traffic stays inside Tailscale's WireGuard mesh.
+- **`client_inactivity_timeout => 3600`**: the Beats input closes idle TCP connections after this many seconds. The default (60s) is too aggressive for long-lived Filebeat connections that may sit idle between batches; 1h is a safer upper bound.
+- **Daily indices** (`logs-%{+YYYY.MM.dd}`) — easy to roll, easy to delete with ILM. One day per index means a mapping conflict is contained to a single day.
 
 ### 5.7 `docker-compose.yml`
 
@@ -250,8 +253,8 @@ services:
       - /opt/observability-logs/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
       - /opt/observability-logs/data:/usr/share/logstash/data
     ports:
-      - "5044:5044"        # Beats input — HAProxy VIP reaches here in Phase 5
-      - "9600:9600"        # Monitoring API — over Tailscale only, not publicly exposed
+      - "5044:5044"        # Beats input — reached by HAProxy from the VIP
+      - "9600:9600"        # Monitoring API — private network only
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:9600 || exit 1"]
@@ -261,6 +264,9 @@ services:
 
 > [!WARNING]
 > **Never hardcode the password in `docker-compose.yml`.** Special characters trigger bash history expansion and docker-compose's own variable substitution, both of which silently mangle the value. Always reference it via `${VAR}` and keep the actual value in a `.env` written with a single-quoted heredoc.
+
+> [!IMPORTANT]
+> Keep the `pipeline/` directory containing **only the pipeline file you intend to load**. Backup copies (`main.conf.bak`) placed in the same folder will be loaded as additional pipelines and cause `Address already in use` on port 5044. Store backups outside this directory.
 
 ### 5.8 Start it
 
@@ -275,36 +281,19 @@ sudo docker compose logs -f logstash
 Look for:
 
 ```
-[INFO ][logstash.outputs.elasticsearch] Restored connection to ES instance {:url=>"http://logstash_writer:xxxxxx@100.114.84.48:9200/"}
+[INFO ][logstash.outputs.elasticsearch] Restored connection to ES instance {:url=>"http://logstash_writer:xxxxxx@10.0.0.5:9200/"}
 [INFO ][logstash.javapipeline ][main] Pipeline started {"pipeline.id"=>"main"}
 [INFO ][logstash.agent          ] Successfully started Logstash API endpoint {:port=>9600, :ssl_enabled=>false}
 ```
 
 If you see `Got response code '401' contacting Elasticsearch`, the password in `.env` doesn't match the one in ES — re-check it from the VPS `.env`.
 
-### 5.9 Sanity check from the VPS
+### 5.9 Repeat on logstash02
 
-After both workers are up, send a test event from the VPS through one of them and check that ES received it:
-
-```bash
-# Quick TCP event via netcat — Beats protocol won't work but a raw line lands in
-# Logstash's logs if we temporarily add a tcp input. For a real end-to-end test,
-# use Filebeat (see filebeat-setup, once that's deployed).
-```
-
-For now, the cleanest end-to-end test is to watch the indices in ES once Filebeat is configured to ship to a worker.
-
-### 5.10 Repeat on logstash02
-
-Steps **5.3 → 5.8** are identical on the second VM. Same image, same `.env` (same password, same role), same pipeline, same ports. The point of running two is horizontal capacity and fault isolation — they're peers, not primary/secondary.
+Steps **5.4 → 5.8** are identical on the second VM. Same image, same `.env` (same password), same pipeline, same ports. The point of running two is horizontal capacity and fault isolation — they're peers, not primary/secondary.
 
 ## 6. Where to go next
 
 - [[observability/logs/elasticsearch/elasticsearch-setup|elasticsearch-setup]] — the ES instance these workers write to.
+- [[networking/miscellaneous/haproxy|haproxy]] — the load balancer that fronts these workers.
 - [[observability/logs/kibana/kibana-setup|kibana-setup]] — UI on top of the data Logstash indexes.
-
-Coming up next in the deploy:
-
-- **Filebeat** on the VPS — the producer that will push events into these workers. (`filebeat-setup`, Phase 4.)
-- **HAProxy + Keepalived** on `lb01` / `lb02` — the HA load-balancer pair that fronts these workers. (`haproxy-for-logs`, `keepalived-vrrp`, Phase 5.)
-- **Grok parsing** for nginx access logs + journald — added to the empty `filter {}` block above. (Phase 6.)

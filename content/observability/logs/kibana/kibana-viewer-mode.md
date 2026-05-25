@@ -223,12 +223,14 @@ ES refuses the write because the `log_viewer` role does not grant any of the `ma
 
 ## What the visitor experiences vs what the admin experiences
 
-| Path                                | What happens                                                                                   |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Visitor opens `farnetiandrea.it/logs` | Lands on the provider chooser, picks "Public anonymous viewer", goes straight to Discover.    |
-| Admin opens `farnetiandrea.it/logs`   | Same chooser. Picks "Login with credentials", enters `elastic` + the password, gets full UI.  |
-| Visitor tries to save a search        | UI surfaces a 403 from ES; the action fails clearly with no data loss.                        |
-| Admin saves a search                  | Works normally — `elastic` has `superuser` and can write to `.kibana_*`.                      |
+| Path                                  | What happens                                                                                 |
+| ------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Visitor opens `farnetiandrea.it/logs` | Lands on the provider chooser, picks "Public anonymous viewer", goes straight to Discover.   |
+| Admin opens `farnetiandrea.it/logs`   | Same chooser. Picks "Login with credentials", enters `elastic` + the password, gets full UI. |
+| Visitor tries to save a search        | UI surfaces a 403 from ES; the action fails clearly with no data loss.                       |
+| Admin saves a search                  | Works normally — `elastic` has `superuser` and can write to `.kibana_*`.                     |
+
+
 ## Step 9 — Hardening: redact at the Logstash layer
 
 The anonymous role only restricts *what fields exist in Kibana terms* (e.g. only Discover/Dashboard/Visualize, no management). It does **not** redact the *content* of the fields. If your raw events contain client IPs, JWT tokens, email addresses, or app-internal stack traces, the anonymous user can see them all by clicking into any document in Discover.

@@ -53,7 +53,7 @@ flowchart LR
     LS2 -- "indexes" --> ES
 ```
 
-All traffic between the VPS and the 4 VMs runs on **Tailscale** (private mesh, no public ports on the VMs).
+All traffic between the VPS and the 4 VMs runs on a private LAN: the VMs have no public ports exposed.
 
 ## The stack I use
 

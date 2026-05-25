@@ -36,10 +36,8 @@ Filebeat is the opposite: **push**. The agent decides when to send, the central 
 
 Pull works for metrics because samples are continuous: missing one is fine, the next one is right behind. Logs are discrete events — each line is meaningful on its own, and you don't get a chance to "ask again later". A push model with a buffer (Logstash + persistent queue) handles that asymmetry better than scraping ever could.
 
-## Where Filebeat fits in this lab
+## Where Filebeat fits in this stack
 
-Filebeat runs natively (via `apt`) on the VPS, reads `/var/log/syslog`, `/var/log/auth.log`, the systemd journal, and the stdout of every Docker container on the host. It pushes the events to `logstash01:5044` over Tailscale.
-
-Once the load-balancer layer (Phase 5) is up, the single `logstash01` target will be replaced by the **HAProxy VIP**, and Filebeat will get HA + load balancing for free.
+Filebeat runs natively (via `apt`) on the host whose logs we want to collect — in this lab the VPS, but it can be any Linux box. It reads `/var/log/syslog`, `/var/log/auth.log`, the systemd journal, and the stdout of every Docker container on the host. It pushes the events to the HAProxy VIP on `10.0.0.10:5044`, which load-balances them across the Logstash workers.
 
 The deploy walkthrough is in [[observability/logs/filebeat/filebeat-setup|filebeat-setup]].

@@ -41,4 +41,4 @@ Parsing is CPU-heavy. A single Logstash instance is a single bottleneck. Running
 - Roll out config changes one worker at a time, without dropping events.
 - Survive single-worker crashes without backpressure on the shippers.
 
-This lab runs **two Logstash workers** (logstash01, logstash02), each in its own Docker container on its own Tailscale VM, fronted by an HAProxy VIP. The deploy walkthrough is in [[observability/logs/logstash/logstash-setup|logstash-setup]].
+This stack runs **two Logstash workers** (`logstash01` at `10.0.0.21`, `logstash02` at `10.0.0.22`), each in its own Docker container on a dedicated VM, fronted by the HAProxy VIP at `10.0.0.10`. The deploy walkthrough is in [[observability/logs/logstash/logstash-setup|logstash-setup]].

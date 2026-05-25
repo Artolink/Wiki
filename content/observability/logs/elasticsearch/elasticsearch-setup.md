@@ -1,8 +1,8 @@
 ---
-title: Elasticsearch — Setup
+title: Elasticsearch Setup
 ---
 
-This page walks through deploying Elasticsearch 8.15 in a single-node Docker container on the VPS, with X-Pack security enabled and persistent storage on a bind-mounted volume. The cluster is exposed on `127.0.0.1:9200` (for local services like Kibana) and on the Tailscale IP `100.114.84.48:9200` (for Logstash workers running on private VMs). No public exposure.
+This page walks through deploying Elasticsearch 8.15 in a single-node Docker container on the VPS, with X-Pack security enabled and persistent storage on a bind-mounted volume. The cluster is exposed on `127.0.0.1:9200` (for local services like Kibana) and on the VPS private IP `10.0.0.5:9200` (for Logstash workers running on private VMs). No public exposure.
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ This page walks through deploying Elasticsearch 8.15 in a single-node Docker con
   ```
 
 - A user with sudo and the ability to run `docker compose`.
-- Tailscale already configured on the VPS, reachable at a known Tailscale IP (e.g. `100.114.84.48`).
+- VPS reachable on a private network at a known IP (in this guide: `10.0.0.5`).
 
 ## Kernel setting — `vm.max_map_count`
 
@@ -86,10 +86,10 @@ services:
     user: "1000:1000"
     environment:
       - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
       - bootstrap.memory_lock=true
       # Security ON, but TLS OFF on the HTTP layer.
-      # Lab simplification: traffic stays on Tailscale, which already encrypts.
+      # Lab simplification: traffic stays on the private LAN.
       # In production this is non-negotiable — enable HTTPS.
       - xpack.security.enabled=true
       - xpack.security.http.ssl.enabled=false
@@ -104,8 +104,8 @@ services:
     volumes:
       - /opt/observability-logs/es-data:/usr/share/elasticsearch/data
     ports:
-      # Tailscale IP — for Logstash workers on private VMs
-      - "100.114.84.48:9200:9200"
+      # Private LAN IP — for Logstash workers on dedicated VMs
+      - "10.0.0.5:9200:9200"
       # Localhost — for Kibana (same host) and quick curl checks
       - "127.0.0.1:9200:9200"
     networks:
@@ -125,9 +125,9 @@ networks:
 A few choices worth calling out:
 
 - **`bootstrap.memory_lock=true`** + `ulimits.memlock: -1` pins ES JVM memory into RAM so it can't be swapped out. ES strongly discourages swapping (latency spikes); locking memory is the cleanest fix.
-- **`ES_JAVA_OPTS=-Xms1g -Xmx1g`** sets both min and max heap to 1 GB. Min == Max is best practice for the JVM — no GC-time resizing. 1 GB is comfortable for a single-node lab.
-- **`xpack.security.http.ssl.enabled=false`** keeps the HTTP API on plain HTTP. Tailscale's WireGuard encrypts the transport between hosts already, and we never expose 9200 publicly. In a production cluster (or anywhere outside a private mesh), enable HTTP TLS.
-- **Two `ports` lines** bind the same container port to two distinct host addresses — Tailscale IP and 127.0.0.1. This makes 9200 reachable to Logstash workers (over Tailscale) and Kibana / local curl (over localhost), but nothing else on the public internet sees it.
+- **`ES_JAVA_OPTS=-Xms2g -Xmx2g`** sets both min and max heap to 2 GB. Min == Max is best practice for the JVM — no GC-time resizing. 1 GB is enough only for an empty cluster; any real log workload needs 2 GB+ to avoid hitting the parent circuit breaker.
+- **`xpack.security.http.ssl.enabled=false`** keeps the HTTP API on plain HTTP. The private LAN is trusted in this lab, and 9200 is never publicly exposed. In a production cluster (or anywhere outside a trusted network), enable HTTP TLS.
+- **Two `ports` lines** bind the same container port to two distinct host addresses — the private LAN IP and 127.0.0.1. This makes 9200 reachable to Logstash workers (over the private LAN) and Kibana / local curl (over localhost), but nothing else on the public internet sees it.
 
 ## Start it
 
@@ -177,15 +177,62 @@ curl -s -o /dev/null -w "%{http_code}\n" -u "elastic:$ELASTIC" http://localhost:
 # 200
 ```
 
+## ILM policy + index template
+
+Logstash will write to daily indices `logs-YYYY.MM.dd`. Without lifecycle management those indices accumulate forever and eventually fill the disk or hit the cluster shard limit. Set up an ILM policy that deletes indices older than 14 days, and an index template that applies it to every `logs-*`:
+
+```bash
+ELASTIC=$(sudo grep '^ELASTIC_PASSWORD=' /opt/observability-logs/.env | cut -d= -f2-)
+
+# ILM policy: keep 14 days, then delete
+curl -sX PUT -u "elastic:$ELASTIC" \
+  -H "Content-Type: application/json" \
+  http://localhost:9200/_ilm/policy/logs_policy \
+  -d '{
+    "policy": {
+      "phases": {
+        "hot": {
+          "actions": {
+            "rollover": { "max_age": "1d", "max_size": "10gb" }
+          }
+        },
+        "delete": {
+          "min_age": "14d",
+          "actions": { "delete": {} }
+        }
+      }
+    }
+  }' && echo
+
+# Index template — applies the policy to all logs-* indices
+curl -sX PUT -u "elastic:$ELASTIC" \
+  -H "Content-Type: application/json" \
+  http://localhost:9200/_index_template/logs_template \
+  -d '{
+    "index_patterns": ["logs-*"],
+    "template": {
+      "settings": {
+        "index.lifecycle.name": "logs_policy",
+        "number_of_shards": 1,
+        "number_of_replicas": 0
+      }
+    },
+    "priority": 500
+  }' && echo
+```
+
+> [!INFO]
+> **`number_of_replicas: 0`** is appropriate for single-node ES — replicas can't be allocated to a different node, so they'd just stay unassigned and yellow the cluster. On a multi-node cluster set this to 1 or higher.
+
 ## What's exposed and to whom
 
-| Address                  | Reached from                            | Purpose                            |
-| ------------------------ | --------------------------------------- | ---------------------------------- |
-| `127.0.0.1:9200`         | Same host (Kibana, local curl, etc.)    | Local services on the VPS          |
-| `100.114.84.48:9200`     | Other Tailscale peers (logstash01/02)   | Log workers writing to ES          |
-| Public internet          | nothing                                 | ES is never publicly addressable   |
+| Address              | Reached from                          | Purpose                          |
+| -------------------- | ------------------------------------- | -------------------------------- |
+| `127.0.0.1:9200`     | Same host (Kibana, local curl, etc.)  | Local services on the VPS        |
+| `10.0.0.5:9200`      | Other hosts on the private LAN (LS workers) | Log workers writing to ES      |
+| Public internet      | nothing                               | ES is never publicly addressable |
 
 ## Where to go next
 
 - [[observability/logs/kibana/kibana-setup|kibana-setup]] — UI on top of this ES, exposed publicly at `/logs/`.
-- [[observability/logs/logstash/logstash-setup|logstash-setup]] — the Logstash workers that write to this ES from the Tailscale side.
+- [[observability/logs/logstash/logstash-setup|logstash-setup]] — the Logstash workers that write to this ES from the private LAN.

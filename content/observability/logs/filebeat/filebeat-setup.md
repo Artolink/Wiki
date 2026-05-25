@@ -1,9 +1,8 @@
 ---
 title: Filebeat — Setup
-description: Install Filebeat natively on the VPS, configure inputs for syslog + journald + Docker autodiscover, and ship to the Logstash worker.
 ---
 
-This page deploys Filebeat on the VPS — the one host whose logs we actually want to collect (the four Tailscale VMs are pure log infrastructure; their own logs are nice-to-have but not the point of this exercise). The agent runs natively via `apt`, not in a container, because shipping logs from a single host has trivial filesystem and journald access requirements that a container would only complicate.
+This page deploys Filebeat on the host whose logs we want to collect — in this lab the VPS, but the same recipe works on any Linux box. The agent runs natively via `apt`, not in a container, because shipping logs from a single host has trivial filesystem and journald access requirements that a container would only complicate.
 
 ## Why "native" and not Docker
 
@@ -11,18 +10,15 @@ Three reasons:
 
 1. **Filesystem access**: reading `/var/log/syslog` and the systemd journal from a container would mean bind-mounting `/var/log`, `/var/log/journal`, `/run/log/journal`, plus the runtime journald socket — workable, fragile, and the kind of detail that breaks after a host upgrade.
 2. **Docker autodiscover**: Filebeat reads `/var/run/docker.sock` to discover running containers. Inside Docker it's a layered indirection.
-3. **A single-host log shipper does not need orchestration.** Filebeat is one binary, one config file, one systemd unit. The container packaging is appropriate when you replicate the same shipper across many short-lived workloads (Kubernetes DaemonSet) — not on a single VPS that gets touched twice a year.
+3. **A single-host log shipper does not need orchestration.** Filebeat is one binary, one config file, one systemd unit. The container packaging is appropriate when you replicate the same shipper across many short-lived workloads (Kubernetes DaemonSet) — not on a single host.
 
 On the VMs that run Logstash (`logstash01`, `logstash02`) we use Docker because they need *Logstash* (a heavyweight JVM application that benefits from the consistent runtime). Here we use native because Filebeat is a Go binary, no JVM, no friction.
 
 ## Prerequisites
 
 - A working Logstash worker pool (see [[observability/logs/logstash/logstash-setup|logstash-setup]]).
-
 - A working HAProxy + Keepalived HA pair with a VIP (see [[networking/miscellaneous/haproxy|haproxy]] and [[networking/miscellaneous/keepalived-vrrp|keepalived-vrrp]]). In this guide the VIP is `10.0.0.10:5044`.
-
-- A user with sudo on the host whose logs you want to collect (in this lab: the VPS).
-- 
+- A user with sudo on the host whose logs you want to collect.
 
 ## Step 1 — install Filebeat 8.x from the official Elastic APT repo
 
@@ -89,8 +85,9 @@ processors:
   - add_docker_metadata: ~
 
 # ============================== Output ==================================
-# Phase 4: ship directly to logstash01 over Tailscale.
-# Phase 5 will replace this with the HAProxy VIP for HA + load balancing.
+# Ship to the HAProxy VIP. The two LB nodes share this VIP via Keepalived;
+# whichever HAProxy currently owns it serves the traffic, with automatic
+# failover.
 output.logstash:
   hosts: ["10.0.0.10:5044"]
 
@@ -150,9 +147,9 @@ logstash: 10.0.0.10:5044...
   talk to server... OK
 ```
 
-(TLS warning is expected — we're on a private Tailscale mesh, and Logstash's Beats input is not TLS-enabled.)
+(TLS warning is expected — we're on a private network, and Logstash's Beats input is not TLS-enabled in this lab.)
 
-If the dial-up step fails, the path between Filebeat and Logstash is broken. Quick reachability checks:
+If the dial-up step fails, the path between Filebeat and the VIP is broken. Quick reachability checks:
 
 ```bash
 ping -c 2 10.0.0.10
@@ -182,10 +179,9 @@ Connection to backoff(...) established
 
 If you see `Failed to connect to backoff`, the output isn't reachable — re-run `filebeat test output`, fix the network, and Filebeat will reconnect on its own (it backoff-retries forever).
 
-
 ## Step 5 — verify end-to-end from Elasticsearch
 
-The pipeline is Filebeat → Logstash → Elasticsearch. We can confirm each hop without touching Kibana:
+The pipeline is Filebeat → HAProxy → Logstash → Elasticsearch. We can confirm each hop without touching Kibana:
 
 ```bash
 ELASTIC=$(sudo grep '^ELASTIC_PASSWORD=' /opt/observability-logs/.env | cut -d= -f2-)
@@ -205,12 +201,11 @@ What to look for in a sample document:
 
 - `agent.type: "filebeat"` — confirms the producer
 - `agent.version: "8.x.x"` — Filebeat version
-- `host.hostname: "personalDomain"` — host metadata processor
+- `host.hostname: "<your-host>"` — host metadata processor
 - `log_source: "syslog"` (or `"journald"`) — the custom field we added per input
-- `event.original: "May 22 10:27:19 personalDomain systemd[1]: ..."` — the raw log line
+- `event.original: "May 22 10:27:19 ... systemd[1]: ..."` — the raw log line
 
 If the count is positive and grows each time you re-run it, Filebeat → Logstash → ES is working end to end.
 
 > [!INFO]
 > To see this data in **Kibana Discover**, you need a Data View pointed at `logs-*`. Create it from Stack Management as described in [[observability/logs/kibana/kibana-setup#Step 7 — create a Data View|kibana-setup]] — the same view is automatically usable by the public anonymous viewer once it exists.
-
