@@ -112,7 +112,56 @@ This is the **most common source of bugs** in HAProxy setups that forward long-l
 
 ## 9. The HA layer above HAProxy
 
-A single HAProxy is itself a single point of failure. The canonical solution: run **two HAProxy instances on two hosts**, share a Virtual IP between them, manage the VIP with Keepalived (VRRP). The clients always target the VIP; whichever HAProxy currently owns it serves the traffic; if it dies, the VIP migrates to the standby within ~3 seconds. This layer is covered in [[networking/miscellaneous/keepalived-vrrp|keepalived-vrrp]].
+A single HAProxy is, of course, a single point of failure and does not allow for any traffic distribution, nor has a queue system like Kafka or RabbitMQ. 
+
+To make at least the LB layer redundant, you need a separate component that:
+
+1. monitors which HAProxy instance is alive,
+
+2. owns a **Virtual IP (VIP)** that clients target, and migrates it to the surviving node on failure.
+
+There are two mainstream schools for doing this on Linux.
+
+### 9.1 Lightweight: HAProxy + Keepalived (this lab)
+
+Two HAProxy instances on two hosts, both running the same config, plus **Keepalived** on each host implementing **VRRP**. Clients always target the VIP; whichever HAProxy currently owns it serves the traffic; if that node dies, the VIP migrates to the standby within ~3 seconds.
+
+- HAProxy itself runs **active-active at process level** (both daemons are always up), but the VIP is **active-passive** — only one node receives traffic at a time.
+
+- Minimal configuration, no quorum, no fencing. Split-brain is theoretically possible under a network partition, but for a stateless LB in front of stateless workers the blast radius is small.
+
+- Covered end-to-end in [[networking/miscellaneous/keepalived-vrrp|keepalived-vrrp]].
+
+This is what the lab uses — the standard open-source recipe for "highly-available HAProxy".
+
+### 9.2 Enterprise alternative: HAProxy + Pacemaker + Corosync
+
+In larger environments (and most commercial distributions with HA add-ons — Red Hat HA, SUSE HAE) HAProxy is fronted by a full cluster manager instead of Keepalived:
+
+- **Corosync** — the messaging / membership layer. Handles "who's in the cluster, who's reachable, do we have quorum". Doesn't manage any resource on its own.
+
+- **Pacemaker** — the resource manager that sits on top of Corosync. Treats both the VIP (`ocf:heartbeat:IPaddr2`) and HAProxy itself (`systemd:haproxy`) as **cluster resources**, with explicit dependencies, colocation, and ordering rules.
+
+The trade-off vs. Keepalived:
+
+| Aspect | Keepalived (lab) | Pacemaker + Corosync (enterprise) |
+
+| ------------------- | --------------------------- | ---------------------------------------------- |
+
+| Protocol | VRRP (L2 multicast) | Corosync totem ring (UDP) |
+
+| Resources managed | VIP only (+ check scripts) | Anything (VIP, services, mounts, …) |
+
+| Quorum / fencing | None | Native quorum + STONITH |
+
+| Configuration | A few dozen lines | `pcs` / `crm` tooling, much more articulated |
+
+| Vendor support | Community only | Red Hat HA, SUSE HAE, … |
+
+When you choose this path you get stronger guarantees against split-brain (fencing is mandatory), the ability to express things like *"if haproxy dies on node A, migrate the VIP to node B **and** restart haproxy there"*, and integration with an HA stack you may already have for databases or shared storage. The cost is operational complexity: more daemons, more config, steeper learning curve.
+
+> [!INFO]
+> **About "Heartbeat".** You may hear this stack referred to generically as *Heartbeat*, especially in older docs or from veteran sysadmins. Historically Heartbeat was the original Linux-HA daemon (pre-2009) that did both messaging and resource management; the project later split into **Corosync** (messaging) + **Pacemaker** (resource manager). The Heartbeat daemon still exists as a legacy messaging layer but is rarely used in new deployments — modern clusters are Corosync-based. Treat "Heartbeat" as the name of the *concept / legacy stack*, not of a current component (the `ocf:heartbeat:*` resource agent namespace is a naming leftover from those years).
 
 ---
 

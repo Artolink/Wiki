@@ -1,22 +1,19 @@
 ---
-title: Filebeat — Setup
+title: "Filebeat: the log shipper for our Log system"
 ---
+Read [[observability/logs/filebeat/_index|this Filebeat overview]] for a quick theory lesson.
 
-This page deploys Filebeat on the host whose logs we want to collect — in this lab the VPS, but the same recipe works on any Linux box. The agent runs natively via `apt`, not in a container, because shipping logs from a single host has trivial filesystem and journald access requirements that a container would only complicate.
+This page deploys Filebeat on the host whose logs we want to collect: in this lab the VPS, but the same recipe works on any Linux box. 
 
-## Why "native" and not Docker
-
-Three reasons:
-
-1. **Filesystem access**: reading `/var/log/syslog` and the systemd journal from a container would mean bind-mounting `/var/log`, `/var/log/journal`, `/run/log/journal`, plus the runtime journald socket — workable, fragile, and the kind of detail that breaks after a host upgrade.
-2. **Docker autodiscover**: Filebeat reads `/var/run/docker.sock` to discover running containers. Inside Docker it's a layered indirection.
-3. **A single-host log shipper does not need orchestration.** Filebeat is one binary, one config file, one systemd unit. The container packaging is appropriate when you replicate the same shipper across many short-lived workloads (Kubernetes DaemonSet) — not on a single host.
-
-On the VMs that run Logstash (`logstash01`, `logstash02`) we use Docker because they need *Logstash* (a heavyweight JVM application that benefits from the consistent runtime). Here we use native because Filebeat is a Go binary, no JVM, no friction.
+The agent runs natively via `apt`, not in a container, because shipping logs from a single host has trivial filesystem and journald access requirements that a container would only complicate.
 
 ## Prerequisites
 
-- A working Logstash worker pool (see [[observability/logs/logstash/logstash-setup|logstash-setup]]).
+Of course, since Filebeat **pushes** logs somewhere, it would be better to have some components of the stack already in place.
+
+For example:
+
+- A working Logstash pool (see [[observability/logs/logstash/logstash-setup|the Logstash setup]]).
 - A working HAProxy + Keepalived HA pair with a VIP (see [[networking/miscellaneous/haproxy|haproxy]] and [[networking/miscellaneous/keepalived-vrrp|keepalived-vrrp]]). In this guide the VIP is `10.0.0.10:5044`.
 - A user with sudo on the host whose logs you want to collect.
 

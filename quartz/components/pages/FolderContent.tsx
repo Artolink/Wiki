@@ -16,15 +16,19 @@ import { findSeriesForPage } from "../../util/series"
 // di `byDateAndAlphabeticalFolderFirst` in PageList.tsx). `numeric: true`
 // abilita il "natural sort": "0. Pre-upgrade", "1. Patch", "2. Post-upgrade"
 // vengono ordinati correttamente invece di "0., 1., 10., 2., 3.".
+// Lo strip `^[^\w]+` rimuove emoji/spazi/punteggiatura iniziali prima del
+// confronto, così "🚀 1. Boot" viene letto come "1. Boot" e l'ordinamento
+// numerico funziona anche con i titoli del frontmatter che hanno un'icona
+// davanti (stessa logica di `explorerSortFn` in quartz.layout.ts).
 const alphabeticalFolderFirst: SortFn = (a, b) => {
   const aIsFolder = isFolderPath(a.slug ?? "")
   const bIsFolder = isFolderPath(b.slug ?? "")
   if (aIsFolder && !bIsFolder) return -1
   if (!aIsFolder && bIsFolder) return 1
 
-  const aTitle = (a.frontmatter?.title ?? a.slug ?? "").toLowerCase()
-  const bTitle = (b.frontmatter?.title ?? b.slug ?? "").toLowerCase()
-  return aTitle.localeCompare(bTitle, undefined, { numeric: true })
+  const aTitle = (a.frontmatter?.title ?? a.slug ?? "").replace(/^[^\w]+/u, "")
+  const bTitle = (b.frontmatter?.title ?? b.slug ?? "").replace(/^[^\w]+/u, "")
+  return aTitle.localeCompare(bTitle, undefined, { numeric: true, sensitivity: "base" })
 }
 
 interface FolderContentOptions {
