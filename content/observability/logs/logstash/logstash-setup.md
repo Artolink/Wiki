@@ -294,6 +294,8 @@ Steps **5.4 → 5.8** are identical on the second VM. Same image, same `.env` (s
 
 ## 6. Where to go next
 
-- [[observability/logs/elasticsearch/elasticsearch-setup|elasticsearch-setup]] — the ES instance these workers write to.
-- [[networking/miscellaneous/haproxy|haproxy]] — the load balancer that fronts these workers.
-- [[observability/logs/kibana/kibana-setup|kibana-setup]] — UI on top of the data Logstash indexes.
+- [[networking/miscellaneous/haproxy|haproxy]] — **next in this series**: the load balancer that will be deployed in front of these workers.
+
+- [[observability/logs/filebeat/filebeat-setup|filebeat-setup]] — coming later in the series: the producer that will push events through HAProxy into these workers.
+
+Back-references (already covered earlier in the series): [[observability/logs/elasticsearch/elasticsearch-setup|elasticsearch-setup]] is the ES instance these workers write to; [[observability/logs/kibana/kibana-setup|kibana-setup]] is the UI on top of it.

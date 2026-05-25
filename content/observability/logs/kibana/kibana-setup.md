@@ -205,5 +205,4 @@ A Data View tells Kibana which Elasticsearch indices to expose to Discover, Dash
 
 ## Where to go next
 
-- [[observability/logs/kibana/kibana-viewer-mode|kibana-viewer-mode]] — layer an anonymous provider on top of this base deploy so the public sees Discover without a login prompt.
-- Once Filebeat is shipping events ([[observability/logs/filebeat/filebeat-setup|filebeat-setup]]), the `logs` data view created in Step 7 will start showing live data.
+- Once Filebeat is shipping events ([[observability/logs/filebeat/filebeat-setup|filebeat-setup]], at the end of the series), the `logs` data view created in Step 7 will start showing live data.

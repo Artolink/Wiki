@@ -2,17 +2,16 @@
 title: 🔍 Logs (ELK Stack)
 series:
   - observability/logs/my-elk-stack
-  - observability/logs/filebeat
-  - observability/logs/filebeat/filebeat-setup
-  - networking/miscellaneous/haproxy
-  - networking/miscellaneous/keepalived-vrrp
-  - observability/logs/logstash
-  - observability/logs/logstash/logstash-setup
   - observability/logs/elasticsearch
   - observability/logs/elasticsearch/elasticsearch-setup
   - observability/logs/kibana
   - observability/logs/kibana/kibana-setup
-  - observability/logs/kibana/kibana-viewer-mode
+  - observability/logs/logstash
+  - observability/logs/logstash/logstash-setup
+  - networking/miscellaneous/haproxy
+  - networking/miscellaneous/keepalived-vrrp
+  - observability/logs/filebeat
+  - observability/logs/filebeat/filebeat-setup
 ---
 This is the "logs" half of my observability setup: the complementary half of the [Grafana stack](../metrics/my-grafana-stack) project for metrics. 
 
@@ -29,4 +28,4 @@ This is the actual workflow.
 - LBs receive logs, and forward them to two **Logstash workers**, which are responsible of "standardizing" them for ElasticSearch, which is their final destination.
 - Once they arrive in **ElasticSearch** (which runs on my VPS as well), they are ready to be visualized via our **Kibana** dashboard (that runs... you said it, on my VPS).
 
-The abstract walkthrough is in [[my-elk-stack|My ELK Stack: how to centralise logs from your VMs]], but if you want to read about each component in detail, you can follow this series starting down below!
+If you want to read about each component in detail, you can follow this series starting down below, but there's also the abstract walkthrough in [[my-elk-stack|My ELK Stack: how to centralise logs from your VMs]], I suggest to check that out first!

@@ -1,12 +1,17 @@
 ---
 title: Elasticsearch Setup
 ---
+Read [[observability/logs/elasticsearch/_index|this ElasticSearch overview]] for a quick theory lesson.
 
-This page walks through deploying Elasticsearch 8.15 in a single-node Docker container on the VPS, with X-Pack security enabled and persistent storage on a bind-mounted volume. The cluster is exposed on `127.0.0.1:9200` (for local services like Kibana) and on the VPS private IP `10.0.0.5:9200` (for Logstash workers running on private VMs). No public exposure.
+This page walks through deploying Elasticsearch in a single-node Docker container on the VPS, with persistent storage on a bind-mounted volume. 
+
+The cluster is exposed on `127.0.0.1:9200` (for local services like Kibana) and on the VPS private IP `10.0.0.5:9200` (for Logstash workers running on private VMs). 
+
+No public exposure.
 
 ## Prerequisites
 
-- Docker CE installed via the official method (the `apt install docker.io` shortcut ships an older fork and can cause surprises with `docker compose` v2):
+- Docker CE installed via the official method:
 
   ```bash
   sudo install -m 0755 -d /etc/apt/keyrings
@@ -23,7 +28,11 @@ This page walks through deploying Elasticsearch 8.15 in a single-node Docker con
 - A user with sudo and the ability to run `docker compose`.
 - VPS reachable on a private network at a known IP (in this guide: `10.0.0.5`).
 
-## Kernel setting — `vm.max_map_count`
+## Installation
+
+Before the actual installation, here are some prerequisites to set up.
+
+### Kernel setting: `vm.max_map_count`
 
 > [!IMPORTANT]
 > Elasticsearch uses memory-mapped files heavily and refuses to start if `vm.max_map_count < 262144`. This must be set on the *host*, not in the container.
@@ -43,7 +52,7 @@ sysctl vm.max_map_count
 # vm.max_map_count = 262144
 ```
 
-## Directory layout
+### Directory layout
 
 ```bash
 sudo mkdir -p /opt/observability-logs/es-data
@@ -51,18 +60,18 @@ sudo chown -R 1000:1000 /opt/observability-logs/es-data
 cd /opt/observability-logs
 ```
 
-UID 1000 matches the `elasticsearch` user inside the official image — without this, the container can't write to the bind-mounted data directory.
+UID 1000 matches the `elasticsearch` user inside the official image: without this, the container can't write to the bind-mounted data directory.
 
-## Generate the `elastic` superuser password
+### Generate the `elastic` superuser password
 
 > [!WARNING]
-> Use **hex-only** passwords. Special characters like `!` and `$` are interpreted by bash (history expansion) and docker-compose (variable expansion) in ways that silently truncate or mangle the value, and the symptoms only show up later as authentication failures. `openssl rand -hex 24` gives 48 hex chars — enough entropy, zero metacharacter traps.
+> Use **hex-only** passwords. Special characters like `!` and `$` are interpreted by bash!
 
 ```bash
 echo "ELASTIC=$(openssl rand -hex 24)"
 ```
 
-Copy the hex value into your password manager **now**, then write it into the `.env` using a single-quoted heredoc (the quotes around `'EOF'` stop bash from interpreting anything inside):
+Copy the hex value into your password manager **now** (What? You don't have one? Check [[keepass-setup|this]] out immediately!) then write it into the `.env` using EOF (the quotes around `'EOF'` stop bash from interpreting anything inside):
 
 ```bash
 sudo tee /opt/observability-logs/.env > /dev/null <<'EOF'
@@ -71,10 +80,8 @@ EOF
 sudo chmod 600 /opt/observability-logs/.env
 ```
 
-> [!INFO]
-> Other services (Kibana, Logstash, the anonymous viewer) will need their own credentials too. Each of their setup pages appends to this same `.env` file when the time comes — generate them in context, not all up front.
 
-## docker-compose.yml — Elasticsearch service
+### docker-compose.yml
 
 Create `/opt/observability-logs/docker-compose.yml`:
 
@@ -124,26 +131,26 @@ networks:
 
 A few choices worth calling out:
 
-- **`bootstrap.memory_lock=true`** + `ulimits.memlock: -1` pins ES JVM memory into RAM so it can't be swapped out. ES strongly discourages swapping (latency spikes); locking memory is the cleanest fix.
-- **`ES_JAVA_OPTS=-Xms2g -Xmx2g`** sets both min and max heap to 2 GB. Min == Max is best practice for the JVM — no GC-time resizing. 1 GB is enough only for an empty cluster; any real log workload needs 2 GB+ to avoid hitting the parent circuit breaker.
+- **`bootstrap.memory_lock=true`** + `ulimits.memlock: -1` pins ElasticSearch JVM memory into RAM so it can't be swapped out. ES strongly discourages swapping (latency spikes); locking memory is the cleanest fix.
+- **`ES_JAVA_OPTS=-Xms2g -Xmx2g`** sets both min and max heap to 2 GB. Min == Max is best practice for the JVM. Any real log workload needs 2 GB+ to avoid hitting the parent circuit breaker.
 - **`xpack.security.http.ssl.enabled=false`** keeps the HTTP API on plain HTTP. The private LAN is trusted in this lab, and 9200 is never publicly exposed. In a production cluster (or anywhere outside a trusted network), enable HTTP TLS.
-- **Two `ports` lines** bind the same container port to two distinct host addresses — the private LAN IP and 127.0.0.1. This makes 9200 reachable to Logstash workers (over the private LAN) and Kibana / local curl (over localhost), but nothing else on the public internet sees it.
+- **Two `ports` lines** bind the same container port to two distinct host addresses: the private LAN IP and 127.0.0.1. This makes 9200 reachable to Logstash workers (over the private LAN), and to Kibana / local curl (over localhost), but nothing else on the public internet sees it.
 
-## Start it
+### Start it
 
 ```bash
 cd /opt/observability-logs
 sudo docker compose up -d elasticsearch
 ```
 
-The first start pulls the ~1 GB image and warms up the cluster — give it ~60 seconds.
+The first start pulls the ~1 GB image and warms up the cluster: give it ~60 seconds.
 
 ```bash
 sudo docker compose logs -f elasticsearch
 # ... [INFO ][o.e.n.Node] [elasticsearch] started
 ```
 
-## Verify
+## Verify#
 
 ```bash
 ELASTIC=$(sudo grep '^ELASTIC_PASSWORD=' /opt/observability-logs/.env | cut -d= -f2-)
@@ -165,7 +172,7 @@ Expected:
 ```
 
 > [!INFO]
-> **Yellow is fine here.** It means primary shards are allocated but replicas can't be (single-node can't host replicas of its own data — that would defeat the point). On a real cluster you'd see green; on a single-node lab, yellow is the steady state.
+> **Yellow is fine here.** It means primary shards are allocated but replicas can't be (single-node can't host replicas of its own data: that would defeat the point).
 
 Auth sanity check:
 
@@ -179,7 +186,11 @@ curl -s -o /dev/null -w "%{http_code}\n" -u "elastic:$ELASTIC" http://localhost:
 
 ## ILM policy + index template
 
-Logstash will write to daily indices `logs-YYYY.MM.dd`. Without lifecycle management those indices accumulate forever and eventually fill the disk or hit the cluster shard limit. Set up an ILM policy that deletes indices older than 14 days, and an index template that applies it to every `logs-*`:
+Logstash will write to daily indices `logs-YYYY.MM.dd`. 
+
+Without lifecycle management those indices accumulate forever and eventually fill the disk or hit the cluster shard limit. 
+
+Set up an ILM policy that deletes indices older than 14 days, and an index template that applies it to every `logs-*`:
 
 ```bash
 ELASTIC=$(sudo grep '^ELASTIC_PASSWORD=' /opt/observability-logs/.env | cut -d= -f2-)
@@ -221,9 +232,6 @@ curl -sX PUT -u "elastic:$ELASTIC" \
   }' && echo
 ```
 
-> [!INFO]
-> **`number_of_replicas: 0`** is appropriate for single-node ES — replicas can't be allocated to a different node, so they'd just stay unassigned and yellow the cluster. On a multi-node cluster set this to 1 or higher.
-
 ## What's exposed and to whom
 
 | Address              | Reached from                          | Purpose                          |
@@ -234,5 +242,6 @@ curl -sX PUT -u "elastic:$ELASTIC" \
 
 ## Where to go next
 
-- [[observability/logs/kibana/kibana-setup|kibana-setup]] — UI on top of this ES, exposed publicly at `/logs/`.
-- [[observability/logs/logstash/logstash-setup|logstash-setup]] — the Logstash workers that write to this ES from the private LAN.
+- [[observability/logs/kibana|kibana]]: **next in this series**: the web UI.
+
+- [[observability/logs/logstash/logstash-setup|logstash-setup]]: the worker pool that will write events into ES from the private LAN.

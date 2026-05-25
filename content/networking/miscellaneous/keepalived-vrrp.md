@@ -337,6 +337,8 @@ sudo systemctl start haproxy
 
 ## Where to go next
 
-- [[networking/miscellaneous/haproxy|haproxy]] — the load balancer that sits inside this VRRP pair.
-- [[observability/logs/logstash/logstash-setup|logstash-setup]] — the workers that HAProxy distributes traffic to.
+- [[observability/logs/filebeat|filebeat]] — **next in this series**: the log shipper that will start pushing Beats traffic into the VIP you just provisioned.
+
 - Tighten the failover detection time by lowering `advert_int` to `0.5` (fractional seconds) if your network can tolerate 2× the VRRP heartbeat traffic.
+
+Back-references (already covered earlier in the series): [[networking/miscellaneous/haproxy|haproxy]] is the load balancer that sits inside this VRRP pair; [[observability/logs/logstash/logstash-setup|logstash-setup]] is the worker pool downstream of it.

@@ -294,6 +294,8 @@ A clean reload doesn't drop existing connections — HAProxy spawns the new proc
 
 ## Where to go next
 
-- [[networking/miscellaneous/keepalived-vrrp|keepalived-vrrp]] — the VRRP layer that owns the VIP and migrates it between loglb01 and loglb02 on failure.
-- [[observability/logs/logstash/logstash-setup|logstash-setup]] — the worker pool that sits behind this LB.
-- [[observability/logs/filebeat/filebeat-setup|filebeat-setup]] — the producer that sends Beats traffic into the VIP.
+- [[networking/miscellaneous/keepalived-vrrp|keepalived-vrrp]] — **next in this series**: the VRRP layer that owns the VIP and migrates it between loglb01 and loglb02 on failure.
+
+- [[observability/logs/filebeat/filebeat-setup|filebeat-setup]] — coming later in the series: the producer that will push Beats traffic into this VIP.
+
+Back-reference: [[observability/logs/logstash/logstash-setup|logstash-setup]] is the worker pool this LB distributes to — already deployed earlier in the series.

@@ -9,12 +9,14 @@ The agent runs natively via `apt`, not in a container, because shipping logs fro
 
 ## Prerequisites
 
-Of course, since Filebeat **pushes** logs somewhere, it would be better to have some components of the stack already in place.
+Filebeat **pushes** logs somewhere, so the consumer side has to exist first. 
 
-For example:
+If you've been following the series in the correct order, then everything below is already deployed:
 
-- A working Logstash pool (see [[observability/logs/logstash/logstash-setup|the Logstash setup]]).
-- A working HAProxy + Keepalived HA pair with a VIP (see [[networking/miscellaneous/haproxy|haproxy]] and [[networking/miscellaneous/keepalived-vrrp|keepalived-vrrp]]). In this guide the VIP is `10.0.0.10:5044`.
+- A working Logstash pool ([[observability/logs/logstash/logstash-setup|logstash-setup]]).
+
+- A working HAProxy + Keepalived HA pair with a VIP ([[networking/miscellaneous/haproxy|haproxy]] + [[networking/miscellaneous/keepalived-vrrp|keepalived-vrrp]]). In this guide the VIP is `10.0.0.10:5044`.
+
 - A user with sudo on the host whose logs you want to collect.
 
 ## Step 1 — install Filebeat 8.x from the official Elastic APT repo

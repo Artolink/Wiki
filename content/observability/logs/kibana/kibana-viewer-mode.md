@@ -365,6 +365,10 @@ New events will repopulate the index pattern within seconds.
 | Forensics on raw events | Source files on the VPS (`tail`, `journalctl`) | `logs-internal-*` via admin login                           |
 ## Where to go next
 
-- Once Filebeat is shipping events ([[observability/logs/filebeat/filebeat-setup|filebeat-setup]]), the `logs-*` data view created in [[observability/logs/kibana/kibana-setup#Step 7 — create a Data View|kibana-setup]] will show live data to the anonymous viewer.
+- [[observability/logs/logstash|logstash]] — **next in this series**: the parsing layer that will write events into the indices this viewer reads.
+
+- Once Filebeat is shipping events ([[observability/logs/filebeat/filebeat-setup|filebeat-setup]], at the end of the series), the `logs-*` data view created in [[observability/logs/kibana/kibana-setup#Step 7 — create a Data View|kibana-setup]] will show live data to the anonymous viewer.
+
 - Build a public dashboard and pin it in the navigation. The visitor will see it the moment they enter — no further auth.
+
 - (Optional) tighten the role further: grant `feature_dashboard.read` only and drop `feature_discover.read` if you want the public to consume curated dashboards only, not free-text search across indices.

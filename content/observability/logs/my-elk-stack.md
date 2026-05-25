@@ -14,9 +14,9 @@ tags:
 The **ELK Stack** is the open-source ecosystem for centralised logging, maintained by Elastic and the broader community.
 
 The acronym covers three components:
-- **E** — **Elasticsearch**: a distributed search engine + document database optimised for logs and time-series text events.
-- **L** — **Logstash**: an event-processing pipeline (input → filter → output).
-- **K** — **Kibana**: the web UI that queries Elasticsearch and renders dashboards.
+- **E**: **Elasticsearch**: a distributed search engine + document database optimised for logs and time-series text events.
+- **L**: **Logstash**: an event-processing pipeline (input → filter → output).
+- **K**: **Kibana**: the web UI that queries Elasticsearch and renders dashboards.
 
 In modern deployments a fourth piece is almost always added: **Filebeat**, the lightweight log shipper that lives on every source machine and pushes events into the pipeline. The combination is sometimes called the **Elastic Stack** to underline that Beats are first-class citizens, not an add-on.
 
@@ -75,6 +75,26 @@ The three layers each solve one specific problem:
 - **Multiple Logstash workers**: parsing is CPU-heavy. Two identical workers double the throughput, and if one dies the load balancer just stops sending events to it.
 - **Single Elasticsearch**: this is the only simplification, but it can work fine like this for most cases.
 
+## Deployment order
+
+This series walks the components in **deploy order**, which for a push-based pipeline like ELK runs **opposite to the data flow**: the consumer side has to exist before the producer has anywhere to push to! 
+
+From the receiving end backwards:
+
+1. **Elasticsearch**: the DB. Once this is up and queryable, everything else has somewhere to send events.
+
+2. **Kibana**: the UI. Connected to ES, exposed via nginx.
+
+3. **Logstash workers**: the parsers. One minimal pipeline (beats input → ES output) is enough.
+
+4. **HAProxy + Keepalived**: the Load Balancer layer. Two LBs, active/standby VIP with failover.
+
+5. **Filebeat**: the log shipper. Targets the LB VIP directly.
+
+Each step has its own page in this series. 
+
+Hit *Start the series* below and you'll be walked through one piece at a time.
+
 ## Scaling beyond this lab
 
 > [!TIP] What changes when you have 2000+ machines
@@ -86,23 +106,3 @@ The three layers each solve one specific problem:
 > - **An Elasticsearch cluster** with separate node types: 3+ master, 5-20+ data, 2-4 ingest, 2-4 coordinator. This is where the real bottleneck lives (indexing throughput, shard count, JVM heap pressure).
 > - **Multi-tenant Kibana spaces** so different teams can have their own dashboards, saved searches, and role-based access on the same ES backend.
 
-## Deployment order
-
-The series walks the components in **data-flow order** for readability, but the actual deploy order is the **reverse**: store first, viewer next, then the parsing layer, the LB pair, and the producer last. From the receiving end backwards:
-
-1. **Elasticsearch** — the store. Once this is up and queryable, everything else has somewhere to send events.
-
-2. **Kibana** — the UI. Connect to ES, expose via nginx, verify the empty Discover loads.
-
-3. **Logstash workers** — the parsers. One minimal pipeline (beats input → ES output) is enough.
-
-4. **HAProxy + Keepalived** — the LB layer. Two LBs, active/standby VIP, failover tests.
-
-5. **Filebeat** — the shipper. Targets the VIP directly. End-to-end verification in Kibana Discover.
-
-6. **Enrichment & polish** — grok parsing, dashboards, ILM retention, anonymous read-only role.
-
-Each step has its own page in this series. Hit *Start the series* below and you'll be walked through one piece at a time.
-
-> [!TIP]
-> The first time you go through this, do it on a non-production VPS / lab VMs. Filebeat can produce surprising volumes (especially with `docker autodiscover`), and a misconfigured Logstash filter can fill `/var/log` on Logstash itself with parse errors at 100 MB/min. You want a setup you can `docker compose down -v` and start over.
