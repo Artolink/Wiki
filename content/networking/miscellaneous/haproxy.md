@@ -6,7 +6,7 @@ This page is two things in one.
 
 The first half is a **complete reference to HAProxy** as it applies to log-shipping pipelines: what it is, how the configuration is structured, the knobs that matter, the pitfalls that bite first-timers. 
 
-The second half is the **exact configuration** used in my Observability logs lab (ELK stack).
+The second half is a **real use-case example**, showing the HAProxy configuration I used for my Observability logs lab (ELK stack).
 
 ## 1. What is HAProxy?
 

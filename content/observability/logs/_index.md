@@ -1,7 +1,6 @@
 ---
 title: 🔍 Logs (ELK Stack)
 series:
-  - observability/logs/my-elk-stack
   - observability/logs/elasticsearch
   - observability/logs/elasticsearch/elasticsearch-setup
   - observability/logs/kibana
