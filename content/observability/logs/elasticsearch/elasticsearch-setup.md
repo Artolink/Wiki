@@ -45,7 +45,8 @@ Before the actual installation, here are some prerequisites to set up.
 ### Kernel settings
 
 > [!IMPORTANT]
-> Elasticsearch uses memory-mapped files heavily and refuses to start if `vm.max_map_count < 262144`. This must be set on the *host*, not in the container.
+> Elasticsearch uses memory-mapped files heavily and refuses to start if `vm.max_map_count < 262144`. 
+> This must be set on the *host*, not in the container.
 
 ```bash
 # Apply now
