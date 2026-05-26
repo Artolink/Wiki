@@ -3,6 +3,8 @@ title: "Kibana: Our web UI for the ELK Stack"
 ---
 Read [[observability/logs/kibana/_index|this Kibana overview]] for a quick theory lesson.
 
+## Overview
+
 This page covers the **base deploy** of Kibana: Docker container on the VPS, talking to the local Elasticsearch, served under the sub-path `/logs/` of `farnetiandrea.it` via nginx. 
 
 Public access stays behind a login form: anyone hitting `farnetiandrea.it/logs` gets the basic auth screen.
