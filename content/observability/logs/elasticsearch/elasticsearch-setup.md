@@ -3,11 +3,21 @@ title: Elasticsearch Setup
 ---
 Read [[observability/logs/elasticsearch/_index|this ElasticSearch overview]] for a quick theory lesson.
 
+## Overview
+
 This page walks through deploying Elasticsearch in a single-node Docker container on the VPS, with persistent storage on a bind-mounted volume. 
 
 The cluster is exposed on `127.0.0.1:9200` (for local services like Kibana) and on the VPS private IP `10.0.0.5:9200` (for Logstash workers running on private VMs). 
 
 No public exposure.
+
+This is what's exposed and to whom:
+
+| Address          | Reached from                                      | Purpose                                   |
+| ---------------- | ------------------------------------------------- | ----------------------------------------- |
+| `127.0.0.1:9200` | Same host (Kibana, local curl, etc.)              | Local services on the VPS                 |
+| `10.0.0.5:9200`  | Other hosts on the private LAN (LogStash workers) | LogStash workers writing to ElasticSearch |
+| Public internet  | nothing                                           | ES is never publicly addressable          |
 
 ## Prerequisites
 
@@ -32,7 +42,7 @@ No public exposure.
 
 Before the actual installation, here are some prerequisites to set up.
 
-### Kernel setting: `vm.max_map_count`
+### Kernel settings
 
 > [!IMPORTANT]
 > Elasticsearch uses memory-mapped files heavily and refuses to start if `vm.max_map_count < 262144`. This must be set on the *host*, not in the container.
@@ -150,7 +160,7 @@ sudo docker compose logs -f elasticsearch
 # ... [INFO ][o.e.n.Node] [elasticsearch] started
 ```
 
-## Verify#
+### Verify
 
 ```bash
 ELASTIC=$(sudo grep '^ELASTIC_PASSWORD=' /opt/observability-logs/.env | cut -d= -f2-)
@@ -184,7 +194,7 @@ curl -s -o /dev/null -w "%{http_code}\n" -u "elastic:$ELASTIC" http://localhost:
 # 200
 ```
 
-## ILM policy + index template
+### ILM policy + index template
 
 Logstash will write to daily indices `logs-YYYY.MM.dd`. 
 
@@ -232,13 +242,6 @@ curl -sX PUT -u "elastic:$ELASTIC" \
   }' && echo
 ```
 
-## What's exposed and to whom
-
-| Address              | Reached from                          | Purpose                          |
-| -------------------- | ------------------------------------- | -------------------------------- |
-| `127.0.0.1:9200`     | Same host (Kibana, local curl, etc.)  | Local services on the VPS        |
-| `10.0.0.5:9200`      | Other hosts on the private LAN (LS workers) | Log workers writing to ES      |
-| Public internet      | nothing                               | ES is never publicly addressable |
 
 ## Where to go next
 
