@@ -70,7 +70,10 @@ export function buildFullseriesFor(
       return isUnderIndex(f.slug, hub)
     })
     .sort(compareTitles)
-    .map((f) => simplifySlug(f.slug as FullSlug) as string)
+    // Stessa normalizzazione di findSeriesForPage qui sotto: per sotto-_index
+    // simplifySlug lascerebbe lo slash finale ("foo/bar/") e il successivo
+    // matchSlug non li riconoscerebbe più.
+    .map((f) => (simplifySlug(f.slug as FullSlug) as string).replace(/\/$/, ""))
 }
 
 // Trova la series a cui appartiene la pagina `current`, se presente.
@@ -94,7 +97,14 @@ export function findSeriesForPage(
   const currentFullSlug = current.slug
   if (!currentFullSlug) return null
 
-  const publicSlug = simplifySlug(currentFullSlug) as string
+  // NB: NON usiamo `simplifySlug` qui — quella utility di Quartz core, dopo
+  // aver tolto il suffix "index", lascia lo slash finale (es. "foo/bar/index"
+  // → "foo/bar/"), che poi non matcha mai "foo/bar" come scritto a mano nel
+  // frontmatter `series:` di un'altra pagina. La conseguenza è che le pagine
+  // `_index` membre di una series non venivano più riconosciute come tali e
+  // FolderContent/PageSequenceNav si comportavano come se non lo fossero.
+  // Stessa normalizzazione che fa PageSequenceNav.tsx.
+  const publicSlug = currentFullSlug.replace(/\/index$/, "")
   const matchSlug = (s: string) => s === currentFullSlug || s === publicSlug
 
   // 1. Esplicita: own series array
