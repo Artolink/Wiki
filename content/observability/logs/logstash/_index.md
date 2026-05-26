@@ -1,5 +1,5 @@
 ---
-title: Logstash
+title: ⚙️ Logstash
 ---
 
 **Logstash** is the workhorse of the ELK stack: it accepts events from many sources, runs them through a pipeline of filters that parse and enrich the data, and sends the result downstream — usually to Elasticsearch, but it can also fan out to Kafka, files, S3, other Logstash instances, etc.

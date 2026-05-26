@@ -1,5 +1,5 @@
 ---
-title: Elasticsearch
+title: 🗃️ Elasticsearch
 ---
 
 **Elasticsearch** (ES) is a distributed, JSON-native, schema storage and search engine. 

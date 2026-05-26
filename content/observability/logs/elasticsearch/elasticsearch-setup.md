@@ -1,5 +1,5 @@
 ---
-title: Elasticsearch Setup
+title: "Elasticsearch: The JSON store and search engine for Logs"
 ---
 Read [[observability/logs/elasticsearch/_index|this ElasticSearch overview]] for a quick theory lesson.
 
