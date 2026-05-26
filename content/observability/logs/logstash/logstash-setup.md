@@ -1,5 +1,5 @@
 ---
-title: Logstash — Setup
+title: "Logstash: where raw logs become structured events"
 ---
 Read [[observability/logs/logstash/_index|this Logstash overview]] for a quick theory lesson.
 
