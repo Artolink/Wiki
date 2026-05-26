@@ -247,17 +247,22 @@ document.addEventListener("nav", async () => {
   for (let i = 0; i < nodes.length; i++) {
     const codeBlock = nodes[i] as HTMLElement
     const pre = codeBlock.parentElement as HTMLPreElement
-    const clipboardBtn = pre.querySelector(".clipboard-button") as HTMLButtonElement
+    // Il bottone clipboard sui blocchi Mermaid è disattivato di proposito (vedi
+    // clipboard.inline.ts). L'expand button quindi non deve fare offset per
+    // lasciargli spazio: sta direttamente flush a destra.
+    const clipboardBtn = pre.querySelector(".clipboard-button") as HTMLButtonElement | null
     const expandBtn = pre.querySelector(".expand-button") as HTMLButtonElement
 
-    const clipboardStyle = window.getComputedStyle(clipboardBtn)
-    const clipboardWidth =
-      clipboardBtn.offsetWidth +
-      parseFloat(clipboardStyle.marginLeft || "0") +
-      parseFloat(clipboardStyle.marginRight || "0")
-
-    // Set expand button position
-    expandBtn.style.right = `calc(${clipboardWidth}px + 0.3rem)`
+    if (clipboardBtn) {
+      const clipboardStyle = window.getComputedStyle(clipboardBtn)
+      const clipboardWidth =
+        clipboardBtn.offsetWidth +
+        parseFloat(clipboardStyle.marginLeft || "0") +
+        parseFloat(clipboardStyle.marginRight || "0")
+      expandBtn.style.right = `calc(${clipboardWidth}px + 0.3rem)`
+    } else {
+      expandBtn.style.right = "0.3rem"
+    }
     pre.prepend(expandBtn)
 
     // query popup container

@@ -9,6 +9,13 @@ document.addEventListener("nav", () => {
     const pre = els[i]
     const codeBlock = pre.getElementsByTagName("code")[0]
     if (codeBlock) {
+      // I diagrammi Mermaid (```mermaid ... ```) ricevono la classe `mermaid`
+      // sul <code> in ofm.ts (transformers). Non hanno senso da "copiare" come
+      // sorgente — l'output renderizzato è un SVG — e cliccare sul diagramma
+      // per copiare il codice DSL sottostante è anti-intuitivo. Skippiamo sia
+      // il bottone che l'handler di click sul <pre>.
+      if (codeBlock.classList.contains("mermaid")) continue
+
       const source = (
         codeBlock.dataset.clipboard ? JSON.parse(codeBlock.dataset.clipboard) : codeBlock.innerText
       ).replace(/\n\n/g, "\n")
