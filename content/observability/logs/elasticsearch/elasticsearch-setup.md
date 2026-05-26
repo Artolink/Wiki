@@ -146,7 +146,7 @@ A few choices worth calling out:
 - **`xpack.security.http.ssl.enabled=false`** keeps the HTTP API on plain HTTP. The private LAN is trusted in this lab, and 9200 is never publicly exposed. In a production cluster (or anywhere outside a trusted network), enable HTTP TLS.
 - **Two `ports` lines** bind the same container port to two distinct host addresses: the private LAN IP and 127.0.0.1. This makes 9200 reachable to Logstash workers (over the private LAN), and to Kibana / local curl (over localhost), but nothing else on the public internet sees it.
 
-### Start it
+### Start it and verify
 
 ```bash
 cd /opt/observability-logs
@@ -160,8 +160,7 @@ sudo docker compose logs -f elasticsearch
 # ... [INFO ][o.e.n.Node] [elasticsearch] started
 ```
 
-### Verify
-
+Now let's verify the installation is working:
 ```bash
 ELASTIC=$(sudo grep '^ELASTIC_PASSWORD=' /opt/observability-logs/.env | cut -d= -f2-)
 
