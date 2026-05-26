@@ -1,5 +1,5 @@
 ---
-title: "Elasticsearch: The JSON store and search engine for Logs"
+title: "Elasticsearch: The JSON storage and search engine for Logs"
 ---
 Read [[observability/logs/elasticsearch/_index|this ElasticSearch overview]] for a quick theory lesson.
 
@@ -11,7 +11,7 @@ The cluster is exposed on `127.0.0.1:9200` (for local services like Kibana) and 
 
 No public exposure.
 
-This is what's exposed and to whom:
+This is what will be exposed, and to whom:
 
 | Address          | Reached from                                      | Purpose                                   |
 | ---------------- | ------------------------------------------------- | ----------------------------------------- |
@@ -40,12 +40,13 @@ This is what's exposed and to whom:
 
 ## Installation
 
-Before the actual installation, here are some prerequisites to set up.
+Before the actual installation, here are some prerequisites to take care of.
 
 ### Kernel settings
 
 > [!IMPORTANT]
 > Elasticsearch uses memory-mapped files heavily and refuses to start if `vm.max_map_count < 262144`. 
+> 
 > This must be set on the *host*, not in the container.
 
 ```bash
@@ -96,49 +97,50 @@ sudo chmod 600 /opt/observability-logs/.env
 
 Create `/opt/observability-logs/docker-compose.yml`:
 
-```yaml
-services:
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
-    container_name: elasticsearch
-    user: "1000:1000"
-    environment:
-      - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms2g -Xmx2g
-      - bootstrap.memory_lock=true
-      # Security ON, but TLS OFF on the HTTP layer.
-      # Lab simplification: traffic stays on the private LAN.
-      # In production this is non-negotiable — enable HTTPS.
-      - xpack.security.enabled=true
-      - xpack.security.http.ssl.enabled=false
-      - xpack.security.transport.ssl.enabled=false
-      - xpack.security.enrollment.enabled=false
-      # Pre-set the password of the built-in `elastic` superuser so we don't
-      # have to fish it out of the first-boot logs.
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-    ulimits:
-      memlock: { soft: -1, hard: -1 }
-      nofile: { soft: 65536, hard: 65536 }
-    volumes:
-      - /opt/observability-logs/es-data:/usr/share/elasticsearch/data
-    ports:
-      # Private LAN IP — for Logstash workers on dedicated VMs
-      - "10.0.0.5:9200:9200"
-      # Localhost — for Kibana (same host) and quick curl checks
-      - "127.0.0.1:9200:9200"
-    networks:
-      - elk-net
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fsS -u elastic:${ELASTIC_PASSWORD} http://localhost:9200/_cluster/health || exit 1"]
-      interval: 30s
-      timeout: 5s
-      retries: 5
-
-networks:
-  elk-net:
-    driver: bridge
-```
+> [!example]- Example: my docker-compose (ElasticSearch)
+> ```yaml
+> services:
+>   elasticsearch:
+>     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+>     container_name: elasticsearch
+>     user: "1000:1000"
+>     environment:
+>       - discovery.type=single-node
+>       - ES_JAVA_OPTS=-Xms2g -Xmx2g
+>       - bootstrap.memory_lock=true
+>       # Security ON, but TLS OFF on the HTTP layer.
+>       # Lab simplification: traffic stays on the private LAN.
+>       # In production this is non-negotiable — enable HTTPS.
+>       - xpack.security.enabled=true
+>       - xpack.security.http.ssl.enabled=false
+>       - xpack.security.transport.ssl.enabled=false
+>       - xpack.security.enrollment.enabled=false
+>       # Pre-set the password of the built-in `elastic` superuser so we don't
+>       # have to fish it out of the first-boot logs.
+>       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+>     ulimits:
+>       memlock: { soft: -1, hard: -1 }
+>       nofile: { soft: 65536, hard: 65536 }
+>     volumes:
+>       - /opt/observability-logs/es-data:/usr/share/elasticsearch/data
+>     ports:
+>       # Private LAN IP — for Logstash workers on dedicated VMs
+>       - "10.0.0.5:9200:9200"
+>       # Localhost — for Kibana (same host) and quick curl checks
+>       - "127.0.0.1:9200:9200"
+>     networks:
+>       - elk-net
+>     restart: unless-stopped
+>     healthcheck:
+>       test: ["CMD-SHELL", "curl -fsS -u elastic:${ELASTIC_PASSWORD} http://localhost:9200/_cluster/health || exit 1"]
+>       interval: 30s
+>       timeout: 5s
+>       retries: 5
+>
+> networks:
+>   elk-net:
+>     driver: bridge
+> ```
 
 A few choices worth calling out:
 
@@ -200,7 +202,7 @@ Logstash will write to daily indices `logs-YYYY.MM.dd`.
 
 Without lifecycle management those indices accumulate forever and eventually fill the disk or hit the cluster shard limit. 
 
-Set up an ILM policy that deletes indices older than 14 days, and an index template that applies it to every `logs-*`:
+Set up an ILM policy that deletes indices older than 14 days: 
 
 ```bash
 ELASTIC=$(sudo grep '^ELASTIC_PASSWORD=' /opt/observability-logs/.env | cut -d= -f2-)
@@ -224,7 +226,10 @@ curl -sX PUT -u "elastic:$ELASTIC" \
       }
     }
   }' && echo
+```
 
+And an index template that applies it to every `logs-*`:
+```bash
 # Index template — applies the policy to all logs-* indices
 curl -sX PUT -u "elastic:$ELASTIC" \
   -H "Content-Type: application/json" \
@@ -245,6 +250,6 @@ curl -sX PUT -u "elastic:$ELASTIC" \
 
 ## Where to go next
 
-- [[observability/logs/kibana|kibana]]: **next in this series**: the web UI.
+- [[observability/logs/kibana|Kibana]]: **next in this series**: the web UI.
 
-- [[observability/logs/logstash/logstash-setup|logstash-setup]]: the worker pool that will write events into ES from the private LAN.
+- [[observability/logs/logstash/logstash-setup|Logstash setup]]: the worker pool that will write events into ES from the private LAN.
