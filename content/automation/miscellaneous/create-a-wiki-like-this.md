@@ -325,4 +325,4 @@ Great, so now you have your VPS hosting your personal Wiki on your domain... But
 
 Well, this can also be the starting point for something bigger.  
   
-If this is your first step into building your own homelab, a [metrics](my-grafana-stack) and logging stack is probably the next thing to do. Go on and check out my guides!
+If this is your first step into building your own homelab, a [metrics](my-grafana-stack) and [[my-elk-stack|logging]] stack is probably the next thing to do. Go on and check out my guides!
