@@ -54,7 +54,7 @@ flowchart LR
 
 All traffic between the VPS and the 4 VMs runs on a private LAN: the VMs have no public ports exposed.
 
-## The stack I use
+### The stack I use
 
 | Role               | Tool                  | Where it runs                   | What it does                                                                          |
 | ------------------ | --------------------- | ------------------------------- | ------------------------------------------------------------------------------------- |
@@ -64,7 +64,7 @@ All traffic between the VPS and the 4 VMs runs on a private LAN: the VMs have no
 | Storage + search   | **Elasticsearch**     | on the VPS (Docker)             | indexes events, runs queries, retains data with ILM policy                            |
 | Visualisation      | **Kibana**            | on the VPS (Docker)             | UI for Discover / Visualize / Dashboard; exposed publicly via nginx on `/logs/`       |
 
-## Why this topology?
+Why this topology?
 
 Because it mirrors a real, scalable, enterprise pattern for production.
 
@@ -74,27 +74,15 @@ The three layers each solve one specific problem:
 - **Multiple Logstash workers**: parsing is CPU-heavy. Two identical workers double the throughput, and if one dies the load balancer just stops sending events to it.
 - **Single Elasticsearch**: this is the only simplification, but it can work fine like this for most cases.
 
-## Deployment order
+> [!note]
+>This series walks the components in **deploy order**, which for a push-based pipeline like ELK runs **opposite to the data flow**: the consumer side has to exist before the producer has anywhere to push to! 
 
-This series walks the components in **deploy order**, which for a push-based pipeline like ELK runs **opposite to the data flow**: the consumer side has to exist before the producer has anywhere to push to! 
+## ## Deployment
 
-From the receiving end backwards:
+Here's the whole deployment (installation + configuration of each component) from start to finish.
 
-1. **Elasticsearch**: the DB. Once this is up and queryable, everything else has somewhere to send events.
 
-2. **Kibana**: the UI. Connected to ES, exposed via nginx.
-
-3. **Logstash workers**: the parsers. One minimal pipeline (beats input → ES output) is enough.
-
-4. **HAProxy + Keepalived**: the Load Balancer layer. Two LBs, active/standby VIP with failover.
-
-5. **Filebeat**: the log shipper. Targets the LB VIP directly.
-
-Each step has its own page in this series. 
-
-Hit *Start the series* below and you'll be walked through one piece at a time.
-
-## Scaling beyond this lab
+## Scaling from this lab to production
 
 > [!TIP] What changes when you have 2000+ machines
 > The same shape, just multiplied:

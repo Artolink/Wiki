@@ -86,7 +86,11 @@ The scraper layer, in fact, becomes essential once you start dealing with infras
 
 ***
 
-##  1. Node-exporter setup
+## Deployment
+
+Here's the whole deployment (installation + configuration of each component) from start to finish.
+
+###  1. Node-exporter setup
 
 Here we are, ready to configure our node-exporter in any VM where we need metrics.
 
@@ -108,7 +112,7 @@ And to conclude, we harden everything by binding the service to our private LAN,
 
 ***
 
-##  2. VictoriaMetrics setup
+###  2. VictoriaMetrics setup
 
 Ok so now we are ready to install our TSDB: VictoriaMetrics, the place where we store metrics, and where we do queries via the Grafana GUI dashboard.
 
@@ -126,7 +130,7 @@ And to conclude, we can do some iptables hardening for Docker (pretty interestin
 
 ***
 
-##  3. VMAgent setup
+###  3. VMAgent setup
 
 We are almost there!
 
@@ -149,7 +153,7 @@ The data now lives inside the DB, we just need a dashboard to make queries and v
 
 ***
 
-##  4. Grafana setup
+###  4. Grafana setup
 
 Here we are, last step of this guide, let's do it!
 
