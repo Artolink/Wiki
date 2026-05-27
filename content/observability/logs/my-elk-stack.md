@@ -239,3 +239,8 @@ We have a complete, scalable ELK stack mirroring the shape used in real producti
 Congratulations!
 
 To keep the stack healthy long-term, I leave you with the closing thoughts: ![[filebeat-setup#Final considerations|the Final considerations]]
+## What to do next
+
+Great, you've successfully implemented a working log system... but do you have [[my-grafana-stack|a metrics system]] as well?
+
+If the answer is no well, you've got a new project to work on!

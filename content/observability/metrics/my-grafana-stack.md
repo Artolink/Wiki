@@ -177,3 +177,9 @@ We have successfully deployed a complete, simple yet solid Grafana stack, congra
 The only thing left to do now is personalize it with your dashboards. If you don't know how to do that, I wrote a [[create-dashboards-views|guide]] to help you take your first steps with Grafana. 
 
 Check it out and start monitoring!
+
+## What to do next
+
+Great, you've successfully implemented a working metrics system... but do you have [[my-elk-stack|a logs system]] as well?
+
+If the answer is no well, you've got a new project to work on!
