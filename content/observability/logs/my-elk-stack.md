@@ -119,7 +119,7 @@ Kibana runs as a Docker container next to Elasticsearch on the VPS, served publi
 First the prereqs and the credentials Kibana needs (the built-in `kibana_system` service user + the saved-object encryption key):
 ![[kibana-setup#Prerequisites]]
 ![[kibana-setup#1. Generate Kibana credentials]]
-![[kibana-setup#2. Set the kibana_system user password in ElasticSearch]]
+![[kibana-setup#2. Add the password of kibana_system user in ElasticSearch]]
 
 Then the compose service, and start:
 ![[kibana-setup#3. Add the Kibana service in docker-compose]]
@@ -163,10 +163,10 @@ Then from the VPS, create the dedicated ES user so a compromised worker can only
 ![[logstash-setup#3. Create the ES role and user (on the VPS)]]
 
 On each worker VM, drop the `.env`, the YAML config, the pipeline file, and the compose:
-![[logstash-setup#4. Create the .env file on each worker]]
-![[logstash-setup#5. The logstash.yml config]]
-![[logstash-setup#6. The pipeline main.conf]]
-![[logstash-setup#7. The docker-compose file]]
+![[logstash-setup#4. Create a .env file on each worker]]
+![[logstash-setup#5. config/logstash.yml]]
+![[logstash-setup#6. pipeline/main.conf]]
+![[logstash-setup#7. docker-compose.yml]]
 
 Bring it up and watch for the "pipeline started" line:
 ![[logstash-setup#8. Start it]]
@@ -221,7 +221,7 @@ First the prereqs and install from the official Elastic 8.x APT repo:
 ![[filebeat-setup#1. Install Filebeat from the official repo]]
 
 Then the config, pointing `output.logstash` at the HAProxy VIP at `10.0.0.10:5044`:
-![[filebeat-setup#2. The filebeat.yml config]]
+![[filebeat-setup#2. /etc/filebeat/filebeat.yml]]
 
 Sanity-check the config, then enable and start the service:
 ![[filebeat-setup#3. Sanity-check the config]]

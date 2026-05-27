@@ -16,7 +16,7 @@ For us:
 - Reaches VictoriaMetrics via the Docker network using the service name `victoriametrics:8428` (no port exposure needed on the host).
 - Exposed publicly at `https://farnetiandrea.it/metrics/` via my existing nginx + certbot stack as a reverse-proxy. 
 
-## 1. Setup:
+## 1. Setup
 
 ### 1. Create the directory
 
