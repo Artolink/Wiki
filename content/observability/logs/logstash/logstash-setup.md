@@ -30,7 +30,7 @@ This is what will be exposed, and to whom:
 - Docker CE installed (same recipe as in [[observability/logs/elasticsearch/elasticsearch-setup#Prerequisites|elasticsearch-setup]]).
 - Network reachability from the VM to the VPS at `10.0.0.5:9200`.
 
-### 2. Generate the `logstash_writer` password on the VPS
+### 2. Generate the logstash_writer password on the VPS
 
 The workers don't need ES superuser. 
 
@@ -86,7 +86,7 @@ curl -s -o /dev/null -w "HTTP %{http_code}\n" \
 # HTTP 200
 ```
 
-### 4. Create a `.env` file on each worker
+### 4. Create a .env file on each worker
 
 On each worker VM, paste the `logstash_writer` password (taken from the VPS `.env`) into a local `.env` using EOF, so bash doesn't expand anything:
 
@@ -105,7 +105,7 @@ echo "Length: ${#PW}"
 # Length: 48
 ```
 
-### 5. `config/logstash.yml`
+### 5. config/logstash.yml
 
 ```yaml
 # /opt/observability-logs/config/logstash.yml
@@ -117,7 +117,7 @@ pipeline.batch.delay: 50
 
 `http.host: 0.0.0.0` is required so the monitoring API on `:9600` is reachable from outside the container (used by the healthcheck and by future Prometheus scraping).
 
-### 6. `pipeline/main.conf`
+### 6. pipeline/main.conf
 
 The Logstash pipeline itself.
 
@@ -154,7 +154,7 @@ A couple of details:
 - **`client_inactivity_timeout => 3600`**: the Beats input closes idle TCP connections after this many seconds. The default (60s) is too aggressive for long-lived Filebeat connections that may sit idle between batches: 1h is a safer upper bound.
 - **Daily indices** (`logs-%{+YYYY.MM.dd}`): easy to roll, easy to delete with ILM. One day per index means a mapping conflict is contained to a single day.
 
-### 7. `docker-compose.yml`
+### 7. docker-compose.yml
 
 > [!example]- Example: my docker-compose (logstash service)
 > ```yaml

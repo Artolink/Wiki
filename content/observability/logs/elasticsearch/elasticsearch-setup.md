@@ -74,7 +74,7 @@ cd /opt/observability-logs
 
 UID 1000 matches the `elasticsearch` user inside the official image: without this, the container can't write to the bind-mounted data directory.
 
-### Generate the `elastic` superuser password
+### Generate the elastic superuser password
 
 > [!WARNING]
 > Use **hex-only** passwords. Special characters like `!` and `$` are interpreted by bash!

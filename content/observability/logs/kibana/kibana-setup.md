@@ -48,7 +48,7 @@ KIBANA_ENCRYPTION_KEY=<paste hex value here>
 EOF
 ```
 
-### 2. Add the password of `kibana_system` user in ElasticSearch
+### 2. Add the password of kibana_system user in ElasticSearch
 
 ```bash
 cd /opt/observability-logs
@@ -144,7 +144,7 @@ curl -s -o /dev/null -w "HTTP %{http_code}\n" http://localhost:5601/logs/api/sta
 # HTTP 200
 ```
 
-### 5. Nginx reverse-proxy at `/logs/`
+### 5. Nginx reverse-proxy at /logs/
 
 Add a `location /logs/` block to your existing virtual host in Nginx. 
 

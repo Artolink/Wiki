@@ -46,7 +46,7 @@ filebeat version
 > 
 > Elastic guarantees forward compatibility within a major version, so a newer Filebeat against an older Elasticsearch is supported... **BUT** the reverse (older Filebeat → newer ES) is not.
 
-### 2. `/etc/filebeat/filebeat.yml`
+### 2. /etc/filebeat/filebeat.yml
 
 The shipped default config is heavy with disabled modules. 
 

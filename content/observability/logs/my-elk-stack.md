@@ -99,7 +99,7 @@ Then the kernel tweak that ElasticSearch requires and the data directory layout:
 ![[elasticsearch-setup#Directory layout]]
 
 We generate the `elastic` superuser password and write the compose file:
-![[elasticsearch-setup#Generate the `elastic` superuser password]]
+![[elasticsearch-setup#Generate the elastic superuser password]]
 ![[elasticsearch-setup#docker-compose.yml]]
 
 Bring it up and verify the cluster is online (`yellow` is expected on single-node: replicas can't be allocated):
@@ -119,14 +119,14 @@ Kibana runs as a Docker container next to Elasticsearch on the VPS, served publi
 First the prereqs and the credentials Kibana needs (the built-in `kibana_system` service user + the saved-object encryption key):
 ![[kibana-setup#Prerequisites]]
 ![[kibana-setup#1. Generate Kibana credentials]]
-![[kibana-setup#2. Add the password of `kibana_system` user in ElasticSearch]]
+![[kibana-setup#2. Set the kibana_system user password in ElasticSearch]]
 
 Then the compose service, and start:
 ![[kibana-setup#3. Add the Kibana service in docker-compose]]
 ![[kibana-setup#4. Start Kibana]]
 
 Expose it publicly via nginx and verify the login screen loads:
-![[kibana-setup#5. Nginx reverse-proxy at `/logs/`]]
+![[kibana-setup#5. Nginx reverse-proxy at /logs/]]
 ![[kibana-setup#6. Verify public access]]
 
 And finally create a **Data View** that points Discover at the `logs-*` indices Logstash will populate later:
@@ -159,14 +159,14 @@ First the prereqs on each VM:
 ![[logstash-setup#1. Prerequisites on each VM]]
 
 Then from the VPS, create the dedicated ES user so a compromised worker can only append to `logs-*` and nothing else:
-![[logstash-setup#2. Generate the `logstash_writer` password on the VPS]]
+![[logstash-setup#2. Generate the logstash_writer password on the VPS]]
 ![[logstash-setup#3. Create the ES role and user (on the VPS)]]
 
 On each worker VM, drop the `.env`, the YAML config, the pipeline file, and the compose:
-![[logstash-setup#4. Create a `.env` file on each worker]]
-![[logstash-setup#5. `config/logstash.yml`]]
-![[logstash-setup#6. `pipeline/main.conf`]]
-![[logstash-setup#7. `docker-compose.yml`]]
+![[logstash-setup#4. Create the .env file on each worker]]
+![[logstash-setup#5. The logstash.yml config]]
+![[logstash-setup#6. The pipeline main.conf]]
+![[logstash-setup#7. The docker-compose file]]
 
 Bring it up and watch for the "pipeline started" line:
 ![[logstash-setup#8. Start it]]
@@ -221,7 +221,7 @@ First the prereqs and install from the official Elastic 8.x APT repo:
 ![[filebeat-setup#1. Install Filebeat from the official repo]]
 
 Then the config, pointing `output.logstash` at the HAProxy VIP at `10.0.0.10:5044`:
-![[filebeat-setup#2. `/etc/filebeat/filebeat.yml`]]
+![[filebeat-setup#2. The filebeat.yml config]]
 
 Sanity-check the config, then enable and start the service:
 ![[filebeat-setup#3. Sanity-check the config]]
@@ -239,4 +239,3 @@ We have a complete, scalable ELK stack mirroring the shape used in real producti
 Congratulations!
 
 To keep the stack healthy long-term, I leave you with the closing thoughts: ![[filebeat-setup#Final considerations|the Final considerations]]
-
