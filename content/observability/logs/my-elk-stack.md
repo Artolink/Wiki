@@ -19,6 +19,8 @@ The acronym covers three components:
 
 In modern deployments a fourth piece is almost always added: **Filebeat**, the lightweight log shipper that lives on every source machine and pushes events into the pipeline. The combination is sometimes called the **Elastic Stack** to underline that Beats are first-class citizens, not an add-on.
 
+***
+
 ## Architecture
 
 ```mermaid
@@ -76,6 +78,8 @@ The three layers each solve one specific problem:
 
 > [!note]
 >This series walks the components in **deploy order**, which for a push-based pipeline like ELK runs **opposite to the data flow**: the consumer side has to exist before the producer has anywhere to push to! 
+
+***
 
 ## Deployment
 
