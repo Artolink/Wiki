@@ -255,10 +255,10 @@ The five-minute health round:
 
 For real production scenarios, consider:
 
--  **backing up the ES data periodically:** The ILM policy from [[observability/logs/elasticsearch/elasticsearch-setup#ILM policy + index template|the Elasticsearch setup]] only *deletes* old indices, but it doesn't back anything up, and if the VPS disk dies, the logs go with it. The native answer is an ES Backup Repository, pointed at S3 or a separate volume.
-- Adding **Kafka** cluster as a buffer between Beats and Logstash, to handle traffic spikes and retain logs if any massive outage occurs.
-- Running **Elasticsearch as a real cluster** instead of a single-node instance: at least 3 master-eligible nodes for quorum-based election, multiple data nodes spreading shards horizontally, and `number_of_replicas ≥ 1` on every index so a node failure never takes a shard offline. The cluster status finally turns `green` instead of the permanent `yellow` of the single-node setup. 
-
-### Scaling the infrastructure
-
-Besides the ones mentioned above, the stack's shape doesn't change when you grow, only the multipliers do: more Logstash workers behind the same LB pair, multiple LB pairs geographically distributed etc.
+> [!TIP] What changes when you have 2000+ machines
+> - **backing up the ES data periodically:** The ILM policy from [[observability/logs/elasticsearch/elasticsearch-setup#ILM policy + index template|the Elasticsearch setup]] only *deletes* old indices, but it doesn't back anything up, and if the VPS disk dies, the logs go with it. The native answer is an ES Backup Repository, pointed at S3 or a separate volume.
+> - **More Logstash workers** behind the same LB pair: HAProxy's `balance roundrobin` scales horizontally for free until you saturate the LB itself.
+> - **Multiple LB pairs** geographically distributed, often with DNS round-robin in front, when one VIP can't handle the throughput anymore.
+> - **A Kafka cluster between Beats and Logstash** as a buffer: absorbs traffic spikes that even a HA-LB can't smooth out, and decouples producers from consumers (LS can be down for maintenance and no events are lost).
+> - **An Elasticsearch cluster** with separate node types: 3+ master, 5-20+ data, 2-4 ingest, 2-4 coordinator. This is where the real bottleneck lives (indexing throughput, shard count, JVM heap pressure).
+> - **Multi-tenant Kibana spaces** so different teams can have their own dashboards, saved searches, and role-based access on the same ES backend.
