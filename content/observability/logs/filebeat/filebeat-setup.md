@@ -13,13 +13,14 @@ Filebeat **pushes** logs somewhere, so the consumer side has to exist first.
 
 If you've been following the series in the correct order, then everything below is already deployed:
 
-- A working Logstash pool ([[observability/logs/logstash/logstash-setup|logstash-setup]]).
+- A working Logstash pool ([[observability/logs/logstash/logstash-setup|check out the Logstash setup]]).
 
-- A working HAProxy + Keepalived HA pair with a VIP ([[networking/miscellaneous/haproxy|haproxy]] + [[networking/miscellaneous/keepalived-vrrp|keepalived-vrrp]]). In this guide the VIP is `10.0.0.10:5044`.
+- A working HAProxy + Keepalived HA pair with a VIP ([[networking/miscellaneous/haproxy|check out HAProxy]] + [[networking/miscellaneous/keepalived-vrrp|Keepalived VRRP]]). 
+  In this guide my VIP is `10.0.0.10:5044`.
 
-- A user with sudo on the host whose logs you want to collect.
+## Installation
 
-## Step 1 — install Filebeat 8.x from the official Elastic APT repo
+### 1. Install Filebeat from the official repo
 
 ```bash
 # Elastic GPG key
@@ -40,90 +41,94 @@ filebeat version
 # filebeat version 8.x.x (amd64), libbeat 8.x.x [...]
 ```
 
-> [!INFO]
-> Filebeat and Elasticsearch don't have to match versions exactly. The "8.x" repo gets you the latest 8.x, which talks to ES 8.15 fine. Elastic guarantees forward compatibility within a major version — a newer Filebeat against an older ES is supported; the reverse (older Filebeat → newer ES) is not.
+> [!IMPORTANT]
+> Filebeat and Elasticsearch don't have to match versions exactly. 
+> 
+> Elastic guarantees forward compatibility within a major version, so a newer Filebeat against an older Elasticsearch is supported... **BUT** the reverse (older Filebeat → newer ES) is not.
 
-## Step 2 — `/etc/filebeat/filebeat.yml`
+### 2. `/etc/filebeat/filebeat.yml`
 
-The shipped default config is heavy with disabled modules. Replace it cleanly:
+The shipped default config is heavy with disabled modules. 
 
-```bash
-sudo cp /etc/filebeat/filebeat.yml /etc/filebeat/filebeat.yml.orig
+Replace it cleanly:
 
-sudo tee /etc/filebeat/filebeat.yml > /dev/null <<'EOF'
-# ============================== Inputs ==================================
-filebeat.inputs:
-  - type: filestream
-    id: syslog-files
-    enabled: true
-    paths:
-      - /var/log/syslog
-      - /var/log/auth.log
-    fields:
-      log_source: "syslog"
-    fields_under_root: true
-
-  - type: journald
-    id: systemd
-    enabled: true
-    fields:
-      log_source: "journald"
-    fields_under_root: true
-
-# ============================== Autodiscover ============================
-# Pick up logs from any Docker container on this host automatically.
-filebeat.autodiscover:
-  providers:
-    - type: docker
-      hints.enabled: true
-
-# ============================== Processors ==============================
-processors:
-  - add_host_metadata:
-      when.not.contains.tags: forwarded
-  - add_docker_metadata: ~
-
-# ============================== Output ==================================
-# Ship to the HAProxy VIP. The two LB nodes share this VIP via Keepalived;
-# whichever HAProxy currently owns it serves the traffic, with automatic
-# failover.
-output.logstash:
-  hosts: ["10.0.0.10:5044"]
-
-# ============================== Setup ===================================
-# Output is Logstash, which writes to logs-* with its own index pattern.
-# Disable Filebeat's direct-to-ES setup steps — those target "filebeat-*"
-# indices we don't actually use here.
-setup.template.enabled: false
-setup.ilm.enabled: false
-setup.dashboards.enabled: false
-
-# ============================== Logging =================================
-logging.level: info
-logging.to_files: true
-logging.files:
-  path: /var/log/filebeat
-  name: filebeat
-  keepfiles: 7
-  permissions: 0644
-EOF
-
-sudo chmod 600 /etc/filebeat/filebeat.yml
-```
-
+> [!example]- Example: my filebeat.yml setup
+> ```bash
+> sudo cp /etc/filebeat/filebeat.yml /etc/filebeat/filebeat.yml.orig
+>
+> sudo tee /etc/filebeat/filebeat.yml > /dev/null <<'EOF'
+> # ============================== Inputs ==================================
+> filebeat.inputs:
+>   - type: filestream
+>     id: syslog-files
+>     enabled: true
+>     paths:
+>       - /var/log/syslog
+>       - /var/log/auth.log
+>     fields:
+>       log_source: "syslog"
+>     fields_under_root: true
+>
+>   - type: journald
+>     id: systemd
+>     enabled: true
+>     fields:
+>       log_source: "journald"
+>     fields_under_root: true
+>
+> # ============================== Autodiscover ============================
+> # Pick up logs from any Docker container on this host automatically.
+> filebeat.autodiscover:
+>   providers:
+>     - type: docker
+>       hints.enabled: true
+>
+> # ============================== Processors ==============================
+> processors:
+>   - add_host_metadata:
+>       when.not.contains.tags: forwarded
+>   - add_docker_metadata: ~
+>
+> # ============================== Output ==================================
+> # Ship to the HAProxy VIP. The two LB nodes share this VIP via Keepalived;
+> # whichever HAProxy currently owns it serves the traffic, with automatic
+> # failover.
+> output.logstash:
+>   hosts: ["10.0.0.10:5044"]
+>
+> # ============================== Setup ===================================
+> # Output is Logstash, which writes to logs-* with its own index pattern.
+> # Disable Filebeat's direct-to-ES setup steps — those target "filebeat-*"
+> # indices we don't actually use here.
+> setup.template.enabled: false
+> setup.ilm.enabled: false
+> setup.dashboards.enabled: false
+>
+> # ============================== Logging =================================
+> logging.level: info
+> logging.to_files: true
+> logging.files:
+>   path: /var/log/filebeat
+>   name: filebeat
+>   keepfiles: 7
+>   permissions: 0644
+> EOF
+>
+> sudo chmod 600 /etc/filebeat/filebeat.yml
+> ```
 A few notes on each section:
 
-- **`filestream`** is the modern replacement for the deprecated `log` input. Same purpose (tail a file), better at handling rotations and renames, and the only one Elastic adds new features to. Use it for any new deploy.
-- **`journald`** input pulls from the systemd journal directly. No need to redirect journald to a file first. Captures all units' stdout by default; you can filter with `include_matches: ["_SYSTEMD_UNIT=ssh.service"]`.
 - **`fields_under_root: true`** promotes the custom `log_source` to a top-level field instead of nesting it under `fields.log_source`. Makes Kibana queries cleaner (`log_source:syslog` vs `fields.log_source:syslog`).
-- **Autodiscover with `docker` provider + `hints.enabled: true`** auto-attaches to every running container, reads its stdout/stderr from `/var/lib/docker/containers/<id>/*.log`. Containers can opt in/out via Docker labels (the "hints").
+- **Autodiscover with `docker` provider + `hints.enabled: true`** auto-attaches to every running container, reads its stdout/stderr from `/var/lib/docker/containers/<id>/*.log`.
 - **`add_host_metadata`** enriches every event with the hostname, OS, architecture. Crucial later when you scale beyond one shipper.
 - **`add_docker_metadata`** does the same for Docker events: container name, image, labels.
 
 > [!WARNING]
-> Always disable `setup.template`, `setup.ilm`, and `setup.dashboards` when shipping to Logstash. Otherwise Filebeat tries to reach Elasticsearch directly *also*, fails because it has no ES credentials, and prints a stream of warnings at every startup. They're harmless but they confuse a real diagnosis.
+> Always disable `setup.template`, `setup.ilm`, and `setup.dashboards` when shipping to Logstash. Otherwise Filebeat tries to reach Elasticsearch directly *also*, fails because it has no ES credentials, and prints a stream of warnings at every startup. 
+> 
+> They're harmless, but they confuse a real diagnosis.
 
-## Step 3 — sanity-check the config
+### 3. Sanity-check the config
 
 ```bash
 # YAML / structure validation
@@ -146,16 +151,18 @@ logstash: 10.0.0.10:5044...
   talk to server... OK
 ```
 
-(TLS warning is expected — we're on a private network, and Logstash's Beats input is not TLS-enabled in this lab.)
+(TLS warning is expected: we're on a private network, and Logstash's Beats input is not TLS-enabled in this lab)
 
-If the dial-up step fails, the path between Filebeat and the VIP is broken. Quick reachability checks:
+If the dial-up step fails, the path between Filebeat and the VIP is broken. 
+
+Quick reachability checks:
 
 ```bash
 ping -c 2 10.0.0.10
 nc -zv 10.0.0.10 5044
 ```
 
-## Step 4 — enable and start
+### 4. Enable and start
 
 ```bash
 sudo systemctl enable filebeat
@@ -176,11 +183,12 @@ Connecting to backoff(async(tcp://10.0.0.10:5044))
 Connection to backoff(...) established
 ```
 
-If you see `Failed to connect to backoff`, the output isn't reachable — re-run `filebeat test output`, fix the network, and Filebeat will reconnect on its own (it backoff-retries forever).
 
-## Step 5 — verify end-to-end from Elasticsearch
+### 5. Verify end-to-end from Elasticsearch
 
-The pipeline is Filebeat → HAProxy → Logstash → Elasticsearch. We can confirm each hop without touching Kibana:
+The pipeline is Filebeat → HAProxy → Logstash → Elasticsearch. 
+
+We can confirm each hop without touching Kibana:
 
 ```bash
 ELASTIC=$(sudo grep '^ELASTIC_PASSWORD=' /opt/observability-logs/.env | cut -d= -f2-)
@@ -198,13 +206,59 @@ curl -s -u "elastic:$ELASTIC" "http://localhost:9200/logs-*/_search?size=1&sort=
 
 What to look for in a sample document:
 
-- `agent.type: "filebeat"` — confirms the producer
-- `agent.version: "8.x.x"` — Filebeat version
-- `host.hostname: "<your-host>"` — host metadata processor
-- `log_source: "syslog"` (or `"journald"`) — the custom field we added per input
-- `event.original: "May 22 10:27:19 ... systemd[1]: ..."` — the raw log line
+- `agent.type: "filebeat"`: confirms the producer
+- `agent.version: "8.x.x"`: Filebeat version
+- `host.hostname: "<your-host>"`: host metadata processor
+- `log_source: "syslog"` (or `"journald"`): the custom field we added per input
+- `event.original: "May 22 10:27:19 ... systemd[1]: ..."`: the raw log line
 
-If the count is positive and grows each time you re-run it, Filebeat → Logstash → ES is working end to end.
+If the count is positive and grows each time you re-run it, Filebeat → Logstash → ES is working end to end!
 
 > [!INFO]
-> To see this data in **Kibana Discover**, you need a Data View pointed at `logs-*`. Create it from Stack Management as described in [[observability/logs/kibana/kibana-setup#Step 7 — create a Data View|kibana-setup]] — the same view is automatically usable by the public anonymous viewer once it exists.
+> To see this data in **Kibana Discover**, you need a Data View pointed at `logs-*`. 
+> 
+> Create it from Stack Management as described in [[observability/logs/kibana/kibana-setup#Step 7 — create a Data View|the Kibana setup]].
+
+
+## Final considerations
+
+You're done. 
+
+Congratulations!
+
+If you've followed the series from the start, you now have an end-to-end log pipeline running on five hosts: 
+
+- **Elasticsearch** indexing on the VPS
+- **Kibana** serving the dashboard (with anonymous read-only viewing)
+- Two **Logstash workers** parsing in parallel
+- Two **HAProxy + Keepalived** fronting the workers, with a single highly-available VIP
+- **Filebeat** pushing syslog / journald / Docker logs into that VIP.
+
+Smaller than what you'd run in production, but pretty identical in shape.
+
+### General pipeline monitoring 
+
+A log pipeline that doesn't tell you when *it itself* is broken, is half-built. 
+
+The five-minute health round:
+
+| Component       | Quick check                                       | Looking for                                    |
+| --------------- | ------------------------------------------------- | ---------------------------------------------- |
+| Elasticsearch   | `curl :9200/_cluster/health`                      | `status: yellow` (lab) / `green` (cluster)     |
+| Kibana          | `curl :5601/logs/api/status`                      | HTTP 200, `overall.level: available`           |
+| Logstash worker | `curl :9600`                                      | `status: green`, `events.in` rising            |
+| HAProxy         | `curl :8404/;csv`                                 | both Logstash backends `UP`, `scur > 0`        |
+| Keepalived      | `ip addr show \| grep 10.0.0.10`                  | VIP on MASTER, absent on BACKUP                |
+| Filebeat        | `journalctl -u filebeat -n 20`                    | `Connection ... established`, no `dial` errors |
+
+### From a lab to real production
+
+For real production scenarios, consider:
+
+-  **backing up the ES data periodically:** The ILM policy from [[observability/logs/elasticsearch/elasticsearch-setup#ILM policy + index template|the Elasticsearch setup]] only *deletes* old indices, but it doesn't back anything up, and if the VPS disk dies, the logs go with it. The native answer is an ES Backup Repository, pointed at S3 or a separate volume.
+- Adding **Kafka** cluster as a buffer between Beats and Logstash, to handle traffic spikes and retain logs if any massive outage occurs.
+- Running **Elasticsearch as a real cluster** instead of a single-node instance: at least 3 master-eligible nodes for quorum-based election, multiple data nodes spreading shards horizontally, and `number_of_replicas ≥ 1` on every index so a node failure never takes a shard offline. The cluster status finally turns `green` instead of the permanent `yellow` of the single-node setup. 
+
+### Scaling the infrastructure
+
+Besides the ones mentioned above, the stack's shape doesn't change when you grow, only the multipliers do: more Logstash workers behind the same LB pair, multiple LB pairs geographically distributed etc.
