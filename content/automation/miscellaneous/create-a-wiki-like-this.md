@@ -1,5 +1,5 @@
 ---
-title: The ultimate note-taking setup! Create a Wiki like mine!
+title: The ultimate note-taking setup! Create a Wiki like this!
 tags:
   - WebsiteCreation
   - Projects
