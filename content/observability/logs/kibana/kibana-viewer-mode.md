@@ -1,25 +1,31 @@
 ---
-title: Kibana — Public Read-Only Viewer Mode
+title: A public Read-Only Viewer Mode for Kibana!
 ---
+## Overview
 
-The base Kibana deploy ([[observability/logs/kibana/kibana-setup|kibana-setup]]) puts the UI behind a login form. That's the right default — but for a site whose explicit goal is sharing dashboards with the public, we want visitors to **land directly on Discover** without entering any credentials, while still keeping a basic-auth path for the admin who actually edits things.
+The [[observability/logs/kibana/kibana-setup|base Kibana deploy]] puts the UI behind a login form. 
 
-This page is about adding that public read-only experience on top of the existing deploy. Three moving parts:
+That's the right default... but for a site whose explicit goal is sharing dashboards with the public, we want visitors to **land directly on Discover** without entering any credentials, while still keeping a basic-auth path for the admin who actually edits things.
+
+This page is about adding that public read-only experience on top of the existing deploy. 
+
+Three moving parts:
 
 1. A **least-privilege role** in Elasticsearch that allows reading log indices and using Discover / Dashboard / Visualize, and nothing else.
 2. An **Elasticsearch user** (`anonymous`) bound to that role.
 3. An **anonymous authentication provider** in Kibana that auto-logs the visitor in as that user.
 
-## Why "role-level" read-only, not "HTTP-level"
+A tempting first reaction is to put a guard in nginx: "only allow `GET` and `HEAD` on `/logs/`". 
 
-A tempting first reaction is to put a guard in nginx: "only allow `GET` and `HEAD` on `/logs/`". This **does not work** for Kibana:
+This unfortunately **does not work** for Kibana: Kibana issues `POST` requests for ordinary **read** operations. Every Discover query is a `POST /api/console/proxy` with a JSON body. Every Dashboard refresh is a `POST` against `_search`. Block `POST` and the UI breaks immediately.
 
-- Kibana issues `POST` requests for ordinary **read** operations. Every Discover query is a `POST /api/console/proxy` with a JSON body. Every Dashboard refresh is a `POST` against `_search`. Block `POST` and the UI breaks immediately.
-- The HTTP verb is not a reliable signal of write intent in any modern app — REST-ish backends route writes via verb, but Kibana's API is closer to RPC-over-HTTP.
+The correct layer to enforce read-only is the **Elasticsearch role**: grant `read` on the data indices and the right Kibana application privileges, withhold `write` / `manage`. 
 
-The correct layer to enforce read-only is the **Elasticsearch role**: grant `read` on the data indices and the right Kibana application privileges, withhold `write` / `manage`. The user can then click anywhere, and the ones that try to write fail with `403 Forbidden` at the data layer.
+The user can then click anywhere, and the ones that try to write fail with `403 Forbidden` at the data layer.
 
-## Step 1 — generate the anonymous user's password
+## Setup
+
+### 1. Generate the anonymous user's password
 
 ```bash
 echo "ANONYMOUS=$(openssl rand -hex 24)"
@@ -33,7 +39,7 @@ ANONYMOUS_PASSWORD=<paste hex value here>
 EOF
 ```
 
-## Step 2 — create the `log_viewer` role
+### 2. Create the log_viewer role
 
 Read-only, scoped to log indices, with the minimum Kibana application privileges needed to use Discover, Dashboard, and Visualize on the default space.
 
@@ -66,13 +72,10 @@ A few notes on the role definition:
 
 - **`cluster: ["monitor"]`** is the minimum cluster-level privilege a logged-in Kibana session needs to call `_cluster/health`, `_nodes`, etc.
 - **Indices `read` + `view_index_metadata`** lets Discover list fields and query documents, but never write, delete, or alter mappings.
-- **`applications.application: "kibana-.kibana"`**: the registered name of the Kibana application in ES's security model. `feature_<name>.read` privileges follow the Kibana feature taxonomy — each major area of the UI has its own.
+- **`applications.application: "kibana-.kibana"`**: the registered name of the Kibana application in ES's security model.
 - **`resources: ["space:default"]`** scopes the privileges to the default Kibana space only. If you create more spaces later, the role does not see them.
 
-> [!TIP]
-> Defining Kibana feature privileges via the **Elasticsearch security API** (the `applications` field above) avoids having to talk to the Kibana role API, which requires the basePath prefix and is awkward to script.
-
-## Step 3 — create the `anonymous` user
+### 3. Create the anonymous user
 
 ```bash
 ANON=$(grep '^ANONYMOUS_PASSWORD=' .env | cut -d= -f2-)
@@ -93,11 +96,9 @@ curl -s -o /dev/null -w "anonymous auth: HTTP %{http_code}\n" \
 ```
 
 > [!IMPORTANT]
-> The user is literally named `anonymous`, but it is still an ES user with a real password. Kibana will log itself in as this user on behalf of the visitor — the visitor never sees the credential. "Anonymous" describes the visitor's experience, not the ES backend.
+> The user is literally named `anonymous`, but it is still an ES user with a real password. Kibana will log itself in as this user on behalf of the visitor: the visitor never sees the credential. "Anonymous" describes the visitor's experience, not the ES backend.
 
-## Step 4 — Kibana auth providers in `config/kibana.yml`
-
-The provider configuration cannot be expressed through environment variables in Kibana 8.x. The `XPACK_SECURITY_AUTHC_PROVIDERS_<TYPE>_<NAME>_*` env-var flattening does not handle the nested custom provider names (`anonymous1`, `basic1`) correctly — Kibana sees them as flat keys and marks them as "not enabled" at startup. The canonical fix is a mounted `kibana.yml`.
+### 4. Kibana auth providers in config/kibana.yml
 
 Create `/opt/observability-logs/config/kibana.yml`:
 
@@ -143,9 +144,11 @@ A few details:
 - **`${ANONYMOUS_PASSWORD}`** is interpolated by Kibana itself at startup from its container environment. We'll inject that variable through the compose file in the next step.
 
 > [!WARNING]
-> Whenever you mount a file at `/usr/share/kibana/config/kibana.yml`, you **replace** the official image's default kibana.yml. The default ships with sensible bindings (`server.host: "0.0.0.0"`, ES host pointing at `elasticsearch:9200`, etc.) that disappear the moment the mount takes over. Always include at least `server.host: "0.0.0.0"` in your custom file, or the container becomes unreachable from outside (and the symptom is misleading: Docker still reports the container as "healthy", because the in-container healthcheck on `localhost:5601` works).
+> Whenever you mount a file at `/usr/share/kibana/config/kibana.yml`, you **replace** the official image's default kibana.yml. The default ships with sensible bindings (`server.host: "0.0.0.0"`, ES host pointing at `elasticsearch:9200`, etc.) that disappear the moment the mount takes over. 
+> 
+> Always include at least `server.host: "0.0.0.0"` in your custom file, or the container becomes unreachable from outside (and the symptom is misleading: Docker still reports the container as "healthy", because the in-container healthcheck on `localhost:5601` works).
 
-## Step 5 — wire the password into the container, mount the YAML
+### 5. Wire the password into the container, mount the YAML
 
 Two changes to the `kibana` service in `/opt/observability-logs/docker-compose.yml`:
 
@@ -174,12 +177,9 @@ The relevant lines look like this:
       - /opt/observability-logs/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
 ```
 
-> [!IMPORTANT]
-> **No `XPACK_SECURITY_AUTHC_PROVIDERS_*` env vars.** If you had any from a previous attempt, remove them — env vars override the YAML and would silently re-introduce the "not enabled" problem.
+### 6. Restart
 
-## Step 6 — restart
-
-A simple `restart` is not enough — the new env var requires a recreation:
+A simple `restart` is not enough, the new env var requires a recreation:
 
 ```bash
 cd /opt/observability-logs
@@ -194,7 +194,7 @@ sudo docker compose logs -f kibana
 # Expect: [INFO ][status] Kibana is now available
 ```
 
-## Step 7 — verify the providers are active
+### 7. Verify the providers are active
 
 Check from inside the container that the YAML is mounted and the provider is enabled:
 
@@ -202,12 +202,12 @@ Check from inside the container that the YAML is mounted and the provider is ena
 sudo docker compose exec kibana cat /usr/share/kibana/config/kibana.yml
 ```
 
-Then test from a fresh browser (incognito + hard reload) at `https://farnetiandrea.it/logs`:
+Then test from a fresh browser (incognito + hard reload) at your URL (in my case `https://farnetiandrea.it/logs`):
 
-- Expected: the **Welcome to Elastic** chooser appears with two options — **Public anonymous viewer** and **Login with credentials**. Click the first; you land on Discover with no login form.
-- If the anonymous option is missing and you only see the basic login form, the provider didn't load. Check `docker compose logs kibana | grep -i "provider\|authenticator"` — a `Login attempt for provider with name basic1 is detected, but it isn't enabled` line means the YAML mount didn't take effect (most often because the env vars are still set and overriding it).
+- Expected: the **Welcome to Elastic** chooser appears with two options: **Public anonymous viewer** and **Login with credentials**. Click the first, and you should land on Discover with no login form.
+- If the anonymous option is missing and you only see the basic login form, the provider didn't load. Check `docker compose logs kibana | grep -i "provider\|authenticator"`: a `Login attempt for provider with name basic1 is detected, but it isn't enabled` line means the YAML mount didn't take effect (most often because the env vars are still set and overriding it).
 
-## Step 8 — confirm read-only enforcement
+### 8. Confirm read-only enforcement
 
 Worth proving directly that the role does its job:
 
@@ -219,9 +219,11 @@ curl -sX DELETE -u "anonymous:$ANON" \
 # delete-index: HTTP 403
 ```
 
-ES refuses the write because the `log_viewer` role does not grant any of the `manage` / `delete` / `write` privileges. The visitor in the browser hits the same wall the moment they try anything destructive.
+ES refuses the write because the `log_viewer` role does not grant any of the `manage` / `delete` / `write` privileges. 
 
-## What the visitor experiences vs what the admin experiences
+The visitor in the browser hits the same wall the moment they try anything destructive.
+
+What the visitor experiences vs what the admin experiences:
 
 | Path                                  | What happens                                                                                 |
 | ------------------------------------- | -------------------------------------------------------------------------------------------- |
@@ -231,33 +233,37 @@ ES refuses the write because the `log_viewer` role does not grant any of the `ma
 | Admin saves a search                  | Works normally — `elastic` has `superuser` and can write to `.kibana_*`.                     |
 
 
-## Step 9 — Hardening: redact at the Logstash layer
+## Hardening
 
-The anonymous role only restricts *what fields exist in Kibana terms* (e.g. only Discover/Dashboard/Visualize, no management). It does **not** redact the *content* of the fields. If your raw events contain client IPs, JWT tokens, email addresses, or app-internal stack traces, the anonymous user can see them all by clicking into any document in Discover.
+The anonymous role only restricts *what fields exist in Kibana terms* (e.g. only Discover/Dashboard/Visualize, no management). 
+
+It does **not** redact the *content* of the fields. 
+
+If your raw events contain client IPs, JWT tokens, email addresses, or app-internal stack traces, the anonymous user can see them all by clicking into any document in Discover.
 
 Two ways to deal with this on a Basic license (Field-Level Security would solve it elegantly but needs Platinum):
 
-1. **Redact at ingest** — Logstash strips and anonymizes sensitive patterns before events ever reach Elasticsearch. Simple, low-overhead, applies to all consumers uniformly.
-2. **Dual-index split** — Logstash writes to `logs-internal-*` (full data, admin-only) and `logs-public-*` (sanitized, anonymous-readable). More flexible but doubles the storage and adds pipeline complexity.
+1. **Redact at ingest**: Logstash strips and anonymizes sensitive patterns before events ever reach Elasticsearch. Simple, low-overhead, applies to all consumers uniformly (keep in mind: this also means that even the admin sees anonymous data!).
+2. **Dual-index split**: Logstash writes to `logs-internal-*` (full data, admin-only) and `logs-public-*` (sanitized, anonymous-readable). More flexible but doubles the storage and adds pipeline complexity.
 
-This page walks through option 1.
+This page walks through option 1, for simplicity.
 
-### What the redaction does
+### 1. What the redaction does
 
 A `filter {}` block on each Logstash worker, applied to every event in flight:
 
-1. **`gsub` regex on `event.original` and `message`** — replaces:
+1. **`gsub` regex on `event.original` and `message`** replaces:
    - IPv4 addresses with their `/24` form (`1.2.3.42` → `1.2.3.0`). Enough to keep geographic / netblock context, not enough to identify a single visitor.
    - JWTs (the `eyJ...` prefix is unmistakable) → `[JWT]`.
    - Email addresses → `[EMAIL]`.
    - `Bearer <anything>` headers → `Bearer [TOKEN]`.
    - AWS access key IDs (`AKIA<16chars>`) → `[AWS_KEY]`.
-2. **`remove_field`** — drops fields that have no value for a public viewer but reveal infrastructure:
+1. **`remove_field`** drops fields that have no value for a public viewer but reveal infrastructure:
    - `host.ip`, `host.mac`, `host.id`, `host.architecture`, `host.containerized`, `host.os.kernel`
    - `agent.id`, `agent.ephemeral_id`
    - `log.file.device_id`, `log.file.inode`, `log.file.path`
 
-### The filter block
+### 2. The filter block
 
 Add this between the `input {}` and `output {}` blocks in `/opt/observability-logs/pipeline/main.conf` on **every** Logstash worker:
 
@@ -307,9 +313,11 @@ filter {
 }
 ```
 
-### Restart
+### 3. Restart
 
-Apply on each worker with `down + up -d`, not `restart`. The Beats input on `:5044` doesn't release the socket within the default 10-second grace, so `docker compose restart` consistently fails with `Address already in use` on the second startup:
+Apply on each worker with `down + up -d`, not `restart`. 
+
+The Beats input on `:5044` doesn't release the socket within the default 10-second grace, so `docker compose restart` consistently fails with `Address already in use` on the second startup:
 
 ```bash
 cd /opt/observability-logs
@@ -323,7 +331,7 @@ sudo docker compose logs --tail=20 logstash | grep -iE "pipeline|started"
 
 You want to see `Pipeline started {"pipeline.id"=>"main"}` and `Starting input listener {:address=>"0.0.0.0:5044"}` with no errors.
 
-### Verify on Elasticsearch
+### 4. Verify on Elasticsearch
 
 From the VPS:
 
@@ -338,11 +346,15 @@ curl -s -u "elastic:$ELASTIC" \
   | python3 -m json.tool | head -50
 ```
 
-Check that the dropped fields (`host.ip`, `log.file.path`, ...) are absent and that any IPs in `event.original` end in `.0`.
+Check that the dropped fields (`host.ip`, `log.file.path`...) are absent and that any IPs in `event.original` end in `.0`.
 
-### Wipe pre-redaction history (optional)
+### 5. Wipe pre-redaction history (optional)
 
-The redaction only affects events ingested *after* the restart. Older indices still contain the un-redacted versions. If you want a clean slate:
+The redaction only affects events ingested *after* the restart. 
+
+Older indices still contain the un-redacted versions. 
+
+If you want a clean slate:
 
 ```bash
 ELASTIC=$(sudo grep '^ELASTIC_PASSWORD=' /opt/observability-logs/.env | cut -d= -f2-)
@@ -354,21 +366,12 @@ curl -sX POST -u "elastic:$ELASTIC" \
 
 New events will repopulate the index pattern within seconds.
 
-### Trade-offs
+### 6. Trade-offs
 
 | Aspect                  | This approach (Logstash redact)                | Alternative: dual-index split                               |
 | ----------------------- | ---------------------------------------------- | ----------------------------------------------------------- |
 | Admin sees raw data?    | **No** — same redacted view everyone else gets | Yes — `logs-internal-*` is admin-only with full data        |
 | Storage                 | 1× (just one index per day)                    | 2× (two indices per day, raw + sanitized)                   |
 | Pipeline complexity     | One `filter {}` block, easy to reason about    | Two `output {}` blocks with conditionals, more moving parts |
-| Public viewer trust     | Implicit — what's in ES is already safe        | Implicit — role only grants `read` on `logs-public-*`       |
+| Public viewer trust     | Implicit: what's in ES is already safe         | Implicit: role only grants `read` on `logs-public-*`        |
 | Forensics on raw events | Source files on the VPS (`tail`, `journalctl`) | `logs-internal-*` via admin login                           |
-## Where to go next
-
-- [[observability/logs/logstash|logstash]] — **next in this series**: the parsing layer that will write events into the indices this viewer reads.
-
-- Once Filebeat is shipping events ([[observability/logs/filebeat/filebeat-setup|filebeat-setup]], at the end of the series), the `logs-*` data view created in [[observability/logs/kibana/kibana-setup#Step 7 — create a Data View|kibana-setup]] will show live data to the anonymous viewer.
-
-- Build a public dashboard and pin it in the navigation. The visitor will see it the moment they enter — no further auth.
-
-- (Optional) tighten the role further: grant `feature_dashboard.read` only and drop `feature_discover.read` if you want the public to consume curated dashboards only, not free-text search across indices.
