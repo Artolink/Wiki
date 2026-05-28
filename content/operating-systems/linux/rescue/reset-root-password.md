@@ -1,7 +1,6 @@
 ---
 title: Reset the root password via GRUB
 tags:
-  - Maintenance
 ---
 ## Overview
 

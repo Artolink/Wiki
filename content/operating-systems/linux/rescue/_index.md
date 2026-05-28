@@ -1,3 +1,5 @@
 ---
-title: 🛟 Rescue
+title: 🛟 Linux Rescue
+tags:
+  - Maintenance
 ---

@@ -1,7 +1,6 @@
 ---
 title: "Filesystem rebuild: recreate partitions and restore the data"
 tags:
-  - Maintenance
 ---
 ## Overview
 
