@@ -251,7 +251,7 @@ update-grub
 
 If the partition table itself is corrupted, not just GRUB (e.g. a `/boot` partition was accidentally deleted, or the disk layout is unrecognizable) GRUB rescue alone won't help. 
 
-You're in **filesystem rebuild** territory: recreate partitions with `fdisk` / `parted`, format them, rsync the data back from a backup, then run the GRUB rescue above.
+You're in [[filesystem-rebuild|filesystem rebuild]] territory: recreate partitions with `fdisk` / `parted`, format them, rsync the data back from a backup, then run the GRUB rescue above.
 
 That's a separate procedure with its own dedicated page. 
 
