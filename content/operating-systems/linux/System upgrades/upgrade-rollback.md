@@ -20,13 +20,13 @@ Pick the right tool from the decision tree below before reaching for the keyboar
 
 Quick triage based on the symptoms:
 
-| Symptom                                                      | Best rollback                                                                                                                                                                          |
-| ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The machine **won't boot** at all (kernel panic, GRUB loops) | [Hypervisor snapshot restore](#2-hypervisor-snapshot-restore) or [boot the previous kernel from GRUB](#5-boot-the-previous-kernel-and-pin-it) (if the previous one is still installed) |
-| The machine boots but **everything is broken**               | [Hypervisor or filesystem snapshot rollback](#3-filesystem-snapshot-rollback-lvm--zfs--btrfs)                                                                                          |
-| **One specific service / app** regressed (rest is fine)      | [Downgrade that single package](#6-downgrade-a-single-package)                                                                                                                         |
-| A **config file** got overwritten (Y/I/N prompt answered Y)  | [Restore that file from the `/etc` backup](#4-restore-an-overwritten-config-file-from-the-etc-backup)                                                                                  |
-| The **new kernel** is unhappy on this hardware               | [Boot the previous kernel and pin it](#5-boot-the-previous-kernel-and-pin-it)                                                                                                          |
+| Symptom                                                      | Best rollback                                                                                                                                                                                          |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| The machine **won't boot** at all (kernel panic, GRUB loops) | [Hypervisor snapshot restore](upgrade-rollback#1-hypervisor-snapshot-restore) or [boot the previous kernel from GRUB](#4-boot-the-previous-kernel-and-pin-it) (if the previous one is still installed) |
+| The machine boots but **everything is broken**               | [Hypervisor or filesystem snapshot rollback](#2-filesystem-snapshot-rollback)                                                                                                                          |
+| **One specific service / app** regressed (rest is fine)      | [Downgrade that single package](#6-downgrade-a-single-package)                                                                                                                                         |
+| A **config file** got overwritten (Y/I/N prompt answered Y)  | [Restore that file from the `/etc` backup](#4-restore-an-overwritten-config-file-from-the-etc-backup)                                                                                                  |
+| The **new kernel** is unhappy on this hardware               | [Boot the previous kernel and pin it](#5-boot-the-previous-kernel-and-pin-it)                                                                                                                          |
 
 
 ## 1. Hypervisor snapshot restore
@@ -94,7 +94,7 @@ If the new kernel is unstable on this hardware (which happens more on bare metal
 
 ### Boot the old kernel manually
 
-At the next boot, hold `Shift` (BIOS) or `Esc` (UEFI) right after the firmware splash to enter the GRUB menu, then:
+Reboot and enter the GRUB menu (see [[hardware/enter-the-GRUB|How to enter the GRUB boot menu]] if you've never done it before), then navigate:
 
 ```
 Advanced options for Ubuntu  →  Ubuntu, with Linux 5.15.0-176-generic
