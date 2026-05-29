@@ -24,11 +24,15 @@
   }
 }
 
-// Barra interna: stile "card" come syselement
+// Barra interna: card che impila DUE righe (font + page-width).
+// flex-direction: column è la differenza chiave rispetto alla versione
+// pre-width — ogni riga è un .resizer-row inline-flex con la stessa UX
+// del vecchio FontResizer (decrease / slider / increase / reset).
 .font-resizer {
   display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.3rem;
   padding: 0.35rem 0.55rem;
   border: 1px solid var(--lightgray);
   border-radius: 10px;
@@ -38,6 +42,12 @@
   box-shadow:
     0 8px 24px rgba(27, 33, 48, 0.15),
     0 2px 6px rgba(27, 33, 48, 0.08);
+
+  & .resizer-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
 
   & button {
     background: transparent;
@@ -64,7 +74,7 @@
   }
 
   // Le due "A" hanno la stessa lettera ma in due dimensioni diverse:
-  // visivamente comunica "diminuisci/aumenta".
+  // visivamente comunica "diminuisci/aumenta" (riga 1, font).
   & .font-icon {
     font-family: var(--bodyFont);
     font-weight: 700;
@@ -73,7 +83,10 @@
   & .font-icon-small { font-size: 0.78rem; }
   & .font-icon-large { font-size: 1.1rem; }
 
-  & .font-slider {
+  // Slider comune a entrambe le righe — stessa larghezza e estetica
+  // per dare uniformità visiva fra font-slider e width-slider.
+  & .font-slider,
+  & .width-slider {
     appearance: none;
     -webkit-appearance: none;
     width: 110px;
@@ -112,7 +125,8 @@
 
   // Su mobile compatta lo slider
   @media all and ($mobile) {
-    & .font-slider { width: 70px; }
+    & .font-slider,
+    & .width-slider { width: 70px; }
   }
 }
 

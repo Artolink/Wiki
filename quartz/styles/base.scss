@@ -160,7 +160,10 @@ a {
 }
 
 .page {
-  max-width: calc(#{map.get($breakpoints, desktop)} + 300px);
+  // `--page-max-width` viene impostato runtime dal FontResizer (slider larghezza)
+  // su <html>; il fallback `calc(...)` mantiene il comportamento default di
+  // Quartz (1500px) per il primo paint e per chi disabilita JS.
+  max-width: var(--page-max-width, calc(#{map.get($breakpoints, desktop)} + 300px));
   margin: 0 auto;
   & article {
     & > h1 {

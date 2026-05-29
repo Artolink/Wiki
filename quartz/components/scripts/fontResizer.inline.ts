@@ -1,42 +1,79 @@
-// FontResizer: ridimensiona dinamicamente il testo dell'articolo centrale.
-// Salva il valore in localStorage e lo applica come CSS variable --font-scale
-// su <html>. Il CSS in custom.scss usa questa variabile sull'<article> centrale.
+// Resizer floating: due controlli su due righe.
+//   1) FONT — ridimensiona il testo dell'articolo via CSS variable
+//      `--font-scale` su <html>; il CSS in custom.scss la usa con calc().
+//   2) PAGE WIDTH — ridimensiona il container `.page` via CSS variable
+//      `--page-max-width` su <html>; il selettore in base.scss la legge con
+//      fallback al default Quartz (1500px).
+//
+// Entrambi i valori sono persistiti in localStorage e ri-applicati a ogni
+// navigazione SPA-style (event "nav") e al primo paint.
 
-const STORAGE_KEY = "fontScale"
-const MIN = 0.85
-const MAX = 1.4
-const STEP = 0.05
-const DEFAULT = 1.0
+// ── Stato: FONT ──────────────────────────────────────────────────────────────
+const FONT_KEY = "fontScale"
+const FONT_MIN = 0.85
+const FONT_MAX = 1.4
+const FONT_STEP = 0.05
+const FONT_DEFAULT = 1.0
 
-function clamp(v: number): number {
-  return Math.min(MAX, Math.max(MIN, v))
+// ── Stato: PAGE WIDTH (px) ───────────────────────────────────────────────────
+// MIN = default Quartz = $breakpoints.desktop (1200) + 300 = 1500px.
+// Sotto questa soglia non avrebbe senso "restringere" (taglieremmo testo
+// utile su monitor piccoli, dove il viewport già comanda).
+// MAX = soglia pratica per monitor 4K/ultrawide. Oltre, le sidebar
+// resterebbero troppo lontane dal contenuto centrale per essere utili.
+const WIDTH_KEY = "pageWidth"
+const WIDTH_MIN = 1500
+const WIDTH_MAX = 2400
+const WIDTH_STEP = 50
+const WIDTH_DEFAULT = 1500
+
+function clamp(v: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, v))
 }
 
+// ── FONT ─────────────────────────────────────────────────────────────────────
 function readScale(): number {
-  const v = parseFloat(localStorage.getItem(STORAGE_KEY) ?? "")
-  return isNaN(v) ? DEFAULT : clamp(v)
+  const v = parseFloat(localStorage.getItem(FONT_KEY) ?? "")
+  return isNaN(v) ? FONT_DEFAULT : clamp(v, FONT_MIN, FONT_MAX)
 }
-
 function applyScale(scale: number) {
   document.documentElement.style.setProperty("--font-scale", String(scale))
 }
-
-function syncSliders(scale: number) {
+function syncFontSliders(scale: number) {
   document.querySelectorAll<HTMLInputElement>(".font-resizer .font-slider").forEach((s) => {
     s.value = String(scale)
   })
 }
-
 function setScale(v: number) {
-  const clamped = clamp(v)
-  localStorage.setItem(STORAGE_KEY, String(clamped))
-  applyScale(clamped)
-  syncSliders(clamped)
+  const c = clamp(v, FONT_MIN, FONT_MAX)
+  localStorage.setItem(FONT_KEY, String(c))
+  applyScale(c)
+  syncFontSliders(c)
 }
 
-// Applica lo stato salvato il prima possibile (idealmente in beforeDOMLoaded,
-// ma il componente usa afterDOMLoaded — leggera latenza accettabile).
+// ── PAGE WIDTH ───────────────────────────────────────────────────────────────
+function readWidth(): number {
+  const v = parseFloat(localStorage.getItem(WIDTH_KEY) ?? "")
+  return isNaN(v) ? WIDTH_DEFAULT : clamp(v, WIDTH_MIN, WIDTH_MAX)
+}
+function applyWidth(px: number) {
+  document.documentElement.style.setProperty("--page-max-width", `${px}px`)
+}
+function syncWidthSliders(px: number) {
+  document.querySelectorAll<HTMLInputElement>(".font-resizer .width-slider").forEach((s) => {
+    s.value = String(px)
+  })
+}
+function setWidth(v: number) {
+  const c = clamp(v, WIDTH_MIN, WIDTH_MAX)
+  localStorage.setItem(WIDTH_KEY, String(c))
+  applyWidth(c)
+  syncWidthSliders(c)
+}
+
+// Applica subito lo stato salvato (no flash di layout default → utente).
 applyScale(readScale())
+applyWidth(readWidth())
 
 // Soglia di visibilità espressa come frazione dell'altezza del viewport,
 // così la barra appare alla stessa "altezza relativa" su monitor di
@@ -45,9 +82,12 @@ applyScale(readScale())
 const VISIBLE_THRESHOLD_FRACTION = 0.5
 
 document.addEventListener("nav", () => {
-  const initial = readScale()
-  applyScale(initial)
-  syncSliders(initial)
+  const initFont = readScale()
+  const initWidth = readWidth()
+  applyScale(initFont)
+  applyWidth(initWidth)
+  syncFontSliders(initFont)
+  syncWidthSliders(initWidth)
 
   // ── Visibilità floating: appare solo se il mouse è sopra al contenuto ──
   // Vincoli combinati:
@@ -63,10 +103,6 @@ document.addEventListener("nav", () => {
     const threshold = window.innerHeight * VISIBLE_THRESHOLD_FRACTION
     const belowMidpoint = mouseY > threshold
 
-    // Range orizzontale del contenuto: usiamo <article> (il body del file md
-    // dentro .center). Articolo è più stretto del .center perché ha padding
-    // e max-width applicati, quindi rispecchia il "testo effettivo". Fallback
-    // su .center per le list pages che non hanno <article>.
     const article =
       document.querySelector(".page > #quartz-body > .center article") ||
       document.querySelector(".page > #quartz-body > .center")
@@ -94,33 +130,46 @@ document.addEventListener("nav", () => {
   document.addEventListener("mousemove", onMouseMove, { passive: true })
   window.addCleanup(() => document.removeEventListener("mousemove", onMouseMove))
 
-  // Slider: input event = update in tempo reale mentre l'utente trascina
+  // ── FONT controls ───────────────────────────────────────────────────────
   for (const slider of document.querySelectorAll<HTMLInputElement>(".font-resizer .font-slider")) {
-    const onInput = (e: Event) => {
-      const v = parseFloat((e.target as HTMLInputElement).value)
-      setScale(v)
-    }
+    const onInput = (e: Event) => setScale(parseFloat((e.target as HTMLInputElement).value))
     slider.addEventListener("input", onInput)
     window.addCleanup(() => slider.removeEventListener("input", onInput))
   }
-
-  // Pulsante decrease (A piccolo)
   for (const btn of document.querySelectorAll(".font-resizer .font-decrease")) {
-    const onClick = () => setScale(readScale() - STEP)
+    const onClick = () => setScale(readScale() - FONT_STEP)
     btn.addEventListener("click", onClick)
     window.addCleanup(() => btn.removeEventListener("click", onClick))
   }
-
-  // Pulsante increase (A grande)
   for (const btn of document.querySelectorAll(".font-resizer .font-increase")) {
-    const onClick = () => setScale(readScale() + STEP)
+    const onClick = () => setScale(readScale() + FONT_STEP)
+    btn.addEventListener("click", onClick)
+    window.addCleanup(() => btn.removeEventListener("click", onClick))
+  }
+  for (const btn of document.querySelectorAll(".font-resizer .font-reset")) {
+    const onClick = () => setScale(FONT_DEFAULT)
     btn.addEventListener("click", onClick)
     window.addCleanup(() => btn.removeEventListener("click", onClick))
   }
 
-  // Pulsante reset
-  for (const btn of document.querySelectorAll(".font-resizer .font-reset")) {
-    const onClick = () => setScale(DEFAULT)
+  // ── WIDTH controls ──────────────────────────────────────────────────────
+  for (const slider of document.querySelectorAll<HTMLInputElement>(".font-resizer .width-slider")) {
+    const onInput = (e: Event) => setWidth(parseFloat((e.target as HTMLInputElement).value))
+    slider.addEventListener("input", onInput)
+    window.addCleanup(() => slider.removeEventListener("input", onInput))
+  }
+  for (const btn of document.querySelectorAll(".font-resizer .width-decrease")) {
+    const onClick = () => setWidth(readWidth() - WIDTH_STEP)
+    btn.addEventListener("click", onClick)
+    window.addCleanup(() => btn.removeEventListener("click", onClick))
+  }
+  for (const btn of document.querySelectorAll(".font-resizer .width-increase")) {
+    const onClick = () => setWidth(readWidth() + WIDTH_STEP)
+    btn.addEventListener("click", onClick)
+    window.addCleanup(() => btn.removeEventListener("click", onClick))
+  }
+  for (const btn of document.querySelectorAll(".font-resizer .width-reset")) {
+    const onClick = () => setWidth(WIDTH_DEFAULT)
     btn.addEventListener("click", onClick)
     window.addCleanup(() => btn.removeEventListener("click", onClick))
   }
