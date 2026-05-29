@@ -861,7 +861,10 @@ html[saved-theme="dark"] .sidebar.right .graph .graph-outer > .info-graph-popup 
 // oltre la larghezza dell'articolo. Componenti con `position: fixed` come
 // FontResizer/ScrollProgress non risentono del cap, quindi safe.
 .page > #quartz-body > .center > .page-footer {
-  max-width: 860px;
+  // `--page-max-width` viene impostato runtime dal FontResizer (slider width)
+  // su <html>; il fallback `860px` mantiene il comportamento di default per
+  // chi disabilita JS o per il primissimo paint prima che il bundle parta.
+  max-width: var(--page-max-width, 860px);
   margin-left: auto;
   margin-right: auto;
 }

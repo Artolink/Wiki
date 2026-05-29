@@ -16,16 +16,17 @@ const FONT_STEP = 0.05
 const FONT_DEFAULT = 1.0
 
 // ── Stato: PAGE WIDTH (px) ───────────────────────────────────────────────────
-// MIN = default Quartz = $breakpoints.desktop (1200) + 300 = 1500px.
-// Sotto questa soglia non avrebbe senso "restringere" (taglieremmo testo
-// utile su monitor piccoli, dove il viewport già comanda).
-// MAX = soglia pratica per monitor 4K/ultrawide. Oltre, le sidebar
-// resterebbero troppo lontane dal contenuto centrale per essere utili.
+// La var `--page-max-width` viene letta da `.center > article` (e fratelli)
+// in custom.scss. MIN = default attuale dell'article (860px), così abbassando
+// lo slider non si "stringe oltre" la larghezza attuale. MAX = soglia
+// pratica per monitor wide/ultrawide — oltre, l'occhio fa fatica a tracciare
+// righe troppo lunghe (60-90 caratteri è l'optimum tipografico, 1600px ne
+// stipa ~140 col font scale = 1, che è già oltre il consigliato).
 const WIDTH_KEY = "pageWidth"
-const WIDTH_MIN = 1500
-const WIDTH_MAX = 2400
-const WIDTH_STEP = 50
-const WIDTH_DEFAULT = 1500
+const WIDTH_MIN = 860
+const WIDTH_MAX = 1600
+const WIDTH_STEP = 40
+const WIDTH_DEFAULT = 860
 
 function clamp(v: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, v))

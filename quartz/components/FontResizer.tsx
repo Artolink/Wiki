@@ -65,19 +65,19 @@ const FontResizer: QuartzComponent = ({ displayClass }: QuartzComponentProps) =>
             title="Restringi larghezza pagina"
             aria-label="Restringi larghezza pagina"
           >
-            {/* Frecce verso il centro = shrink */}
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="9 6 14 12 9 18" />
-              <polyline points="15 6 10 12 15 18" />
+            {/* Frecce ›‹ verso il centro = shrink */}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 5 13 12 6 19" />
+              <polyline points="18 5 11 12 18 19" />
             </svg>
           </button>
           <input
             type="range"
             class="width-slider"
-            min="1500"
-            max="2400"
-            step="50"
-            defaultValue="1500"
+            min="860"
+            max="1600"
+            step="40"
+            defaultValue="860"
             aria-label="Larghezza pagina"
           />
           <button
@@ -86,10 +86,10 @@ const FontResizer: QuartzComponent = ({ displayClass }: QuartzComponentProps) =>
             title="Allarga pagina"
             aria-label="Allarga pagina"
           >
-            {/* Frecce verso fuori = expand */}
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="15 6 20 12 15 18" />
-              <polyline points="9 6 4 12 9 18" />
+            {/* Frecce ‹› verso fuori = expand */}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="13 5 20 12 13 19" />
+              <polyline points="11 5 4 12 11 19" />
             </svg>
           </button>
           <button
