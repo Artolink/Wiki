@@ -40,6 +40,39 @@ function clamp(v: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, v))
 }
 
+// Costanti layout (devono coincidere con quelle in styles/variables.scss e
+// custom.scss: $sidePanelWidth = 380, column-gap = 40, .center padding 2rem).
+// Usate per calcolare il max effettivo dello slider in base al viewport.
+const COLUMN_GAP = 40
+const CENTER_PADDING_X = 64 // 2 * 2rem (sx + dx)
+
+// Calcola la larghezza massima che lo slider può "utilmente" raggiungere su
+// questo viewport. Oltre questo valore, l'article verrebbe comunque clampato
+// dal cell del grid (modalità normale) o dal viewport (focus mode), e lo
+// slider sembrerebbe "inerte" nella sua seconda metà.
+function computeMaxAllowedWidth(): number {
+  const viewport = window.innerWidth
+  const focusModeActive = document.documentElement.getAttribute("focus-mode") === "on"
+  // Focus mode: niente sidebar/gap, solo il padding di .center.
+  // Modalità normale: sidebar al minimo (200px) per lato + 2 gap + padding.
+  const available = focusModeActive
+    ? viewport - CENTER_PADDING_X
+    : viewport - 2 * SIDEBAR_MIN - 2 * COLUMN_GAP - CENTER_PADDING_X
+  return Math.min(WIDTH_MAX, Math.max(WIDTH_MIN, Math.floor(available)))
+}
+
+// Aggiorna l'attributo `max` di tutti gli slider della larghezza al valore
+// effettivamente raggiungibile sul viewport corrente. Clampa il valore
+// corrente se sopra il nuovo max (es. dopo un resize della finestra).
+function refreshSliderMax() {
+  const newMax = computeMaxAllowedWidth()
+  document.querySelectorAll<HTMLInputElement>(".font-resizer .width-slider").forEach((s) => {
+    s.max = String(newMax)
+  })
+  const current = readWidth()
+  if (current > newMax) setWidth(newMax)
+}
+
 // ── FONT ─────────────────────────────────────────────────────────────────────
 function readScale(): number {
   const v = parseFloat(localStorage.getItem(FONT_KEY) ?? "")
@@ -104,6 +137,28 @@ document.addEventListener("nav", () => {
   applyWidth(initWidth)
   syncFontSliders(initFont)
   syncWidthSliders(initWidth)
+  // Calcola il max in base al viewport corrente (e a eventuale focus-mode già
+  // attivo da una sessione precedente, ripristinato dal localStorage).
+  refreshSliderMax()
+
+  // Ricalcola il max dello slider quando:
+  //  - il viewport cambia (resize della finestra)
+  //  - l'utente entra/esce dal focus mode (evento custom emesso da
+  //    components/scripts/focusmode.inline.ts → setAttribute + dispatchEvent)
+  // Debounce su resize per non spammare di update durante il drag della finestra.
+  let resizeTimer: ReturnType<typeof setTimeout> | undefined
+  const onResize = () => {
+    clearTimeout(resizeTimer)
+    resizeTimer = setTimeout(refreshSliderMax, 100)
+  }
+  const onSidebarToggled = () => refreshSliderMax()
+  window.addEventListener("resize", onResize, { passive: true })
+  window.addEventListener("sidebartoggled", onSidebarToggled)
+  window.addCleanup(() => {
+    clearTimeout(resizeTimer)
+    window.removeEventListener("resize", onResize)
+    window.removeEventListener("sidebartoggled", onSidebarToggled)
+  })
 
   // ── Visibilità floating: appare solo se il mouse è sopra al contenuto ──
   // Vincoli combinati:
