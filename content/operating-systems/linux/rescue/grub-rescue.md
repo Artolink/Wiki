@@ -1,6 +1,7 @@
 ---
 title: "GRUB rescue: rebuild the bootloader from a Live USB"
 tags:
+  - Maintenance
 ---
 ## Overview
 
