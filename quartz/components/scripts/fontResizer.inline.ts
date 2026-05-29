@@ -59,6 +59,11 @@ function readWidth(): number {
 }
 function applyWidth(px: number) {
   document.documentElement.style.setProperty("--page-max-width", `${px}px`)
+  // Classe condizionale: attiva text-align:justify + hyphens:auto sui paragrafi
+  // SOLO quando lo slider supera il default. Mantiene la lettura left-aligned
+  // a larghezza standard (zero impatto visivo), e "tira" il bordo destro per
+  // dare la percezione di crescita simmetrica solo quando l'utente allarga.
+  document.documentElement.classList.toggle("width-expanded", px > WIDTH_MIN)
 }
 function syncWidthSliders(px: number) {
   document.querySelectorAll<HTMLInputElement>(".font-resizer .width-slider").forEach((s) => {

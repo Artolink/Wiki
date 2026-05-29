@@ -869,6 +869,29 @@ html[saved-theme="dark"] .sidebar.right .graph .graph-outer > .info-graph-popup 
   margin-right: auto;
 }
 
+// ── Justify automatico quando lo slider è "expanded" ────────────────────────
+// La classe `width-expanded` viene applicata su <html> dal FontResizer quando
+// l'utente sposta lo slider oltre il default (860px). In quel caso, e SOLO
+// in quel caso, applichiamo text-align:justify + hyphens:auto ai paragrafi:
+// così il bordo destro del testo si "tira" per riempire la nuova larghezza,
+// dando la percezione di crescita simmetrica del contenuto (invece che
+// "solo verso sinistra", che è quanto succede col left-align di default
+// dove il bordo destro è frastagliato e l'occhio non lo aggancia).
+//
+// Limitato ai <p> e ai list items: applicarlo a heading/code/tabelle
+// produrrebbe artefatti tipografici inaccettabili (heading con grandi
+// spazi tra le parole, code block con allineamento rotto, ecc.).
+html.width-expanded {
+  .page > #quartz-body > .center > article p,
+  .page > #quartz-body > .center > .popover-hint > article p,
+  .page > #quartz-body > .center > article li,
+  .page > #quartz-body > .center > .popover-hint > article li {
+    text-align: justify;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+  }
+}
+
 // Rimuovi la riga separatrice tra Content e page-footer (inserita da
 // renderPage.tsx come <hr />): il footer minimal non ha bisogno di un
 // divisore, il copyright a destra basta.
