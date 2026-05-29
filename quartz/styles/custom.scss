@@ -869,26 +869,20 @@ html[saved-theme="dark"] .sidebar.right .graph .graph-outer > .info-graph-popup 
   margin-right: auto;
 }
 
-// ── Justify automatico quando lo slider è "expanded" ────────────────────────
-// La classe `width-expanded` viene applicata su <html> dal FontResizer quando
-// l'utente sposta lo slider oltre il default (860px). In quel caso, e SOLO
-// in quel caso, applichiamo text-align:justify + hyphens:auto ai paragrafi:
-// così il bordo destro del testo si "tira" per riempire la nuova larghezza,
-// dando la percezione di crescita simmetrica del contenuto (invece che
-// "solo verso sinistra", che è quanto succede col left-align di default
-// dove il bordo destro è frastagliato e l'occhio non lo aggancia).
-//
-// Limitato ai <p> e ai list items: applicarlo a heading/code/tabelle
-// produrrebbe artefatti tipografici inaccettabili (heading con grandi
-// spazi tra le parole, code block con allineamento rotto, ecc.).
-html.width-expanded {
-  .page > #quartz-body > .center > article p,
-  .page > #quartz-body > .center > .popover-hint > article p,
-  .page > #quartz-body > .center > article li,
-  .page > #quartz-body > .center > .popover-hint > article li {
-    text-align: justify;
-    -webkit-hyphens: auto;
-    hyphens: auto;
+// ── Grid columns dinamiche: sidebar restringibile dal FontResizer ───────────
+// Il default Quartz è `380px auto 380px`. Quando il FontResizer aumenta
+// `--page-max-width`, restringe contemporaneamente `--sidebar-width` di
+// `delta/2` per ogni lato, così il contenuto centrale cresce davvero
+// simmetricamente rispetto al centro del viewport (e non solo "incollato
+// al bordo destro" del cell centrale fisso). Override applicato SOLO su
+// desktop reale (sopra il breakpoint tablet) — sotto, il grid è già
+// a colonna unica e le sidebar diventano drawer.
+@media all and (min-width: 1201px) {
+  .page > #quartz-body {
+    grid-template-columns:
+      var(--sidebar-width, 380px)
+      auto
+      var(--sidebar-width, 380px) !important;
   }
 }
 

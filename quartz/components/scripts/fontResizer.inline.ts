@@ -17,16 +17,24 @@ const FONT_DEFAULT = 1.0
 
 // ── Stato: PAGE WIDTH (px) ───────────────────────────────────────────────────
 // La var `--page-max-width` viene letta da `.center > article` (e fratelli)
-// in custom.scss. MIN = default attuale dell'article (860px), così abbassando
-// lo slider non si "stringe oltre" la larghezza attuale. MAX = soglia
-// pratica per monitor wide/ultrawide — oltre, l'occhio fa fatica a tracciare
-// righe troppo lunghe (60-90 caratteri è l'optimum tipografico, 1600px ne
-// stipa ~140 col font scale = 1, che è già oltre il consigliato).
+// in custom.scss. La var `--sidebar-width` viene letta dal grid-template-columns
+// del #quartz-body (override in custom.scss): quando l'article cresce, le due
+// sidebar si restringono dello stesso "delta diviso 2", così l'article cresce
+// **da entrambi i lati** rispetto al centro del viewport invece che dentro un
+// `.center` cell fissa (che lo "incollerebbe" al bordo sx quando supera il cell).
+//
+// MIN = larghezza attuale (860px) — sotto, lo slider non avrebbe effetto.
+// MAX = limite oltre cui le sidebar diventerebbero troppo strette per essere
+//       leggibili (200px min). 860 + (380-200)*2 = 1220 è il punto in cui le
+//       sidebar arrivano al minimo; oltre lo slider può continuare ad agire
+//       solo sul max-width dell'article (utile su monitor ultrawide).
 const WIDTH_KEY = "pageWidth"
 const WIDTH_MIN = 860
-const WIDTH_MAX = 1600
+const WIDTH_MAX = 1400
 const WIDTH_STEP = 40
 const WIDTH_DEFAULT = 860
+const SIDEBAR_DEFAULT = 380
+const SIDEBAR_MIN = 200
 
 function clamp(v: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, v))
@@ -59,11 +67,13 @@ function readWidth(): number {
 }
 function applyWidth(px: number) {
   document.documentElement.style.setProperty("--page-max-width", `${px}px`)
-  // Classe condizionale: attiva text-align:justify + hyphens:auto sui paragrafi
-  // SOLO quando lo slider supera il default. Mantiene la lettura left-aligned
-  // a larghezza standard (zero impatto visivo), e "tira" il bordo destro per
-  // dare la percezione di crescita simmetrica solo quando l'utente allarga.
-  document.documentElement.classList.toggle("width-expanded", px > WIDTH_MIN)
+  // Restringi le sidebar dello stesso "delta / 2" che il contenuto cresce,
+  // così il centro visivo dell'article rimane ancorato al centro del viewport
+  // e l'allargamento è davvero simmetrico (non solo dentro un .center fisso).
+  // SIDEBAR_MIN evita che le sidebar diventino inservibili a slider massimo.
+  const delta = Math.max(0, px - WIDTH_MIN)
+  const newSidebar = Math.max(SIDEBAR_MIN, SIDEBAR_DEFAULT - delta / 2)
+  document.documentElement.style.setProperty("--sidebar-width", `${newSidebar}px`)
 }
 function syncWidthSliders(px: number) {
   document.querySelectorAll<HTMLInputElement>(".font-resizer .width-slider").forEach((s) => {
