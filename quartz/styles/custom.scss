@@ -950,11 +950,19 @@ body[data-slug="graph"] article.popover-hint li {
   -webkit-hyphens: manual;
 }
 
-// Code blocks / immagini / tabelle non devono mai sfondare la colonna
+// Code blocks / immagini / tabelle non devono mai sfondare la colonna.
+// `display: block; margin-inline: auto` centra orizzontalmente questi blocchi
+// dentro l'article: è essenziale quando lo slider del FontResizer allarga
+// l'article — un'immagine standalone (es. `![[Pasted image …]]`) che è più
+// stretta dell'article altrimenti rimarrebbe attaccata al bordo sinistro
+// (default left-align del <p> contenitore) anziché centrarsi nello spazio
+// aggiuntivo.
 .page > #quartz-body > .center pre,
 .page > #quartz-body > .center img,
 .page > #quartz-body > .center .table-container {
   max-width: 100%;
+  display: block;
+  margin-inline: auto;
 }
 
 // Evita overflow orizzontale globale
