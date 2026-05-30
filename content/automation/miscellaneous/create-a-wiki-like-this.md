@@ -169,7 +169,7 @@ Now I'll show you a couple scripts to automate the pipeline process, so that you
 For automating the entire pipeline, we are going to need two scripts:
 
 - `deploy.sh`: lives inside my "wiki" folder on the VPS. Deploys everything on GitHub and generates the site
-- `sync-wiki.sh`: lives inside my work laptop. Syncs every note on the VPS and calls deploy.sh
+- `sync-wiki.sh`: lives inside my work laptop. Syncs every note on the VPS and calls deploy.sh (to be used via [[WSL-installation|WSL]], of course)
 
 `deploy.sh`:
 ```bash
