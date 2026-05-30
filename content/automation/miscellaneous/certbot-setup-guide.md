@@ -6,7 +6,7 @@ tags:
 ---
 ## What is Certbot?
 
-Certbot is the official **Let's Encrypt client**: a single command issues a free, auto-renewing TLS certificate for your domain. It can edit your [Nginx](nginx-web-server-setup.md) config in-place to enable HTTPS, install proper TLS settings, and handle the 90-day auto-renewal in the background.
+Certbot is the official **Let's Encrypt client**: a single command issues a free, auto-renewing [[tls-certificates|TLS certificate]] for your domain. It can edit your [Nginx](nginx-web-server-setup.md) config in-place to enable HTTPS, install proper TLS settings, and handle the 90-day auto-renewal in the background.
 
 ***
 
