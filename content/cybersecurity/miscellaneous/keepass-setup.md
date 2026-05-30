@@ -17,6 +17,9 @@ The alternative is **self-hosting**: a single encrypted file under your control,
 
 KeePass 1 is the old line and unmaintained; **always pick KeePass 2**.
 
+> [!INFO]
+> If you'd rather have automatic cloud sync across devices instead of managing the `.kdbx` file yourself, see [[bitwarden-setup|Bitwarden]]: same goal, opposite trade-offs.
+
 ## Install KeePass 2
 
 Windows:
