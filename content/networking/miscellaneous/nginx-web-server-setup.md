@@ -50,7 +50,9 @@ curl -I http://localhost
 
 `conf.d/` and `sites-enabled/` are equivalent: pick one and stick with it. 
 
-Personally I prefer `conf.d/` for a flatter layout (no symlink dance).
+Personally I prefer the `sites-available/` + `sites-enabled/` pair (the Debian default): one file per domain in `sites-available/`, and a symlink in `sites-enabled/` to "turn it on". 
+
+This way `certbot --nginx` discovers your vhosts automatically, and you can disable a domain with a single `rm` of the symlink, without losing the file.
 
 ### Anatomy of a vhost
 
@@ -110,7 +112,9 @@ server {
 
 This wiki is a static site (Quartz output), then served by Nginx with HTTPS issued by Certbot. 
 
-The vhost lives in `/etc/nginx/conf.d/wiki.farnetiandrea.it.conf` (it also hosts `farnetiandrea.it`, a small landing page + a reverse-proxied Node app called *OfficeGamble*: one file per domain in `conf.d/`!):
+The vhost lives in `/etc/nginx/sites-available/wiki.farnetiandrea.it`, enabled via a symlink in `/etc/nginx/sites-enabled/`. 
+
+The other domain `farnetiandrea.it` (a small landing page + a reverse-proxied Node app called *OfficeGamble*) has its own file `/etc/nginx/sites-available/farnetiandrea.it`, one file per domain:
 > [!example]- Real-world example: this wiki
 > ```nginx
 > # HTTP -> HTTPS redirect (added by Certbot)

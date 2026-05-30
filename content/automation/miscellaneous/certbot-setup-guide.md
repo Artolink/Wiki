@@ -4,7 +4,6 @@ tags:
   - WebsiteCreation
   - Maintenance
 ---
-
 ## What is Certbot?
 
 Certbot is the official **Let's Encrypt client**: a single command issues a free, auto-renewing TLS certificate for your domain. It can edit your [Nginx](nginx-web-server-setup.md) config in-place to enable HTTPS, install proper TLS settings, and handle the 90-day auto-renewal in the background.
@@ -158,7 +157,7 @@ server = https://acme-v02.api.letsencrypt.org/directory
 
 The wiki you're reading runs the exact setup described above. 
 
-The vhost lives in `/etc/nginx/conf.d/wiki.farnetiandrea.it.conf`
+The vhost lives in `/etc/nginx/sites-available/wiki.farnetiandrea.it` (enabled via a symlink in `/etc/nginx/sites-enabled/`).
 
 > [!example]- Example: wiki.farnetiandrea.it
 > ```nginx
