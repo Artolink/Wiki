@@ -32,24 +32,25 @@ The portable ZIP also works if you want everything in one folder: useful on a US
 ## Create the first database
 
 1. *File → New* → pick a path for the `.kdbx` (Dropbox / OneDrive folder is fine, the file is encrypted at rest).
-2. **Master password** — long, memorable, **only one** you ever need to remember. Use a passphrase: `correct-horse-battery-staple` style, 4+ random words is plenty.
-3. Optional but recommended: **key file** alongside the master password. The vault then needs *both* to open — useful if the `.kdbx` ever leaks. Of course store the key file separately (NOT in the same cloud folder!)
+2. **Master password**: long, memorable, **only one** you ever need to remember. Use a passphrase: `correct-horse-battery-staple` style, 4+ random words is plenty.
 
 Each entry has *Title / User / Password / URL / Notes* plus arbitrary custom fields. 
 
 Use **groups** (folders) to organize.
 
-## Plugin 1 — KeePassOTP (TOTP / 2FA codes inside the vault)
+## Plugins 
+
+### 1. KeePassOTP (TOTP / 2FA codes inside the vault)
 
 Stop juggling between the password manager and Google Authenticator on the phone: store the OTP secret next to the password it protects.
 
-### Install
+#### Install
 
 1. Grab `KeePassOTP.plgx` from the [releases page](https://github.com/Rookiestyle/KeePassOTP/releases).
 2. Drop the `.plgx` file into `C:\Program Files\KeePass Password Safe 2\Plugins\`.
 3. Restart KeePass. The plugin appears in *Tools → KeePassOTP*.
 
-### Configure OTP for an entry
+#### Configure OTP for an entry
 
 1. Open the entry (the one for the site that uses 2FA).
 2. Right-click → **OTP → Settings**.
@@ -59,11 +60,11 @@ The entry now shows the live 6-digit code in a column and copies it to the clipb
 
 The code refreshes every 30s like any TOTP app.
 
-## Plugin 2 — KeePassRPC + Kee (browser autofill)
+### 2. KeePassRPC + Kee (browser autofill)
 
 Manual copy-paste from KeePass to the browser is fine but slow. The pair **KeePassRPC** (KeePass-side plugin) + **Kee** (browser extension) wires them together: the extension talks to KeePass over a local WebSocket and autofills login forms.
 
-### Install KeePassRPC
+#### Install KeePassRPC
 
 1. Download `KeePassRPC.plgx` from https://github.com/kee-org/keepassrpc/releases.
 2. Drop into the same `Plugins/` folder.
@@ -71,12 +72,12 @@ Manual copy-paste from KeePass to the browser is fine but slow. The pair **KeePa
 
 KeePassRPC opens a WebSocket on `localhost:12546`: only the browser extension on the same machine can reach it, but if a corporate firewall complains, that's the port to whitelist.
 
-### Install Kee in the browser
+#### Install Kee in the browser
 
 - Firefox: https://addons.mozilla.org/en-US/firefox/addon/kee/
 - Chrome / Edge: search "Kee" in the relevant store, or grab from https://www.kee.pm/.
 
-### First connection
+#### First connection
 
 1. With KeePass open and the database **unlocked**, install/launch Kee in the browser.
 2. KeePass will pop up a dialog: *"A new client (Kee) is asking to connect"*. Verify the unique key/auth code matches what Kee shows in the browser, click **Yes**.
