@@ -1,4 +1,4 @@
 ---
-title: Deploy
+title: ⬇️ Deploy
 tags:
 ---
