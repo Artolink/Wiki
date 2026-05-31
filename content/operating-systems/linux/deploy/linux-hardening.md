@@ -5,14 +5,14 @@ tags:
   - Advanced
 ---
 
-A practical, opinionated baseline for hardening a **fresh Debian or Ubuntu server**. It consolidates the CIS Level 1 server controls with a set of additional measures (auditing, kernel and filesystem hardening, brute-force protection, automatic security updates, firewall) that are commonly omitted but valuable in production.
+The following is a practical baseline for hardening a **fresh Debian or Ubuntu server**. 
+
+It consolidates the CIS Level 1 server controls, with a set of additional measures (auditing, kernel and filesystem hardening, brute-force protection, automatic security updates, firewall) that are commonly omitted, but very valuable in production.
 
 The guide is split into two parts:
 
-1. **Overview** — what hardening is, the philosophy, and how to use this document.
-2. **Implementation** — concrete configuration, grouped by area, ready to be adapted into Ansible, shell scripts, or applied by hand.
-
-> Everything here targets a generic, freshly provisioned machine. Adapt paths, package names, and policy values (lockout counts, password lengths, timeouts) to your own site policy before applying to production.
+1. **Overview**: what hardening is, the philosophy, and how to use this document.
+2. **Implementation**: concrete configuration, grouped by area, ready to be adapted into Ansible, shell scripts, or applied by hand.
 
 ---
 
@@ -20,31 +20,28 @@ The guide is split into two parts:
 
 ### 1.1 What is hardening?
 
-System hardening is the process of reducing a machine's attack surface and increasing the cost of a successful compromise. It rests on a few principles:
+System hardening is the process of reducing a machine's attack surface and increasing the cost of a successful compromise. 
 
-- **Least privilege** — users, services, and files get only the access they strictly need.
-- **Defense in depth** — multiple independent layers, so one failure does not equal total compromise.
-- **Reduce attack surface** — remove unused packages, services, kernel modules, and protocols.
-- **Auditability** — generate and protect logs so that intrusions can be detected and investigated.
-- **Secure defaults** — make the safe configuration the default state of the machine.
+It rests on a few principles:
 
-### 1.2 Configuration profiles
+- **Least privilege**: users, services, and files get only the access they strictly need.
+- **Defense in depth**: multiple independent layers, so one failure does not equal total compromise.
+- **Reduce attack surface**: remove unused packages, services, ports, kernel modules, and protocols.
+- **Auditability**: generate and protect logs so that intrusions can be detected and investigated.
+- **Secure defaults**: make the safe configuration the default state of the machine.
 
-The CIS benchmarks define two server profiles. This guide targets **Level 1** (practical, prudent, no significant loss of functionality) and adds selected **Level 2 / defense-in-depth** items where the cost is low.
+The **CIS Benchmarks** (published by the [Center for Internet Security](https://www.cisecurity.org/cis-benchmarks)) are the *de-facto* industry baseline for secure system configuration: hundreds of pages of concrete, prescriptive rules covering ~140 platforms (operating systems, databases, web servers, cloud, container runtimes).
 
-| Profile | Intent |
-|---|---|
-| Level 1 — Server | Practical, prudent, clear security benefit, does not inhibit normal use |
-| Level 2 — Server | For environments where security is paramount; may affect utility or performance |
+Each Benchmark splits its controls into two profiles: this guide targets **Level 1** (practical, prudent, no significant loss of functionality) and adds selected **Level 2 / defense-in-depth** items only where the cost is low.
 
 ### 1.3 How to read the implementation sections
 
 Each control is presented with:
 
-- **What** — the change being made.
-- **Why** — the risk it mitigates.
-- **How** — the commands or configuration.
-- **Verify** — how to confirm it is applied.
+- **What**: the change being made.
+- **Why**: the risk it mitigates.
+- **How**: the commands or configuration.
+- **Verify**: how to confirm it is applied.
 
 ### 1.4 Order of operations
 
@@ -67,18 +64,23 @@ A sensible sequence when applying these to a fresh machine:
 15. Final verification and compliance scan (§16)
 
 > [!CAUTION]
-> Several changes (SSH, PAM, sudo, firewall) can lock you out if applied incorrectly. **Always keep a second authenticated session open** while applying them, and test login from a new session before closing the old one. For the firewall, allow your management IP / SSH first, *then* enable the default-deny policy.
+> Several changes (SSH, PAM, sudo, firewall) can lock you out if applied incorrectly. 
+> 
+> **Always keep a second authenticated session open** while applying them, and test login from a new session before closing the old one. 
+> 
+> For the firewall, allow your management IP / SSH first, *then* enable the default-deny policy.
 
 ### 1.5 What hardening does NOT protect you from
 
 > [!IMPORTANT]
-> This guide reduces the probability and blast radius of a **remote** or **lateral-movement** compromise. It does **not** protect against:
+> This guide reduces the probability and blast radius of a **remote** or **lateral-movement** compromise. 
+> 
+> It does **not** protect against:
 >
-> - **Accidental or malicious data loss** (`rm -rf`, fat-fingered automation, ransomware). → You need **backups**: off-machine, off-site, encrypted, and *tested*. Tools: `borg` + `borgmatic`, `restic` + `rclone`, `zfs send`, or full enterprise solutions like BareOS.
-> - **Physical access** to the disk. → You need **full-disk encryption (LUKS)** on laptops and bare-metal servers — without it, anyone with 30 seconds at the disk can mount it from a live USB and read `/etc/shadow`, application data, and TLS private keys in clear. Cloud VPS: out of scope, the trust boundary is the provider's hypervisor and you've already accepted it. For the deploy + recovery procedure, see `luks-full-disk-encryption` *(TBD)*.
-> - **Application-layer vulnerabilities** in the software the server actually runs. → You need **dependency / container scanning** in CI (`trivy`, `grype`, `snyk`).
->
-> Hardening, backups, and application security are three independent layers — having one doesn't excuse the other two.
+> - **Accidental or malicious data loss**: You need **encrypted backups**. The open-source tool I use in production is **BareOS**.
+> - **Physical access** to the disk: you need **full-disk encryption (LUKS)** on laptops and bare-metal servers, without it, anyone with 30 seconds at the disk can mount it from a live USB and read `/etc/shadow`, application data, and TLS private keys in clear (Cloud VPS are out of scope, the trust boundary is the provider's hypervisor, and you've already accepted it).
+> - **Application-layer vulnerabilities** in the software the server actually runs.
+
 
 ---
 
@@ -93,7 +95,6 @@ Safe-to-remove candidates on a typical server:
 
 ```bash
 apt-get purge -y \
-  telnet telnetd \
   rsh-client rsh-redone-client \
   talk \
   nis \
@@ -107,9 +108,9 @@ apt-get autoremove --purge -y
 ```
 
 > [!WARNING]
-> **Do NOT blindly purge** `snapd` and `multipath-tools` — they're sometimes flagged in CIS lists but:
+> **Do NOT blindly purge** `snapd` and `multipath-tools`, they're sometimes flagged in CIS lists but:
 > - `snapd` on Ubuntu may be a dependency of `lxd`, cloud-init bootstraps, and some vendor agents.
-> - `multipath-tools` is **mandatory** on SAN/iSCSI/Fibre-Channel storage — removing it can render disks invisible after the next reboot.
+> - `multipath-tools` is **mandatory** on SAN/iSCSI/Fibre-Channel storage: removing it can render disks invisible after the next reboot.
 >
 > Verify your environment first (`snap list`, `multipath -l`) before removing either.
 
@@ -147,7 +148,7 @@ systemctl list-unit-files --state=enabled
 ### 2.4 Time synchronization
 
 **What:** Ensure a single, working time source.
-**Why:** Consistent timestamps are essential for log correlation and time-sensitive auth (Kerberos, TLS — see [[tls-certificates|TLS certificates]]).
+**Why:** Consistent timestamps are essential for log correlation and much more.
 
 `/etc/chrony/chrony.conf`:
 
@@ -168,7 +169,7 @@ chronyc tracking
 ## 3. Kernel modules and filesystem types
 
 **What:** Block the loading of kernel modules that have no business being on a server.
-**Why:** Many filesystem drivers (`cramfs`, `udf`, ...) and removable-media stacks (`usb-storage`, `firewire-core`) expand the kernel attack surface for zero operational benefit on a typical Linux server. Blocking the modules at modprobe level prevents both accidental and malicious loading.
+**Why:** Many filesystem drivers (`cramfs`, `udf`, ...) and removable-media stacks (`usb-storage`, `firewire-core`) expand the kernel attack surface for zero operational benefit on a typical Linux server. 
 
 ### 3.1 Disable unused filesystem modules
 
@@ -195,7 +196,7 @@ done
 ### 3.2 Disable USB storage (optional)
 
 **What:** Block the kernel module that backs USB mass-storage devices.
-**Why:** Stops an attacker with physical access from exfiltrating data or auto-running malware from a USB key. Skip if the server legitimately uses USB drives (backup tapes, license dongles, ...).
+**Why:** Stops an attacker with physical access from exfiltrating data or auto-running malware from a USB key. Skip if the server legitimately uses USB drives.
 
 `/etc/modprobe.d/cis-usb.conf`:
 
@@ -206,7 +207,7 @@ install usb-storage /bin/true
 ### 3.3 Disable wireless interfaces (optional)
 
 **What:** Disable Wi-Fi / Bluetooth radios on a wired-only server.
-**Why:** Removes an entire wireless attack surface (rogue AP, KARMA, BT pairing exploits) on machines that have no business broadcasting.
+**Why:** Removes an entire wireless attack surface on machines that have no business broadcasting.
 
 ```bash
 # Wireless: if `rfkill list` shows entries, block all
@@ -286,7 +287,7 @@ sysctl kernel.yama.ptrace_scope     # -> 1
 ```
 
 > [!INFO]
-> **About IPv6.** This guide hardens IPv6 but does *not* disable it. Disabling IPv6 system-wide breaks Docker / Podman, NetworkManager, systemd-resolved, and some package managers in subtle ways. CIS L1 does not require disabling IPv6, only hardening it. If you have a documented reason to disable it, do so via the bootloader:
+> **About IPv6.** This guide hardens IPv6 but does *not* disable it. Disabling IPv6 system-wide breaks Docker / Podman, NetworkManager, systemd-resolved. CIS L1 does not require disabling IPv6, only hardening it. If you have a documented reason to disable it, do so via the bootloader:
 >
 > ```conf
 > # /etc/default/grub
@@ -302,11 +303,15 @@ sysctl kernel.yama.ptrace_scope     # -> 1
 ## 5. Firewall
 
 **What:** Default-deny incoming, default-allow outgoing, allow only the ports you actually serve.
-**Why:** A firewall is the single most impactful hardening you'll apply: it blocks every service that ever ends up listening on `0.0.0.0` by mistake. Without it, the rest of this guide is bypassable by the first misconfigured daemon.
+**Why:** A firewall is the single most impactful hardening you'll apply: it blocks every service that ever ends up listening on `0.0.0.0` by mistake. 
 
-UFW is the simplest layer on Debian/Ubuntu; it generates nftables rules underneath. For complex topologies (NAT, multiple interfaces, custom chains) configure nftables directly.
+Without it, the rest of this guide is bypassable by the first misconfigured daemon.
 
-### 5.1 UFW — simple default-deny
+UFW is the simplest layer on Debian/Ubuntu: it generates nftables rules underneath. 
+
+For complex topologies (NAT, multiple interfaces, custom chains) configure nftables directly (I definitely recommend learning IPTables and use that).
+
+### 5.1 UFW: simple default-deny
 
 > [!CAUTION]
 > **Allow SSH before enabling UFW**, otherwise you'll lock yourself out of a remote session immediately.
@@ -358,10 +363,7 @@ systemctl enable ufw  # survives reboot
 ## 6. Filesystem Mount Options
 
 **What:** Apply `noexec`, `nodev`, `nosuid` to temporary and shared-memory filesystems; `nodev` on user partitions.
-**Why:** Prevents executing binaries, creating device nodes, or honoring setuid bits in world-writable areas — a common foothold for attackers.
-
-> [!WARNING]
-> `noexec` on `/tmp` is **not free** — it can break `apt`/`dpkg` post-install scripts, `systemd-tmpfiles` setup, certain Java apps that exec from tempdirs, and snap installs. Test on a staging system before rolling out to a busy production host.
+**Why:** Prevents executing binaries, creating device nodes, or honoring setuid bits in world-writable areas, a common foothold for attackers.
 
 ### 6.1 /dev/shm
 
@@ -377,7 +379,7 @@ mount -o remount /dev/shm
 
 ### 6.2 /tmp and /var/tmp (if separate partitions)
 
-Add `noexec,nodev,nosuid` to the options field of the relevant `/etc/fstab` entries, then:
+Add `nodev,nosuid` to the options field of the relevant `/etc/fstab` entries, then:
 
 ```bash
 mount -o remount /tmp
@@ -388,7 +390,7 @@ If `/tmp` is a systemd mount, edit `/etc/systemd/system/local-fs.target.wants/tm
 
 ```ini
 [Mount]
-Options=mode=1777,strictatime,noexec,nodev,nosuid
+Options=mode=1777,strictatime,nodev,nosuid
 ```
 
 ```bash
@@ -398,7 +400,9 @@ systemctl restart tmp.mount
 
 ### 6.3 /home, /var/log, /var/log/audit, removable media
 
-Add `nodev` to `/home`, and `noexec,nodev,nosuid` to any removable-media entries. If `/var/log` and `/var/log/audit` are separate partitions (recommended on auditable systems), they should also carry `nodev,nosuid`.
+Add `nodev` to `/home`, and `noexec,nodev,nosuid` to any removable-media entries. 
+
+If `/var/log` and `/var/log/audit` are separate partitions (recommended on auditable systems), they should also carry `nodev,nosuid`.
 
 **Verify (nothing should be returned):**
 
@@ -415,7 +419,7 @@ done
 ## 7. SSH Server Hardening
 
 **What:** Lock down `sshd` to strong crypto, no root login, sane session limits.
-**Why:** SSH is the primary remote entry point; weak settings invite brute force, MITM, and session hijacking.
+**Why:** SSH is the primary remote entry point: weak settings invite brute force, MITM, and session hijacking.
 
 Apply to `/etc/ssh/sshd_config` (or a drop-in in `/etc/ssh/sshd_config.d/99-hardening.conf`):
 
@@ -471,7 +475,9 @@ sshd -T | grep -Ei 'permitrootlogin|loglevel|ciphers|macs|kexalgorithms|logingra
 ```
 
 > [!TIP]
-> Once every user has a working public key, set `PasswordAuthentication no` and add `AuthenticationMethods publickey` to enforce key-only login. Both together eliminate the password-attack surface entirely.
+> Once every user has a working public key, set `PasswordAuthentication no` and add `AuthenticationMethods publickey` to enforce key-only login. 
+> 
+> Both together eliminate the password-attack surface entirely.
 
 For everything around keys (generation, distribution, agent forwarding, key rotation), see [[SSH-Linux|the SSH guide]].
 
@@ -562,7 +568,7 @@ SHA_CRYPT_MIN_ROUNDS 65536
 SHA_CRYPT_MAX_ROUNDS 65536
 ```
 
-(`yescrypt` is the new default on Debian 12+ and is even stronger; if your distro uses it, leave it alone.)
+(`yescrypt` is the new default on Debian 12+ and is even stronger: if your distro uses it, leave it alone)
 
 ### 8.4 Password history
 
@@ -618,15 +624,14 @@ Add to `/etc/pam.d/su` (this file is not regenerated by `pam-auth-update`, safe 
 auth required pam_wheel.so use_uid group=wheel
 ```
 
-Keep `wheel` empty so nobody can `su` directly. Add a user only when you have a documented, time-bounded reason.
+Keep `wheel` empty so nobody can `su` directly.
+
+Add a user only when you have a documented, time-bounded reason.
 
 ### 8.7 Restrict root console login
 
 **What:** Limit (or forbid) where root may log in directly.
 **Why:** Ensures the console is physically secured and no unexpected terminals are allowed.
-
-> [!DANGER]
-> `pam_securetty.so` treats a **missing** `/etc/securetty` as *"any tty allowed for root"* — exactly the opposite of what most people assume. Do **not** delete the file; **empty it** instead.
 
 ```bash
 # Forbid root login from every tty (recommended on remote servers)
@@ -640,7 +645,9 @@ chmod 600 /etc/securetty
 ### 8.8 System-wide umask
 
 **What:** Set a restrictive default file-creation mask for all users *and* services.
-**Why:** A `umask` in `/etc/profile.d/` only affects interactive login shells — services, cron jobs, sudo, and systemd units ignore it. The right place is `login.defs` + `pam_umask`.
+**Why:** A `umask` in `/etc/profile.d/` only affects interactive login shells: services, cron jobs, sudo, and systemd units ignore it. 
+
+The right place is `login.defs` + `pam_umask`.
 
 `/etc/login.defs`:
 
@@ -648,7 +655,7 @@ chmod 600 /etc/securetty
 UMASK 027
 ```
 
-Ensure `pam_umask.so` is in the session stack — it usually is by default on Debian/Ubuntu, verify with:
+Ensure `pam_umask.so` is in the session stack, it usually is by default on Debian/Ubuntu, verify with:
 
 ```bash
 grep -r pam_umask /etc/pam.d/ /usr/share/pam-configs/
@@ -757,14 +764,10 @@ augenrules --load
 auditctl -l        # list active rules
 ```
 
-> [!TIP]
+> [!important]
 > auditd generates **tens of thousands of events per day** even on a quiet server. Without a consumer that collects, parses and alerts on them, they stay forensic-only: useful *after* an incident, not for real-time detection.
 >
 > Some useful open-source consumers are **Wazuh** or **Elastic SIEM** if you're already in the ELK stack, or even **Splunk** in enterprise environments.
-
-
-> [!WARNING]
-> `-e 2` makes the rules **immutable until the next reboot** — you cannot add, modify, or remove rules without a reboot. Apply it only once your ruleset is stable.
 
 ---
 
@@ -796,7 +799,7 @@ find /var/log -type f -exec chmod g-wx,o-rwx "{}" + \
 ### 11.3 Remote log forwarding
 
 **What:** Forward logs to a central host.
-**Why:** If a host is compromised, remote copies preserve the evidence — and centralized log aggregation makes correlation across hosts possible.
+**Why:** If a host is compromised, remote copies preserve the evidence and centralized log aggregation makes correlation across hosts possible.
 
 `/etc/rsyslog.d/90-remote.conf`:
 
@@ -817,7 +820,9 @@ systemctl restart rsyslog
 
 ### 11.4 Log rotation
 
-Ensure `/etc/logrotate.conf` and `/etc/logrotate.d/*` rotate logs per policy. Example custom rule `/etc/logrotate.d/iptables`:
+Ensure `/etc/logrotate.conf` and `/etc/logrotate.d/*` rotate logs per policy. 
+
+Example custom rule `/etc/logrotate.d/iptables`:
 
 ```conf
 /var/log/iptables.log {
@@ -867,7 +872,7 @@ rm -f /etc/at.deny
 ## 12. Brute-Force Protection (fail2ban)
 
 **What:** Automatically ban IPs that repeatedly fail authentication.
-**Why:** Defense in depth on top of SSH and PAM lockout; banning at the network layer reduces log noise and slows attackers across multiple services.
+**Why:** Defense in depth on top of SSH and PAM lockout: banning at the network layer reduces log noise and slows attackers across multiple services.
 
 `/etc/fail2ban/jail.local`:
 
@@ -894,14 +899,18 @@ fail2ban-client status sshd
 ## 13. Automatic Security Updates
 
 **What:** Apply security patches automatically.
-**Why:** Most compromises exploit known, already-patched vulnerabilities — automated patching closes that window without operator intervention.
+**Why:** Most compromises exploit known, already-patched vulnerabilities, so automated patching closes that window without operator intervention.
+
+> [!DANGER]
+> In critical production servers you may want to do the opposite: disable unattended upgrades, so that anything important that you have running on them doesn't randomly break all of a sudden.
+> 
 
 ```bash
 apt-get install -y unattended-upgrades apt-listchanges
 dpkg-reconfigure -plow unattended-upgrades
 ```
 
-`/etc/apt/apt.conf.d/50unattended-upgrades` — restrict to security, mail on failure, avoid surprise reboots in production:
+`/etc/apt/apt.conf.d/50unattended-upgrades` - restrict to security, mail on failure, avoid surprise reboots in production:
 
 ```conf
 Unattended-Upgrade::Allowed-Origins {
@@ -957,7 +966,7 @@ chmod -x /etc/update-motd.d/50-motd-news 2>/dev/null || true
 
 Deploy drop-ins under `/etc/profile.d/`.
 
-Automatic idle logout — `/etc/profile.d/tmout.sh`:
+Automatic idle logout - `/etc/profile.d/tmout.sh`:
 
 ```sh
 # Auto-logout after 15 min of inactivity (CIS L1 default; raise to 3600 if 1h is preferred)
@@ -965,9 +974,6 @@ declare -xr TMOUT=900
 ```
 
 The `declare -xr` makes `TMOUT` **exported** (so child shells inherit it) and **readonly** (so users can't `unset` it).
-
-> [!INFO]
-> `TMOUT` is honored only by `bash`/`ksh`. `zsh` and `tcsh` ignore it — users of those shells need a different mechanism. On a homogenous Ubuntu/Debian server this is rarely an issue.
 
 ---
 
@@ -1062,21 +1068,19 @@ Re-run a compliance scan **periodically** (monthly) and **after major changes** 
 - [ ] Unnecessary packages purged; required tooling installed (rsyslog, chrony, auditd, ufw, fail2ban, unattended-upgrades)
 - [ ] Unused services disabled; time sync working
 - [ ] Unused kernel modules blocked (`cramfs`, `udf`, `hfs`, ...); USB storage disabled where applicable
-- [ ] sysctl hardening applied (routing, redirects, ASLR, ptrace scope, IPv6 hardening, info-leak protections)
+- [ ] sysctl hardening applied (routing, IPv6 hardening, info-leak protections)
 - [ ] **Firewall**: default-deny incoming, SSH allowed, UFW enabled and persistent
-- [ ] `/dev/shm`, `/tmp`, `/var/tmp` mounted `noexec,nodev,nosuid`; `/home` `nodev`
+- [ ] `/dev/shm`, `/tmp`, `/var/tmp` mounted `nodev,nosuid`. `/home` `nodev`
 - [ ] SSH: no root login, no host-based auth, strong ciphers/MACs/KEX, session limits, banner, validated config
 - [ ] PAM hardening applied via `pam-auth-update` profiles (not by hand-editing common-*)
 - [ ] Password complexity, lockout (faillock), SHA-512, history (pwhistory), and aging configured
-- [ ] `su` restricted to empty `wheel` group; root tty login forbidden by **empty** `/etc/securetty`
+- [ ] `su` restricted to empty `wheel` group. root tty login forbidden by **empty** `/etc/securetty`
 - [ ] System-wide `umask 027` set in `login.defs` (not just `/etc/profile.d/`)
 - [ ] Sudo: `use_pty`, dedicated log file, short timestamp timeout, `!visiblepw`, `env_reset`
-- [ ] auditd installed with rules (identity, scope, privileged, DAC, mount, access, time); trail made immutable
+- [ ] auditd installed with rules (identity, scope, privileged, DAC, mount, access, time)
 - [ ] rsyslog running, `0640` file mode, logs forwarded (TLS if over WAN), rotation configured
-- [ ] Cron directories `0700 root:root`; `cron.allow`/`at.allow` configured, `*.deny` removed
-- [ ] fail2ban active for sshd; management LAN whitelisted
+- [ ] Cron directories `0700 root:root`. `cron.allow`/`at.allow` configured, `*.deny` removed
+- [ ] fail2ban active for sshd. Management LAN whitelisted
 - [ ] Unattended security upgrades enabled (no auto-reboot in prod, mail on errors, minimal steps)
-- [ ] Banners set; MOTD news disabled; `TMOUT` and `umask 027` deployed
-- [ ] AppArmor enabled; critical profiles (sshd, rsyslogd) in enforce mode
-- [ ] root PATH clean; shadow group empty; SUID/SGID and world-writable inventory reviewed
-- [ ] Lynis / OpenSCAP scan run; baseline saved; periodic re-runs scheduled
+- [ ] Banners set. MOTD news disabled. `TMOUT` and `umask 027` deployed
+- [ ] AppArmor enabled. Critical profiles (sshd, rsyslogd) in enforce mode
