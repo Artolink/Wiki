@@ -4,6 +4,8 @@ tags:
   - Maintenance
   - Advanced
 ---
+> [!abstract] Ansible automation
+> If you'd rather automate this instead of applying it by hand, this entire guide is available as a ready-to-run [[linux-hardening-playbook|Ansible playbook]].
 
 The following is a practical baseline for hardening a **fresh Debian or Ubuntu server**. 
 
