@@ -63,7 +63,8 @@ flowchart LR
 
 ***
 
-##  <input type="checkbox"> 1. Install Obsidian on your PC
+## Deployment
+###  <input type="checkbox"> 1. Install Obsidian on your PC
 
 Follow [[obsidian-setup#Installation|the Obsidian setup]] to install Obsidian, create a vault, and learn the essentials (mainly wikilinks and tags, but also callouts and embeds).
 
@@ -75,7 +76,7 @@ The vault is just a normal folder on disk, so just pick a path you'll remember, 
 
 ***
 
-## <input type="checkbox"> 2. Set up your VPS
+### <input type="checkbox"> 2. Set up your VPS
 
 Since my goal is to avoid vendor lock-in and keep everything fully open source, I use a Linux machine with a public IPv4 address. 
 I host Nginx as my web server to publish my entire website on the domain _farnetiandrea.it_, which points directly to that IP address.
@@ -90,7 +91,7 @@ If you want to use the same setup, I recommend:
 
 ***
 
-##  <input type="checkbox"> 3. Install Quartz on the VPS
+###  <input type="checkbox"> 3. Install Quartz on the VPS
 
 Quartz is what converts your Markdown notes into a real site.
 
@@ -115,7 +116,7 @@ You can later also customize `quartz.config.ts` (title, colors, locale) and `qua
 
 ***
 
-##  <input type="checkbox"> 4. Git & GitHub setup
+###  <input type="checkbox"> 4. Git & GitHub setup
 
 Now, create a new empty repository on GitHub called `wiki` (no README, no license, leave it completely empty).
 
@@ -128,7 +129,7 @@ This is essential so that `deploy.sh`, the script that we'll create for automati
 
 ***
 
-##  <input type="checkbox"> 5. Configure Nginx
+###  <input type="checkbox"> 5. Configure Nginx
 
 Nginx is the web-server that allows you to publish the site you just created with Quartz.
 
@@ -145,7 +146,7 @@ and `root /var/www/example;` will be like `root /home/<YOUR_USER>/wiki/public;`
 
 ***
 
-##  <input type="checkbox"> 6. Certbot Installation
+###  <input type="checkbox"> 6. Certbot Installation
 
 Certbot is the software that issues a certificate for your domain, so that it can run in HTTPS.
 
@@ -164,7 +165,7 @@ Now I'll show you a couple scripts to automate the pipeline process, so that you
 
 ***
 
-##  <input type="checkbox"> 7. Automating the process
+###  <input type="checkbox"> 7. Automating the process
 
 For automating the entire pipeline, we are going to need two scripts:
 
