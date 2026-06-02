@@ -3,9 +3,7 @@ title: 🎛️ Ansible AWX
 series:
   - automation/ansible/awx/my-awx-stack
   - automation/ansible/awx/awx-operator-deploy
-  - automation/ansible/awx/awx-external-postgres
   - automation/ansible/awx/awx-execution-nodes
-  - automation/ansible/awx/awx-custom-ee
 ---
 
 **AWX** is the open-source community project of **Ansible Automation Platform** (the commercial product, formerly "Ansible Tower").
