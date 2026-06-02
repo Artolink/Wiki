@@ -3,8 +3,16 @@ title: "My AWX stack: a production-grade UI for Ansible"
 tags:
   - Projects
 ---
+There's a deprecated quickstart version of AWX that every tutorial stops at: a `docker-compose up` on a single host. 
 
-INTRODUZIONE DEL MIO STACK AWX
+It works for ten minutes and falls over the moment you treat it as real.
+
+So, this is the **other** version: AWX deployed the way it's actually run in production environments. 
+
+- The **AWX Operator on Kubernetes** as the control plane
+- An **external, dedicated PostgreSQL** instead of the throwaway pod.
+- Dedicated **execution nodes** joined over a **Receptor mesh**, so playbooks run isolated from the control plane
+- Custom **Execution Environments** built in CI and pulled from my own [[gitlab-setup|GitLab Container Registry]].
 
 ***
 
@@ -17,8 +25,6 @@ INTRODUZIONE DEL MIO STACK AWX
 The **AWX Operator** is a Kubernetes operator: you give it a custom resource (`kind: AWX`) describing the deployment you want, and it reconciles the cluster to match, creating the web pods, task pods, services, and (optionally) a database pod. 
 
 Upgrades, scaling, and backups are all driven by editing custom resources.
-
-This is why the series targets a **managed Kubernetes (KaaS)**: you get the K8s control plane managed by the provider, and you only provision worker nodes to host AWX.
 
 ***
 

@@ -21,7 +21,7 @@ Actually, the Grafana stack can cover every pillar for observability:
 But in this wiki, I’ll show you how to use the Grafana stack only for metrics, while using the ELK stack only for logs. The goal is to showcase different technologies commonly used in production environments, including setups where responsibilities are split exactly this way.
  
 ***
-##  The architecture
+##  Architecture
 
 The whole stack consists in two machines that are on the same **private LAN**:
 
