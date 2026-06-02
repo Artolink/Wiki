@@ -12,9 +12,9 @@ It works for ten minutes and falls over the moment you treat it as real.
 So, this is the **other** version: AWX deployed the way it's actually run in production environments. 
 
 - The **AWX Operator on Kubernetes** as the control plane
-- An **external, dedicated PostgreSQL** instead of the throwaway pod.
+- An **external, dedicated PostgreSQL** instead of the throwaway pod (*TBA*).
 - Dedicated **execution nodes** joined over a **Receptor mesh**, so playbooks run isolated from the control plane
-- Custom **Execution Environments** built in CI and pulled from my own [[gitlab-setup|GitLab Container Registry]].
+- Custom **Execution Environments** built in CI and pulled from my own [[gitlab-setup|GitLab Container Registry]] (*TBA*).
 
 ***
 

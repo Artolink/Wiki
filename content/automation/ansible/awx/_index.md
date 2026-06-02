@@ -21,8 +21,8 @@ If you've been running playbooks by hand, AWX is the step that turns "a script I
 This series builds a **production-grade AWX** the way it's actually run at scale: 
 
 - The AWX Operator on Kubernetes
-- An external HA database
+- An external HA database (*to be added in the future*)
 - Dedicated execution nodes joined over a Receptor mesh
-- Custom Execution Environments built in CI
+- Custom Execution Environments built in CI (*to be added in the future*)
 
 Start from the overview for the architecture, then follow the deploy pages in order.

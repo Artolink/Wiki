@@ -204,5 +204,5 @@ This is exactly how the pattern scales from one node to the dozens you'd find in
 
 ## What you can do in the future
 
-- [[awx-custom-ee|Custom Execution Environments]]: build your own EE with `ansible-builder` and pull it on the execution nodes from the [[gitlab-setup|GitLab Registry]], instead of using the default public EE.
+- Custom Execution Environments: build your own EE with `ansible-builder` and pull it on the execution nodes from the [[gitlab-setup|GitLab Registry]], instead of using the default public EE.
 - **Production: external PostgreSQL**: when your environment allows a dedicated database host, move the DB out of the cluster, it is better for production. 

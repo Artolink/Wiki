@@ -92,7 +92,7 @@ images:
 > [!WARNING]- The `kube-rbac-proxy` image override is mandatory on awx-operator 2.19.x 
 > The operator pod has two containers; one of them references `gcr.io/kubebuilder/kube-rbac-proxy:v0.15.0`, but Google **decommissioned the `gcr.io/kubebuilder` registry**: without the override the operator pod gets stuck at `1/2 Running` with `ImagePullBackOff` and `not found`.
 > 
- The redirect to `quay.io/brancz/kube-rbac-proxy` (the maintainer's repo) fixes it.
+ > The redirect to `quay.io/brancz/kube-rbac-proxy` (the maintainer's repo) fixes it.
 
 Validate the kustomization before applying (catches YAML typos before they touch the cluster):
 
