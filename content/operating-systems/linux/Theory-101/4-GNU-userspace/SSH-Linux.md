@@ -114,6 +114,69 @@ On your **client** (your laptop, where you type `ssh`), everything lives in `~/.
 
 ***
 
+## How the SSH server runs: `sshd` service vs socket activation
+
+You now understand how authentication works. 
+
+But there's one server-side detail that trips up a *lot* of people the first time they change the SSH port: **how `sshd` is actually started**, and **where it reads its listening port from**.
+
+On modern systemd distros, `sshd` can be launched in **two different ways**: and they take the port from **different places**.
+
+|                               | **`ssh.service`** (traditional daemon)                        | **`ssh.socket`** (socket activation)                                                    |
+| ----------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Who holds the port open       | **`sshd` itself**: one long-running process, always listening | **systemd** holds the port and starts a fresh `sshd` only **when a connection arrives** |
+| Where the **port** comes from | `Port` in **`/etc/ssh/sshd_config`**                          | `ListenStream=` in the **`ssh.socket`** unit                                            |
+
+> [!example] The receptionist analogy
+> **Socket activation** is like a *receptionist* (systemd) who holds the office phone line and only calls a worker (`sshd`) when someone rings. The number (port 22) is written on the **receptionist's** desk (the socket unit), not on the worker's note (`sshd_config`).
+> 
+> The **traditional daemon** is the worker holding their *own* line all day, on the number written in their own note (`sshd_config`).
+
+### The gotcha: changing `Port` does nothing
+
+On **Ubuntu 22.10+ / 24.04**, socket activation is the **default**. 
+
+So if you set `Port 2200` in `sshd_config`, restart, and then get `Connection refused` on 2200, it's because **`ssh.socket` is still listening on 22** and ignoring your config.
+
+Check which mode is active and **what port is really open**:
+
+```bash
+ss -tlnp | grep -i ssh          # is sshd listening on :22 or :2200?
+systemctl is-active ssh.socket  # "active" → socket activation is in charge
+```
+
+If `ss` shows `:22` while your config says `Port 2200`, socket activation is the culprit.
+
+### Fixing it: two clean options
+
+> [!info]- Option A: disable the socket, let `sshd_config` rule (simplest)
+> ```bash
+> sudo systemctl disable --now ssh.socket
+> sudo systemctl restart ssh
+> ss -tlnp | grep -i ssh    # now :2200
+> ```
+> Now `sshd` runs as the classic always-on daemon and reads `Port` from `sshd_config` like you'd expect.
+
+> [!info]- Option B: keep socket activation, move the socket to your port
+> ```bash
+> sudo mkdir -p /etc/systemd/system/ssh.socket.d
+> printf '[Socket]\nListenStream=\nListenStream=2200\n' | sudo tee /etc/systemd/system/ssh.socket.d/port.conf
+> sudo systemctl daemon-reload
+> sudo systemctl restart ssh.socket
+> ss -tlnp | grep -i ssh    # :2200
+> ```
+> The empty `ListenStream=` clears the default `:22`, then sets `2200`.
+
+> [!warning] Don't lock yourself out at boot
+> If you disable `ssh.socket` (Option A), make sure the **service** is enabled to start on boot, otherwise a reboot leaves you with no SSH:
+> ```bash
+> systemctl is-enabled ssh    # must say "enabled"
+> sudo systemctl enable ssh   # if it doesn't
+> ```
+> And as always: test the new port from a **second terminal** before closing your current session.
+
+***
+
 ## The procedure
 
 Here's just a quick recap of all the things we'll discuss in a second:
