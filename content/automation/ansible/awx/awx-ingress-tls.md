@@ -1,5 +1,5 @@
 ---
-title: "3. Expose AWX: Ingress + TLS with a real HTTPS endpoint"
+title: "3. Expose AWX: Ingress + TLS"
 tags:
   - Maintenance
   - Advanced

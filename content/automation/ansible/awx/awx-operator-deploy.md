@@ -1,5 +1,5 @@
 ---
-title: "1. AWX Operator: deploy the control plane on Kubernetes"
+title: "1. AWX Operator: deploy the AWX control plane on Kubernetes"
 tags:
 ---
 This page installs the **AWX Operator** on the Kubernetes cluster and brings up the **first AWX instance**.

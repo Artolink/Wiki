@@ -192,6 +192,69 @@ That's pattern A: the control plane orchestrates, the dedicated node executes, i
 
 ***
 
+## 7. Run a real job against a target host
+
+The Demo Job ran a no-op against `localhost` *inside* the EE: it proved the **mesh**, not real automation. 
+
+Now point the execution node at an actual machine. In my case, that's my VPS.
+
+**The model:** AWX never does SSH to targets itself, the **execution node** does. 
+
+The control plane dispatches the job, the node opens the SSH connection from *its own* IP and runs the playbook against the target.
+
+```
+Control plane (K8s)  →  execution node  →  SSH :22  →  target host (my VPS)
+```
+
+So you need three things: an SSH **credential**, an **inventory** with the host, and **connectivity** from the node to the target.
+
+### 1. Credential: a dedicated SSH key
+
+Generate a key just for AWX (don't reuse a personal one) and authorize it on the target:
+
+```bash
+# on your workstation
+ssh-keygen -t ed25519 -f awx_target -C awx
+
+# put the PUBLIC key on the target (or append awx_target.pub to its ~/.ssh/authorized_keys)
+ssh-copy-id -i awx_target.pub <user>@<target>
+```
+
+In AWX: **Resources → Credentials → Add → type _Machine_** → set the **Username** and paste the **private key** (`awx_target`). 
+
+AWX stores it encrypted in its vault.
+
+### 2. Inventory: the target host
+
+**Resources → Inventories → Add → Inventory** (e.g. `infra`), then:
+
+**Hosts → Add** → the target's address.
+
+> [!NOTE]
+> If you have deployed [[gitlab-setup|Gitlab]] like i've shown you, you can save your Ansible inventories in GitLab and connect them to AWX *(tutorial coming soon)*
+
+### 3. Connectivity: node → target:22
+
+The SSH leaves from the **execution node's IP**, not the control plane, so:
+
+- the target's firewall / Security Group must allow **:22 from the execution node's IP**
+- the AWX public key must be in the target's `~/.ssh/authorized_keys`.
+
+Verify straight from the node *before* bothering with launching a job:
+
+```bash
+ssh -i awx_target <user>@<target> "hostname"
+```
+
+If that returns the hostname, the job will work.
+
+### 4. Job template: tie everything together 
+
+**Resources → Templates → Add → Job Template**: pick the **inventory**, the **Machine credential**, a **playbook** (start with a one-line `ansible.builtin.ping`), and set **Instance Groups** to `execution-vms`., then **Launch** → Green means the node SSHed to the target and ran the play. 
+
+That's real automation over the mesh.
+
+***
 ## Scaling out
 
 Adding more execution nodes is the same steps (prepare → register → bundle → firewall → associate), and they all join the same instance group. 
