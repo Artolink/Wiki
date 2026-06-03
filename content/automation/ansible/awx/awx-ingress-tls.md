@@ -1,8 +1,6 @@
 ---
 title: "3. Expose AWX: Ingress + TLS"
 tags:
-  - Maintenance
-  - Advanced
 ---
 
 So far AWX is reached via `kubectl port-forward`: fine to bootstrap, useless as a real service.
