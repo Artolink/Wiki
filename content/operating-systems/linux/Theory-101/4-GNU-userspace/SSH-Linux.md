@@ -114,7 +114,7 @@ On your **client** (your laptop, where you type `ssh`), everything lives in `~/.
 
 ***
 
-## How the SSH server runs: `sshd` service vs socket activation
+## How the SSH server runs: sshd service vs socket activation
 
 You now understand how authentication works. 
 

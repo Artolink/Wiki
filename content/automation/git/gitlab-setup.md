@@ -83,7 +83,7 @@ Three options, pick one:
 | Host SSH moved to e.g. `2200`, GitLab on `22` | Clean URLs (`git clone git@gitlab.yourdomain.com:…`) | Requires updating every existing SSH client config                         |
 | GitLab SSH disabled, HTTPS-only push          | No port conflict                                     | Loses the convenience of key-based push for users                          |
 
-This guide uses **option 2** (host SSH moved aside), the cleanest user experience (very good option if you keep GitLab in a dedicated VPS).
+This guide uses **option 2** (host SSH moved aside), the cleanest user experience (very good option if you keep GitLab in a dedicated VPS) (see also [[SSH-Linux#How the SSH server runs sshd service vs socket activation|the dedicated SSH expalnation]]).
 
 ```bash
 # 1. Move host sshd to port 2200 BEFORE bringing GitLab up
