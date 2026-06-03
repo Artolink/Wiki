@@ -15,7 +15,7 @@ So, this is the **other** version: AWX deployed the way it's actually run in pro
 - The **AWX Operator on Kubernetes** as the control plane
 - An **external, dedicated PostgreSQL** instead of the throwaway pod (*TBA*).
 - Dedicated **execution nodes** joined over a **Receptor mesh**, so playbooks run isolated from the control plane
-- Custom **Execution Environments** built in CI and pulled from my own [[gitlab-setup|GitLab Container Registry]] (*TBA*).
+- Inventories pulled from my own [[gitlab-setup|GitLab Container Registry]].
 - Exposed to the world via Ingress (you probably wanna do it privately)
 
 ***
