@@ -157,6 +157,34 @@ You can see the [Certbot setup guide](certbot-setup-guide.md) to install Certbot
 
 ![[certbot-setup-guide#^basic-conf]]
 
+For example, this is how my final nginx vhost kinda looks like:
+> [!example]- Example: wiki.farnetiandrea.it
+> ```nginx
+> server {
+>     server_name wiki.farnetiandrea.it;
+>     root ~/wiki/public;
+>     index index.html;
+>     location / { try_files $uri $uri.html $uri/ =404; }
+> 
+>     listen [::]:443 ssl;            # managed by Certbot
+>     listen 443 ssl;                 # managed by Certbot
+>     ssl_certificate     /etc/letsencrypt/live/wiki.farnetiandrea.it/fullchain.pem;
+>     ssl_certificate_key /etc/letsencrypt/live/wiki.farnetiandrea.it/privkey.pem;
+>     include /etc/letsencrypt/options-ssl-nginx.conf;
+>     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+> }
+> 
+> server {
+>     if ($host = wiki.farnetiandrea.it) {
+>         return 301 https://$host$request_uri;
+>     }
+>     listen 80;
+>     listen [::]:80;
+>     server_name wiki.farnetiandrea.it;
+>     return 404;
+> }
+> ```
+
 And... we are done!
 
 Your personal Wiki should be online.
