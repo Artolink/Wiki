@@ -4,7 +4,7 @@ tags:
   - Projects
 ---
 ![[Pasted image 20260602180612.png]]
-https://farnetiandrea.it/awx
+https://awx.farnetiandrea.it
 
 There's a deprecated quickstart version of AWX that every tutorial stops at: a `docker-compose up` on a single host. 
 
