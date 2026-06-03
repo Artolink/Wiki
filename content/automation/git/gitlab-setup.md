@@ -144,8 +144,6 @@ services:
 
         # Disable some heavy services if you don't use them
         prometheus_monitoring['enable'] = false
-        grafana['enable'] = false
-        mattermost['enable'] = false
 
         # Sane defaults for a small instance
         puma['worker_processes'] = 2
@@ -211,26 +209,23 @@ The file is auto-deleted after 24 hours, so copy the password to your password m
 
 ## 7. nginx reverse-proxy + HTTPS
 
-This is the same pattern as in [[nginx-web-server-setup|the nginx setup guide]]: TLS terminates on nginx, plain HTTP to the backend on localhost.
+Same pattern as [[nginx-web-server-setup|the nginx setup guide]].
 
-`/etc/nginx/sites-available/gitlab`:
+### 1. Write the vhost HTTP only (Certbot adds the TLS)
+
+Don't hand-write the `listen 443 ssl` block. 
+
+A `listen 443 ssl` directive with no certificate yet makes `nginx -t` fail, obviously (`no "ssl_certificate" is defined`). 
+
+Start **HTTP-only** and let Certbot inject the HTTPS server + redirect.
+
+`/etc/nginx/sites-available/gitlab.yourdomain.com`:
 
 ```nginx
-# Redirect HTTP → HTTPS (Certbot will fill these in)
 server {
     listen 80;
     listen [::]:80;
     server_name gitlab.yourdomain.com;
-    return 301 https://$host$request_uri;
-}
-
-# GitLab UI on https://gitlab.yourdomain.com
-server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
-    server_name gitlab.yourdomain.com;
-
-    # ssl_certificate / ssl_certificate_key added by Certbot
 
     # GitLab pushes can be large — bump body size
     client_max_body_size 1G;
@@ -240,8 +235,7 @@ server {
         proxy_set_header Host              $host;
         proxy_set_header X-Real-IP         $remote_addr;
         proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-        proxy_set_header X-Forwarded-Ssl   on;
+        proxy_set_header X-Forwarded-Proto $scheme;
 
         # Long polling for CI job streaming
         proxy_read_timeout 300s;
@@ -250,21 +244,43 @@ server {
 }
 ```
 
-Enable the site and reload:
+Enable the site, test, reload:
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/gitlab /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/gitlab.yourdomain.com /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-### Issue TLS certificates
+Confirm the plain-HTTP proxy works **before** adding TLS:
+
+```bash
+curl -sI http://gitlab.yourdomain.com | head -n 5   # expect: 302 → /users/sign_in
+```
+
+Of course port 80 needs to be open, also for the Certbot verification.
+
+If it's not, enable it:
+
+```bash
+sudo ufw allow 80/tcp
+```
+
+And of course, 443/tcp too.
+
+### 2. Issue the TLS certificate
 
 ```bash
 sudo certbot --nginx -d gitlab.yourdomain.com
 ```
 
-[[certbot-setup-guide|Certbot] patches the vhost above, adds `ssl_certificate` lines, and schedules auto-renewal via `certbot.timer`. 
+[[certbot-setup-guide|Certbot]] patches the vhost above: it adds the `listen 443 ssl` server, the `ssl_certificate` / `ssl_certificate_key` lines, an **80 → 443 redirect**, and schedules auto-renewal via `certbot.timer`. 
+
+Pick **Redirect** when/if prompted then verify renewal works:
+
+```bash
+sudo certbot renew --dry-run
+```
 
 ---
 

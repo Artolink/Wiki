@@ -40,7 +40,7 @@ For a single domain served by Nginx:
 ```bash
 sudo certbot --nginx -d wiki.example.com
 ```
-
+^maincommand
 For multiple aliases on the same cert:
 
 ```bash

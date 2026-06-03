@@ -73,6 +73,12 @@ server {
 }
 ```
 ^basic-conf
+
+This is a vhost basic starting configuration. Why?
+
+Because for 443, [[certbot-setup-guide|Certbot]] automatically sets it up when you do this:
+![[certbot-setup-guide#^maincommand]]
+
 #### Common patterns
 
 ##### 1. Static site
@@ -171,7 +177,7 @@ Use `restart` only when you change `nginx.conf` itself.
 
 Nginx doesn't issue certificates on its own. 
 
-Pair it with [Certbot](certbot-setup-guide): a single `sudo certbot --nginx -d your-domain.com` adds `listen 443 ssl`, the cert paths, and an HTTP→HTTPS redirect to the existing vhost, plus auto-renewal via `certbot.timer`... and the day you'll want to *look inside* them (check expiration, inspect SAN, verify chain, convert format) check out [[tls-certificates|the TLS certificates reference]] for the openssl one-liners you'll need.
+Pair it with [Certbot](certbot-setup-guide): a single `sudo certbot --nginx -d your-domain.com` *automatically* adds `listen 443 ssl`, the cert paths, and an HTTP→HTTPS redirect to the existing vhost, plus auto-renewal via `certbot.timer`... and the day you'll want to *look inside* them (check expiration, inspect SAN, verify chain, convert format) check out [[tls-certificates|the TLS certificates reference]] for the openssl one-liners you'll need.
 
 
 ### Useful commands
