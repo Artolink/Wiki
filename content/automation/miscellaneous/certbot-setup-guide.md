@@ -41,6 +41,7 @@ For a single domain served by Nginx:
 sudo certbot --nginx -d wiki.example.com
 ```
 ^maincommand
+
 For multiple aliases on the same cert:
 
 ```bash
@@ -89,34 +90,34 @@ If your DNS provider isn't in the official plugin list, the alternatives are `--
 ### What Certbot adds to the vhost
 
 After `certbot --nginx`, your vhost looks roughly like this:
-
-```nginx
-server {
-    server_name wiki.example.com;
-    root /var/www/wiki;
-    index index.html;
-    location / { try_files $uri $uri.html $uri/ =404; }
-
-    # ── added by Certbot ──
-    listen [::]:443 ssl;
-    listen 443 ssl;
-    ssl_certificate     /etc/letsencrypt/live/wiki.example.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/wiki.example.com/privkey.pem;
-    include /etc/letsencrypt/options-ssl-nginx.conf;
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
-}
-
-# also added: HTTP -> HTTPS redirect
-server {
-    if ($host = wiki.example.com) {
-        return 301 https://$host$request_uri;
-    }
-    listen 80;
-    listen [::]:80;
-    server_name wiki.example.com;
-    return 404;
-}
-```
+> [!EXAMPLE] Example: wiki
+> ```nginx
+> server {
+>     server_name wiki.example.com;
+>     root /var/www/wiki;
+>     index index.html;
+>     location / { try_files $uri $uri.html $uri/ =404; }
+>
+>     # ── added by Certbot ──
+>     listen [::]:443 ssl;
+>     listen 443 ssl;
+>     ssl_certificate     /etc/letsencrypt/live/wiki.example.com/fullchain.pem;
+>     ssl_certificate_key /etc/letsencrypt/live/wiki.example.com/privkey.pem;
+>     include /etc/letsencrypt/options-ssl-nginx.conf;
+>     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+> }
+>
+> # also added: HTTP -> HTTPS redirect
+> server {
+>     if ($host = wiki.example.com) {
+>         return 301 https://$host$request_uri;
+>     }
+>     listen 80;
+>     listen [::]:80;
+>     server_name wiki.example.com;
+>     return 404;
+> }
+> ```
 ^basic-conf
 
 The lines with `# managed by Certbot` are owned by Certbot: touch them only if you know what you're doing.

@@ -76,7 +76,7 @@ server {
 
 This is a vhost basic starting configuration. Why?
 
-Because for 443, [[certbot-setup-guide|Certbot]] automatically sets it up when you do this:
+Because for 443, [[certbot-setup-guide|Certbot]] automatically sets everything up when you do this:
 ![[certbot-setup-guide#^maincommand]]
 
 #### Common patterns
