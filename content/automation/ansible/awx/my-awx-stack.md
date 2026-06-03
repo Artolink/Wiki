@@ -4,6 +4,7 @@ tags:
   - Projects
 ---
 ![[Pasted image 20260602180612.png]]
+https://farnetiandrea.it/awx
 
 There's a deprecated quickstart version of AWX that every tutorial stops at: a `docker-compose up` on a single host. 
 
@@ -15,6 +16,7 @@ So, this is the **other** version: AWX deployed the way it's actually run in pro
 - An **external, dedicated PostgreSQL** instead of the throwaway pod (*TBA*).
 - Dedicated **execution nodes** joined over a **Receptor mesh**, so playbooks run isolated from the control plane
 - Custom **Execution Environments** built in CI and pulled from my own [[gitlab-setup|GitLab Container Registry]] (*TBA*).
+- Exposed to the world via Ingress (you probably wanna do it privately)
 
 ***
 
