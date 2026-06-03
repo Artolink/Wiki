@@ -52,7 +52,7 @@ Certbot will:
 1. Confirm your email + ToS (first run only).
 2. Solve the **HTTP-01 challenge** by serving a token over port 80.
 3. Issue the certificate into `/etc/letsencrypt/live/<domain>/`.
-4. Patch your existing Nginx vhost: add the `listen 443 ssl`, `ssl_certificate`, `ssl_certificate_key` directives, and an HTTP→HTTPS redirect.
+4. Patch your existing Nginx vhost: add the `listen 443 ssl`, `ssl_certificate`, `ssl_certificate_key` directives, and an HTTP→HTTPS redirect (that is why its recommended to write only the HTTP directive in nginx: certbot will do the rest).
 5. Reload Nginx.
 
 ***
@@ -89,35 +89,38 @@ If your DNS provider isn't in the official plugin list, the alternatives are `--
 
 ### What Certbot adds to the vhost
 
-After `certbot --nginx`, your vhost looks roughly like this:
-> [!EXAMPLE] Example: wiki
-> ```nginx
-> server {
->     server_name wiki.example.com;
->     root /var/www/wiki;
->     index index.html;
->     location / { try_files $uri $uri.html $uri/ =404; }
->
->     # ── added by Certbot ──
->     listen [::]:443 ssl;
->     listen 443 ssl;
->     ssl_certificate     /etc/letsencrypt/live/wiki.example.com/fullchain.pem;
->     ssl_certificate_key /etc/letsencrypt/live/wiki.example.com/privkey.pem;
->     include /etc/letsencrypt/options-ssl-nginx.conf;
->     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
-> }
->
-> # also added: HTTP -> HTTPS redirect
-> server {
->     if ($host = wiki.example.com) {
->         return 301 https://$host$request_uri;
->     }
->     listen 80;
->     listen [::]:80;
->     server_name wiki.example.com;
->     return 404;
-> }
-> ```
+If you have a nginx vhost with only the HTTP directive written, for example:
+![[nginx-web-server-setup#^basic-conf]]
+
+After you run `certbot --nginx -example.com`, your vhost will look roughly like this:
+```nginx
+# HTTP -> HTTPS redirect (managed by Certbot)
+server {
+    if ($host = example.com) {
+        return 301 https://$host$request_uri;
+    }
+    listen 80;
+    listen [::]:80;
+    server_name example.com;
+    return 404;
+}
+
+# HTTPS: the original server, now with TLS
+server {
+    server_name example.com;
+
+    root /var/www/example;
+    index index.html;
+    location / { try_files $uri $uri.html $uri/ =404; }
+
+    listen [::]:443 ssl;      # managed by Certbot
+    listen 443 ssl;           # managed by Certbot
+    ssl_certificate     /etc/letsencrypt/live/example.com/fullchain.pem;   # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;     # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf;                       # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;                         # managed by Certbot
+}
+```
 ^basic-conf
 
 The lines with `# managed by Certbot` are owned by Certbot: touch them only if you know what you're doing.

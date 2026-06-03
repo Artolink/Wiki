@@ -79,6 +79,9 @@ This is a vhost basic starting configuration. Why?
 Because for 443, [[certbot-setup-guide|Certbot]] automatically sets everything up when you do this:
 ![[certbot-setup-guide#^maincommand]]
 
+And it will become something like this:
+![[certbot-setup-guide#^basic-conf]]
+
 #### Common patterns
 
 ##### 1. Static site
@@ -156,7 +159,7 @@ The other domain `farnetiandrea.it` (a small landing page + a reverse-proxied No
 
 > [!Important]
 > Nginx does **not** expand `~` to the user's home directory, that's a shell convention, not an Nginx one! 
-> In a real config use the absolute path (e.g. `/var/www/wiki` or the full home path): `~/wiki/public` is shown here only to keep the example free of personal account details.
+> In a real config, use the absolute path (e.g. `/var/www/wiki` or the full home path): `~/wiki/public` is shown here only to keep the example free of personal account details.
 
 ***
 
