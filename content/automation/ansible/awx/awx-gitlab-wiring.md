@@ -11,7 +11,11 @@ Git becomes the single source of truth: AWX just mirrors it.
 
 ## The model: one mechanism, two consumers
 
-A **Project** in AWX = a Git repo, cloned and kept in sync — a **live link**, not a one-time import. The *same* Project mechanism feeds two things:
+A **Project** in AWX = a Git repo, cloned and kept in sync.
+
+Its a **live link**, not a one-time import.
+
+Basically, we can create a project that will host our inventories, and another one for our playbooks. 
 
 ```mermaid
 flowchart LR
@@ -36,9 +40,9 @@ flowchart LR
     JT -- "run via execution node" --> Target
 ```
 
-- **Job Templates** pick a **playbook** from a Project ← the *primary* purpose of a Project.
-- **Inventory Sources** pick an **inventory file** from a Project ← versions your hosts.
-- **roles / collections** come in through `requirements.yml`, auto-installed on Project sync.
+- **Job Templates** pick a **playbook** from inside a Project
+- **Inventory Sources** pick an **inventory file** from a Project
+- **roles / collections** come in through `requirements.yml`, automatically on Project sync.
 
 > [!INFO]
 > A green **Sync Status: Success** on an inventory, or a Job Template that just *has* a playbook dropdown, both mean the same thing underneath: a **Project** (Git) behind it.
@@ -47,17 +51,20 @@ flowchart LR
 
 ## 1. GitLab: the repos
 
-Enterprise layout = **one repo per concern** (the `playbooks`, `roles`, `collections`, `inventories` split you'd see at work).
-
-**Inventories** repo — `inventories/prod` (folder per machine type, inventory + `group_vars/` together):
+**Inventories** repo (folder per machine type, inventory + `group_vars/` together):
 ```
 inventories/prod
-└── openstack/
+└── openstack/ # its just an example
     ├── openstack.yml
     └── group_vars/all.yml
+inventories/test
+...
 ```
 
-**Playbooks** repo — `automation/playbooks`:
+> [!IMPORTANT]
+> Keep `group_vars/` in the **same folder** as the inventory file, that's how Ansible (and AWX's import) auto-loads them.
+
+**Playbooks** repo:
 ```
 automation/playbooks
 ├── site.yml
@@ -65,56 +72,48 @@ automation/playbooks
 └── collections/requirements.yml   # external collections
 ```
 
-`site.yml` (a minimal verify playbook):
-```yaml
-- name: Reach every host
-  hosts: all
-  gather_facts: false
-  tasks:
-    - name: ping
-      ansible.builtin.ping:
-```
-
-`collections/requirements.yml`:
-```yaml
-collections:
-  - name: community.general
-```
-
-> [!IMPORTANT]
-> Keep `group_vars/` in the **same folder** as the inventory file — that's how Ansible (and AWX's import) auto-loads them.
-
 ***
 
-## 2. GitLab: read-only SSH access (one credential, all repos)
+## 2. GitLab: read-only SSH access (one credential for all repos)
 
-AWX only needs to **clone**. Don't use HTTPS deploy *tokens* (per-repo, don't scale). Use a **read-only service account** with an SSH key, member of the groups → one credential clones every repo.
+AWX only needs to **clone**. 
+
+To do that, we can use a **read-only service account** with a dedicated SSH key, member of every group: this way one credential can clone every repo.
+
+Procedure:
 
 1. **Bot user**: Admin → **Users → New user** → `svc-awx`.
-2. **Read access**: each group (`inventories`, `automation`) → **Manage → Members → Invite** → `svc-awx` → role **Reporter**.
-3. **SSH key**:
+2. **Read access**: each group (`inventories`, `automation`...) → **Manage → Members → Invite** → `svc-awx` → role **Reporter**.
+3. **Create a SSH key**:
    ```bash
    ssh-keygen -t ed25519 -f svc-awx -C svc-awx -N ""
    ```
-   Admin → Users → `svc-awx` → **Impersonate** → **Preferences → SSH Keys** → paste `svc-awx.pub` → **Stop impersonation**.
+4. Admin → Users → `svc-awx` → **Impersonate** → **Preferences → SSH Keys** → paste `svc-awx.pub` → **Stop impersonation**.
 
 > [!TIP]- Lighter alternative: an SSH deploy key (per-repo)
-> Add the **public** key as a read-only **Deploy key** (Repo → Settings → Repository → Deploy keys, *Grant write permissions* OFF), and enable the same key on other repos. SSH too — just per-repo instead of group-wide.
+> Add the **public** key as a read-only **Deploy key** (Repo → Settings → Repository → Deploy keys, *Grant write permissions* OFF), and enable the same key on other repos. SSH too, just per-repo instead of group-wide.
+
+Besides the key we just created for syncing projects and inventories, every target needs: 
+
+- A **key for letting the execution nodes in via SSH** (the public half goes in the target's `~/.ssh/authorized_keys`, while the private half stays in every execution nodes)
+- The target allowing `:22` **from the execution node's IP**
 
 ***
 
-## 3. AWX: Source Control credential (SSH) — shared
+## 3. AWX: Source Control credential (SSH)
 
 **Resources → Credentials → Add**
 - **Credential Type**: `Source Control`
-- **SCM Private Key**: the **private** `svc-awx` (whole block, incl. `-----BEGIN OPENSSH PRIVATE KEY-----`)
+- **SCM Private Key**: the **private** `svc-awx` key
 - Leave Username / Password / Passphrase **empty** (the user comes from the `git@` URL).
 
 ***
 
 ## 4. AWX: one Project per repo
 
-Create a Project for **each** repo — same steps, different URL. **Resources → Projects → Add**:
+Create a Project for **each** repo: same steps, different URL. 
+
+**Resources → Projects → Add**:
 
 | Field | Playbooks | Inventories |
 |---|---|---|
@@ -124,85 +123,72 @@ Create a Project for **each** repo — same steps, different URL. **Resources �
 | Source Control Credential | `svc-awx` | `svc-awx` |
 | Options | ✅ Update Revision on Launch | ✅ Update Revision on Launch |
 
-**Save** each → wait for **Successful**. Copy the exact SSH URL from the repo's **Code → Clone with SSH**.
+For the Source Control URL, you have to copy the exact SSH URL from the GitLab repo's **Code → Clone with SSH**.
 
-> [!NOTE]
-> On sync, AWX also runs `ansible-galaxy install` for any `roles/requirements.yml` and `collections/requirements.yml` in the Project → your roles & collections arrive from Git automatically. (Public Galaxy works out of the box; private Git/registry sources need extra credential setup.)
+**Save** each, and wait for **Successful**. 
+
+Ok, so now your AWX can see inventories and playbooks from your GitLab.
+
+Now let's see how to actually put everything together in AWX: 
+
+- Inventories in a inventory source
+- Playbooks in a job template
+
+And combine them to make everything work and run.
 
 ***
 
-## 5. Path A — Playbooks → Job Template
+### Inventories → Inventory + Source
+
+**Resources → Inventories → Add → Inventory** → Name → **Save** (this is just an empty container for now).
+
+Now open it: **Sources** tab (appears only after saving) → **Add**:
+
+| Field          | Value                                                    |
+| -------------- | -------------------------------------------------------- |
+| Source         | **Sourced from a Project**                               |
+| Project        | `Inventories`                                            |
+| Inventory file | `openstack/openstack.yml` (in this example)              |
+| Options        | ✅ Update on launch · ✅ Overwrite · ✅ Overwrite variables |
+
+**Save → Sync**.
+
+> [!BUG]- The "Inventory file" dropdown only shows `/ (project root)`
+> AWX auto-lists inventory files at the **repo root**: files that are in **subfolders** often aren't suggested.
+> 
+> The field is **typeable**: just type your inventory path (in my example `openstack/openstack.yml`) relative to the repo root.
+
+***
+
+### Playbooks → Job Template
 
 This is the main use of a Project.
 
 **Resources → Templates → Add → Job Template**:
 
-| Field | Value |
-|---|---|
-| Name | `site` |
-| Job Type | Run |
-| **Inventory** | `OpenStack` (from Path B) |
-| **Project** | `Playbooks` |
-| **Playbook** | `site.yml` *(dropdown — auto-detected)* |
-| **Credentials** | the **Machine** credential for the targets |
+| Field               | Value                                         |
+| ------------------- | --------------------------------------------- |
+| Name                | The name of the job Template                  |
+| Job Type            | Run                                           |
+| **Inventory**       | `OpenStack` (from the one we just created)    |
+| **Project**         | `Playbooks`                                   |
+| **Playbook**        | `site.yml` *(dropdown, auto-detected)*        |
+| **Credentials**     | the **Machine** credential for the targets    |
 | **Instance Groups** | `execution-vms` *(run on the execution node)* |
 
-**Save → Launch**. AWX runs the playbook **straight from the cloned repo**.
-
-> [!NOTE]
-> The **Playbook** dropdown auto-lists files AWX recognises as playbooks — no manual path needed (unlike the inventory-file case below).
-
-***
-
-## 6. Path B — Inventories → Inventory + Source
-
-**Resources → Inventories → Add → Inventory** → Name `OpenStack` → **Save** *(empty container — nothing connects to Git here)*.
-
-Open it → **Sources** tab (appears only after saving) → **Add**:
-
-| Field | Value |
-|---|---|
-| Source | **Sourced from a Project** |
-| Project | `Inventories` |
-| Inventory file | `openstack/openstack.yml` |
-| Options | ✅ Update on launch · ✅ Overwrite · ✅ Overwrite variables |
-
-**Save → Sync**.
-
-> [!BUG]- The "Inventory file" dropdown only shows `/ (project root)`
-> AWX auto-lists inventory files at the **repo root**; files in **subfolders** often aren't suggested. (1) **Re-sync the Project** so AWX has the committed file. (2) The field is **typeable** — just type `openstack/openstack.yml` (path relative to repo root). Saved on the Source, one-time.
-
-> [!NOTE]- "My `group_vars/all.yml` var isn't on the host!"
-> Correct — the host page shows **host vars only**. `group_vars/all.yml` are **group vars** (the `all` scope): AWX imports them as **inventory-level variables** (Inventory → Edit → Variables), and merges them onto every host at runtime.
+**Save → Launch**. 
 
 ***
 
 ## 7. Verify end-to-end
 
-Targets need: a **Machine credential** (SSH key whose public half is in the target's `~/.ssh/authorized_keys`), the target allowing `:22` **from the execution node's IP**, and the Inventory's **Instance Groups = `execution-vms`**.
 
-Then either:
-- **Launch the `site` Job Template** (Path A) → green play recap, or
-- **Ad-hoc**: Inventory → Hosts → select → **Run Command** → module `ping`.
-
-Success looks like:
-```
-host | SUCCESS => { "ping": "pong" }
-```
-The job's **Execution Node** = your node, confirming it ran over the mesh.
-
-***
-
-## The Project is a live link (don't delete it)
-
-Deleting a Project does **not** wipe already-imported inventory hosts (they're copied into AWX's DB), so it *looks* like things still work. But you've cut the live link: inventories stop syncing, **Job Templates lose their playbook**, and with *Update on launch* the next launch **fails** trying to sync. A Project is the engine that keeps AWX mirrored to Git — not a one-shot import.
 
 ***
 
 ## Scaling out
 
-Git stays the single source of truth; AWX mirrors it:
+Git stays the single source of truth, AWX has to mirror it:
+
 - **playbooks** repo → Project → many **Job Templates**
-- **inventories** repo → Project → many **Inventory Sources** (one per type: `openstack/`, `vmware/`, …)
-- **roles / collections** → `requirements.yml`, auto-installed on sync
-- one `svc-awx` SSH credential reads them all
+- **inventories** repo → Project → many **Inventory Sources** (one per type: `openstack/`, `windows/`, …)
