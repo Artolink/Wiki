@@ -1,5 +1,5 @@
 ---
-title: "4. Connect AWX to Gitlab: run playbooks and inventories using Git"
+title: "4. Connect AWX to Gitlab: store and run playbooks and inventories using Git"
 tags:
 ---
 

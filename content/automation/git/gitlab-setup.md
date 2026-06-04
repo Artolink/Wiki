@@ -423,5 +423,13 @@ First start after an upgrade can take 5-15 minutes, be patient and watch `docker
 
 ## Where to go next
 
-- **CI/CD pipelines** (`.gitlab-ci.yml`): build, test, deploy on every push. 
+Have you deployed [[my-awx-stack|AWX]] yet?
+
+If the answer is no, go ahead, so that you can later:
+
+- [[awx-gitlab-wiring|Connect GitLab and AWX together]]: that way you can store inventories and playbooks in GitLab, and run them directly via Ansible AWX with a great UI!
+ 
+- **Create CI/CD pipelines in GitLab** (`.gitlab-ci.yml`): build, test, deploy on every push. 
   A good starting point could be: build the [[create-a-wiki-like-this|wiki Quartz site]] in CI and deploy via SSH to the VPS instead of running `deploy.sh`.
+
+This is a real production-grade interconnected stack, a great base for great automation!
