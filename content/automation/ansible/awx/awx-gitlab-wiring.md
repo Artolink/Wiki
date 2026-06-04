@@ -180,12 +180,6 @@ This is the main use of a Project.
 
 ***
 
-## 7. Verify end-to-end
-
-
-
-***
-
 ## Scaling out
 
 Git stays the single source of truth, AWX has to mirror it:
