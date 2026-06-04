@@ -107,9 +107,9 @@ Procedure:
 
 Besides the key we just created for syncing projects and inventories, every target needs: 
 
-- A **key for letting the execution nodes in via SSH**: the public half goes in the target's `~/.ssh/authorized_keys`, while the private half stays in every execution nodes
-  (you can of course recycle it for every target: you just need to create it in a execution node, and do `ssh-copy-id -i awx_target.pub <user>@<target-ip>`) (of course you also need to put the private key in any other execution node that you have)
-- Every target allowing `:22` **from the execution node's IP** as source
+- A **key for letting the execution nodes in via SSH** (that you will select later in AWX when running the playbook): the public half goes in the target's `~/.ssh/authorized_keys`, while the private half stays in every execution nodes.
+  You can of course recycle it for every target: you just need to create it in a execution node, and do `ssh-copy-id -i awx_target.pub <user>@<target-ip>` (of course you also need to put the private key in any other execution node that you have).
+- Every target allowing `:22` **from the execution node's IP** as source.
 
 ***
 
