@@ -226,12 +226,13 @@ AWX stores it encrypted in its vault.
 
 ### 2. Inventory: the target host
 
-**Resources → Inventories → Add → Inventory** (e.g. `infra`), then:
+There are two ways:
 
-**Hosts → Add** → the target's address.
+1) Simple: **Resources → Inventories → Add → Inventory** (e.g. `infra`), then: **Hosts → Add** → the target's address.
+2) Pro: If you have deployed [[gitlab-setup|Gitlab]] like i've shown you, you can save your Ansible inventories in GitLab and link them to an AWX project
 
-> [!NOTE]
-> If you have deployed [[gitlab-setup|Gitlab]] like i've shown you, you can save your Ansible inventories in GitLab and connect them to AWX *(tutorial coming soon)*
+
+
 
 ### 3. Connectivity: node → target:22
 
