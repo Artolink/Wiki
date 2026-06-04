@@ -209,7 +209,7 @@ The file is auto-deleted after 24 hours, so copy the password to your password m
 
 ## 7. nginx reverse-proxy + HTTPS
 
-Same pattern as [[nginx-web-server-setup|the nginx setup guide]].
+Same usual pattern as [[nginx-web-server-setup|the nginx setup guide]].
 
 ### 1. Write the vhost HTTP only (Certbot adds the TLS)
 
@@ -292,13 +292,6 @@ Open `https://gitlab.yourdomain.com` in a browser:
 - Log in as `root` with the password from §6.
 - Change the root password immediately (User → Edit Profile → Password).
 
-API sanity check from the command line:
-
-```bash
-curl -s https://gitlab.yourdomain.com/api/v4/version | jq
-# { "version": "16.x.x", "revision": "..." }
-```
-
 ---
 
 ## 9. CI/CD runners
@@ -319,22 +312,43 @@ For the simplest single-host setup, deploy the runner as another container in th
     image: gitlab/gitlab-runner:latest
     container_name: gitlab-runner
     restart: unless-stopped
+    extra_hosts:
+     - "gitlab.farnetiandrea.it:host-gateway"
     volumes:
       - /opt/gitlab-runner/config:/etc/gitlab-runner
       - /var/run/docker.sock:/var/run/docker.sock     # so the runner can spawn Docker jobs
 ```
 
+> [!NOTE]- Why `extra_hosts: host-gateway`
+> `host-gateway` writes the domain into the runner's `/etc/hosts`, resolving it to the **host's gateway**: this way the runner reaches **nginx on the host (`:443`)** with the correct SNI and certificate, instead of the GitLab container. Entries in `/etc/hosts` take precedence over Docker's internal DNS, so the name is no longer hijacked to the container's internal IP (where `:443` has no TLS listener).
+
 Register the runner:
 
 1. In GitLab UI: _Admin Area → CI/CD → Runners → New instance runner_, copy the registration token.
+   ![[Pasted image 20260604112814.png]]
 2. On the host:
-    
     ```bash
     sudo docker exec -it gitlab-runner gitlab-runner register \  --url https://gitlab.yourdomain.com \  --registration-token <token> \  --executor docker \  --docker-image alpine:latest \  --description "shared-runner-host" \  --non-interactive
     ```
     
 3. The runner appears in the GitLab UI as "online".
 
+The job containers need the same "host-gateway" mapping: when a pipeline runs, the **job containers** the runner spawns must also reach `gitlab.yourdomain.com` to clone the repo, and they **don't inherit** the runner's `extra_hosts`. 
+
+To achieve that, after registering, edit `config.toml` (in `/opt/gitlab-runner/config/`) and add it under the `[runners.docker]` section:
+
+```toml
+[runners.docker]
+extra_hosts = ["gitlab.yourdomain.com:host-gateway"]
+```
+
+Then restart the runner so it reloads the config:
+
+```bash
+
+docker restart gitlab-runner
+
+```
 From now on, any `.gitlab-ci.yml` you push will be picked up by the runner.
 
 ---
@@ -407,5 +421,4 @@ First start after an upgrade can take 5-15 minutes, be patient and watch `docker
 ## Where to go next
 
 - **CI/CD pipelines** (`.gitlab-ci.yml`): build, test, deploy on every push. 
-  A good starting point: build the [[create-a-wiki-like-this|wiki Quartz site]] in CI and deploy via SSH to the VPS instead of running `deploy.sh`.
-- **Custom Ansible Execution Environments** for AWX: the natural sinergy between this stack and AWX.
+  A good starting point could be: build the [[create-a-wiki-like-this|wiki Quartz site]] in CI and deploy via SSH to the VPS instead of running `deploy.sh`.

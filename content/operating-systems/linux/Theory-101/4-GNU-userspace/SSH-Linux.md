@@ -160,12 +160,13 @@ If `ss` shows `:22` while your config says `Port 2200`, socket activation is the
 > [!info]- Option B: keep socket activation, move the socket to your port
 > ```bash
 > sudo mkdir -p /etc/systemd/system/ssh.socket.d
-> printf '[Socket]\nListenStream=\nListenStream=2200\n' | sudo tee /etc/systemd/system/ssh.socket.d/port.conf
+> printf '[Socket]\nListenStream=\nListenStream=0.0.0.0:2200\nListenStream=[::]:2200\n' \
+>   | sudo tee /etc/systemd/system/ssh.socket.d/port.conf
 > sudo systemctl daemon-reload
 > sudo systemctl restart ssh.socket
-> ss -tlnp | grep -i ssh    # :2200
+> ss -tlnp | grep 2200    # must show BOTH 0.0.0.0:2200 and [::]:2200
 > ```
-> The empty `ListenStream=` clears the default `:22`, then sets `2200`.
+> The empty `ListenStream=` clears the default `:22`; the two explicit lines bind port 2200 on **both** IPv4 and IPv6. **Don't** use a bare `ListenStream=2200` — see the gotcha below.
 
 > [!warning] Don't lock yourself out at boot
 > If you disable `ssh.socket` (Option A), make sure the **service** is enabled to start on boot, otherwise a reboot leaves you with no SSH:
