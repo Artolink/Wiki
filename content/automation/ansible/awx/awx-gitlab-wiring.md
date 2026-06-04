@@ -15,7 +15,7 @@ A **Project** in AWX = a Git repo, cloned and kept in sync.
 
 Its a **live link**, not a one-time import.
 
-Basically, we can create a project that will host our inventories, and another one for our playbooks. 
+Basically, we can create a project that will contain our inventories, and another one for our playbooks, and link everything together to make it run. 
 
 ```mermaid
 flowchart LR
@@ -51,25 +51,34 @@ flowchart LR
 
 ## 1. GitLab: the repos
 
-**Inventories** repo (folder per machine type, inventory + `group_vars/` together):
+First we have to create Groups:
+![[Pasted image 20260604231839.png]]
+
+This is my **Inventories** repo, a group that contains **projects** organized per environment (prod, test, dev...), and every project contain inventories + `group_vars/` together.
+
+For example:
 ```
-inventories/prod
-└── openstack/ # its just an example
-    ├── openstack.yml
-    └── group_vars/all.yml
+inventories/prod # inventories is the group, prod is the project 
+└── openstack/ # openstack is just a folder
+    ├── openstack.yml # this is the inventory file 
+    └── group_vars/all.yml # these are the group_vars
 inventories/test
+└── openstack/
 ...
 ```
 
 > [!IMPORTANT]
 > Keep `group_vars/` in the **same folder** as the inventory file, that's how Ansible (and AWX's import) auto-loads them.
 
-**Playbooks** repo:
+This is my Automation group, it contains a **Playbooks** project, that contains many folders for dedicated playbooks, for example:
 ```
 automation/playbooks
-├── site.yml
-├── roles/requirements.yml         # external roles (Galaxy or Git)
-└── collections/requirements.yml   # external collections
+└── UpgradeHost/
+	├── upgrade.yml
+	├── roles/requirements.yml         # external roles (Galaxy or Git)
+	└── collections/requirements.yml   # external collections
+└── JoinAD/
+...
 ```
 
 ***
@@ -83,20 +92,24 @@ To do that, we can use a **read-only service account** with a dedicated SSH key,
 Procedure:
 
 1. **Bot user**: Admin → **Users → New user** → `svc-awx`.
+   ![[Pasted image 20260604233205.png]]
 2. **Read access**: each group (`inventories`, `automation`...) → **Manage → Members → Invite** → `svc-awx` → role **Reporter**.
+   ![[Pasted image 20260604233359.png]]
 3. **Create a SSH key**:
    ```bash
    ssh-keygen -t ed25519 -f svc-awx -C svc-awx -N ""
    ```
 4. Admin → Users → `svc-awx` → **Impersonate** → **Preferences → SSH Keys** → paste `svc-awx.pub` → **Stop impersonation**.
+   ![[Pasted image 20260604233557.png]]
 
 > [!TIP]- Lighter alternative: an SSH deploy key (per-repo)
 > Add the **public** key as a read-only **Deploy key** (Repo → Settings → Repository → Deploy keys, *Grant write permissions* OFF), and enable the same key on other repos. SSH too, just per-repo instead of group-wide.
 
 Besides the key we just created for syncing projects and inventories, every target needs: 
 
-- A **key for letting the execution nodes in via SSH** (the public half goes in the target's `~/.ssh/authorized_keys`, while the private half stays in every execution nodes)
-- The target allowing `:22` **from the execution node's IP**
+- A **key for letting the execution nodes in via SSH**: the public half goes in the target's `~/.ssh/authorized_keys`, while the private half stays in every execution nodes
+  (you can of course recycle it for every target: you just need to create it in a execution node, and do `ssh-copy-id -i awx_target.pub <user>@<target-ip>`) (of course you also need to put the private key in any other execution node that you have)
+- Every target allowing `:22` **from the execution node's IP** as source
 
 ***
 
