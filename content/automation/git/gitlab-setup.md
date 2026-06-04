@@ -432,4 +432,4 @@ If the answer is no, go ahead, so that you can later:
 - **Create CI/CD pipelines in GitLab** (`.gitlab-ci.yml`): build, test, deploy on every push. 
   A good starting point could be: build the [[create-a-wiki-like-this|wiki Quartz site]] in CI and deploy via SSH to the VPS instead of running `deploy.sh`.
 
-This is a real production-grade interconnected stack, a great base for great automation!
+This is a real production-grade interconnected stack, a professional base for professional automation!
