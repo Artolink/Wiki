@@ -1,5 +1,5 @@
 ---
-title: "Self-hosted GitLab: your personal playbooks + CI/CD pipelines locally"
+title: "Self-hosted GitLab: your personal inventories, playbooks + CI/CD pipelines locally"
 tags:
   - Projects
 ---
