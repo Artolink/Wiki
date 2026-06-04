@@ -51,10 +51,22 @@ flowchart LR
 
 ## 1. GitLab: the repos
 
+> [!note]- There are many other "layouts" you can use in GitLab....
+> For example, the "all-in-one" playbook + inventory projects:
+> 
+> linux-hardening/ # project that contains both playbook and inventory 
+> ├── ansible.cfg 
+> ├── inventory.yml 
+> ├── group_vars/ 
+> │             └── hardened_servers.yml 
+> ├── linux-hardening.yml
+> 
+> Down below I show you the layout I use for separating multiple environments (prod, test, dev...) 
+
 First we have to create Groups:
 ![[Pasted image 20260604231839.png]]
 
-This is my **Inventories** repo, a group that contains **projects** organized per environment (prod, test, dev...), and every project contain inventories + `group_vars/` together.
+This is my **Inventories** group, it contains **projects** organized per environment (prod, test, dev...), and every project contain its inventory file + `group_vars/` together.
 
 For example:
 ```
