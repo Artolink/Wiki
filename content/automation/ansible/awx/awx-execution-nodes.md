@@ -266,7 +266,17 @@ This is exactly how the pattern scales from one node to the dozens you'd find in
 
 ***
 
-## What you can do in the future
+## What to do now
+
+In the future, you can add:
 
 - Custom Execution Environments: build your own EE with `ansible-builder` and pull it on the execution nodes from the [[gitlab-setup|GitLab Registry]], instead of using the default public EE.
-- **Production: external PostgreSQL**: when your environment allows a dedicated database host, move the DB out of the cluster, it is better for production. 
+- An external PostgreSQL**: when your environment allows a dedicated database host, move the DB out of the cluster, it is better for production. 
+
+...But right now, you can:
+
+- [[awx-gitlab-inventories|Connect AWX and GitLab]]: keep inventories **and** playbooks in [[gitlab-setup|GitLab]], and have [[my-awx-stack|AWX]] mirror them. 
+
+It's the ultimate step! 
+
+Make sure to follow my GitLab deploy guide, if you don't have it yet!
