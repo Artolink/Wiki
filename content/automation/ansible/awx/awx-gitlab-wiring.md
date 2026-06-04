@@ -119,8 +119,8 @@ Procedure:
 
 Besides the key we just created for syncing projects and inventories, every target needs: 
 
-- A **key for letting the execution nodes in via SSH** (that you will select later in AWX when running the playbook): the public half goes in the target's `~/.ssh/authorized_keys`, while the private half stays in every execution nodes.
-  You can of course recycle it for every target: you just need to create it in a execution node, and do `ssh-copy-id -i awx_target.pub <user>@<target-ip>` (of course you also need to put the private key in any other execution node that you have).
+- A **key for letting in the execution nodes via SSH** (that you will select later in AWX when running the playbook): the public half goes in the target's `~/.ssh/authorized_keys`, while the private half stays in every execution nodes.
+  You can of course recycle it for every target: you just need to create it in a execution node, and do `ssh-copy-id -i awx_target.pub <user>@<target-ip>` (and of course you also need to put the private key inside every other execution node that you have).
 - Every target allowing `:22` **from the execution node's IP** as source.
 
 ***
@@ -131,6 +131,8 @@ Besides the key we just created for syncing projects and inventories, every targ
 - **Credential Type**: `Source Control`
 - **SCM Private Key**: the **private** `svc-awx` key
 - Leave Username / Password / Passphrase **empty** (the user comes from the `git@` URL).
+  
+  ![[Pasted image 20260605000206.png]]
 
 ***
 
@@ -149,6 +151,8 @@ Create a Project for **each** repo: same steps, different URL.
 | Options | ✅ Update Revision on Launch | ✅ Update Revision on Launch |
 
 For the Source Control URL, you have to copy the exact SSH URL from the GitLab repo's **Code → Clone with SSH**.
+
+![[Pasted image 20260605000406.png]]
 
 **Save** each, and wait for **Successful**. 
 
@@ -169,12 +173,13 @@ And combine them to make everything work and run.
 
 Now open it: **Sources** tab (appears only after saving) → **Add**:
 
-| Field          | Value                                                    |
-| -------------- | -------------------------------------------------------- |
-| Source         | **Sourced from a Project**                               |
-| Project        | `Inventories`                                            |
-| Inventory file | `openstack/openstack.yml` (in this example)              |
-| Options        | ✅ Update on launch · ✅ Overwrite · ✅ Overwrite variables |
+| Field          | Value                                                                    |
+| -------------- | ------------------------------------------------------------------------ |
+| Source         | **Sourced from a Project**                                               |
+| Project        | `Inventories`                                                            |
+| Inventory file | `openstack/openstack.yml` (in this example) (not the same as screenshot) |
+| Options        | ✅ Update on launch · ✅ Overwrite · ✅ Overwrite variables                 |
+![[Pasted image 20260605000838.png]]
 
 **Save → Sync**.
 
@@ -191,15 +196,15 @@ This is the main use of a Project.
 
 **Resources → Templates → Add → Job Template**:
 
-| Field               | Value                                         |
-| ------------------- | --------------------------------------------- |
-| Name                | The name of the job Template                  |
-| Job Type            | Run                                           |
-| **Inventory**       | `OpenStack` (from the one we just created)    |
-| **Project**         | `Playbooks`                                   |
-| **Playbook**        | `site.yml` *(dropdown, auto-detected)*        |
-| **Credentials**     | the **Machine** credential for the targets    |
-| **Instance Groups** | `execution-vms` *(run on the execution node)* |
+| Field               | Value                                          |
+| ------------------- | ---------------------------------------------- |
+| Name                | The name of the job Template                   |
+| Job Type            | Run                                            |
+| **Inventory**       | `OpenStack` (from the one we just created)     |
+| **Project**         | `Playbooks`                                    |
+| **Playbook**        | `playbookName.yml` *(dropdown, auto-detected)* |
+| **Credentials**     | the **Machine** credential for the targets     |
+| **Instance Groups** | `execution-vms` *(run on the execution node)*  |
 
 **Save → Launch**. 
 
@@ -209,5 +214,5 @@ This is the main use of a Project.
 
 Git stays the single source of truth, AWX has to mirror it:
 
-- **playbooks** repo → Project → many **Job Templates**
-- **inventories** repo → Project → many **Inventory Sources** (one per type: `openstack/`, `windows/`, …)
+- **playbooks** GitLab repo → AWX Project → create many **Job Templates**
+- **inventories** GitLab repo → AWX Project → add many **Inventory Sources** (one per type: `openstack/`, `windows/`…)
