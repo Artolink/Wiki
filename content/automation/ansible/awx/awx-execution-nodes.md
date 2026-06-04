@@ -275,7 +275,7 @@ In the future, you can add:
 
 ...But right now, you can:
 
-- [[awx-gitlab-inventories|Connect AWX and GitLab]]: keep inventories **and** playbooks in [[gitlab-setup|GitLab]], and have [[my-awx-stack|AWX]] mirror them. 
+- [[awx-gitlab-wiring|Connect AWX and GitLab]]: keep inventories **and** playbooks in [[gitlab-setup|GitLab]], and have [[my-awx-stack|AWX]] mirror them. 
 
 It's the ultimate step! 
 

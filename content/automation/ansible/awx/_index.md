@@ -5,7 +5,7 @@ series:
   - automation/ansible/awx/awx-operator-deploy
   - automation/ansible/awx/awx-execution-nodes
   - automation/ansible/awx/awx-ingress-tls
-  - automation/ansible/awx/awx-gitlab-inventories
+  - automation/ansible/awx/awx-gitlab-wiring
 ---
 
 **AWX** is the open-source community project of **Ansible Automation Platform** (the commercial product, formerly "Ansible Tower").
