@@ -3,6 +3,9 @@ title: "Self-hosted GitLab: your personal playbooks + CI/CD pipelines locally"
 tags:
   - Projects
 ---
+![[Pasted image 20260604181937.png]]
+https://https://gitlab.farnetiandrea.it
+
 What are the advantages of having a self-hosted GitLab?
 
 1) You can store your Ansible Playbooks there
