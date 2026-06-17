@@ -216,13 +216,13 @@ Generate a key just for AWX (don't reuse a personal one) and authorize it on the
 # on your workstation
 ssh-keygen -t ed25519 -f awx_target -C awx
 
-# put the PUBLIC key on the target (or append awx_target.pub to its ~/.ssh/authorized_keys)
+# put the PUBLIC key on every target that you have (or append awx_target.pub to its ~/.ssh/authorized_keys)
 ssh-copy-id -i awx_target.pub <user>@<target>
 ```
 
 In AWX: **Resources → Credentials → Add → type _Machine_** → set the **Username** and paste the **private key** (`awx_target`). 
 
-AWX stores it encrypted in its vault.
+AWX stores it encrypted in its vault, so you can back it up somewhere, and delete it from your workstation.
 
 ### 2. Inventory: the target host
 
