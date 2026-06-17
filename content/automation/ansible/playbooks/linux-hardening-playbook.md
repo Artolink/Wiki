@@ -13,7 +13,7 @@ You can run the whole playbook or any subset with `--tags`.
 
 ## Project layout
 
-The one that I write here is a all-in-one layout: it includes the inventory and everything the playbook needs under the same "linux-hardening" directory.
+The one that I write here is a all-in-one layout: it includes the inventory, group_vars and everything the playbook needs under the same "linux-hardening" directory.
 
 ```
 linux-hardening/

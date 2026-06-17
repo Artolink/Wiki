@@ -15,16 +15,16 @@ A **Project** in AWX = a Git repo, cloned and kept in sync.
 
 Its a **live link**, not a one-time import.
 
-Basically, we can create a project that will contain our inventories, and another one for our playbooks, and link everything together to make it run. 
+Basically, we create one project per repo (some hold playbooks, some hold inventories) and link everything together to make it run.
 
 ```mermaid
 flowchart LR
     subgraph GL["🦊 GitLab"]
-        PB["automation/playbooks<br/>site.yml + roles/ + collections/"]
+        PB["playbooks/linux-hardening<br/>linux-hardening.yml<br/>+ collections/requirements.yml"]
         INV["inventories/prod<br/>openstack/openstack.yml + group_vars/"]
     end
     subgraph AWX["🎛️ AWX"]
-        ProjPB["📚 Project (playbooks)"]
+        ProjPB["📚 Project (playbook)"]
         ProjINV["📚 Project (inventories)"]
         Src["🔗 Inventory Source"]
         Inv["📋 Inventory"]
@@ -52,7 +52,7 @@ flowchart LR
 ## 1. GitLab: the repos
 
 > [!note]- There are many other "layouts" you can use in GitLab....
-> For example, the "all-in-one" playbook + inventory projects:
+> For example, the "all-in-one" layout, one project with both playbook and inventory:
 > 
 > linux-hardening/ # project that contains both playbook and inventory 
 > ├── ansible.cfg 
@@ -61,37 +61,44 @@ flowchart LR
 > │             └── hardened_servers.yml 
 > ├── linux-hardening.yml
 > 
-> Down below I show you the layout I use for separating multiple environments (prod, test, dev...) 
+> Down below I show the layout I use, which separates inventories (per environment) from playbooks (per automation).
 
-First we have to create Groups:
-![[Pasted image 20260604231839.png]]
+First we have to create the Groups:
+![[Pasted image 20260617161900.png]]
 
-This is my **Inventories** group, it contains **projects** organized per environment (prod, test, dev...), and every project contain its inventory file + `group_vars/` together.
-
-For example:
+**Inventories group**: contains one **project per environment** (prod, test, dev...), and every project holds its inventory file + `group_vars/` together:
 ```
-inventories/prod # inventories is the group, prod is the project 
-└── openstack/ # openstack is just a folder
-    ├── openstack.yml # this is the inventory file 
-    └── group_vars/all.yml # these are the group_vars
+inventories/prod          # inventories is the group, prod is the project (repo)
+└── openstack/            # openstack is just a folder (one per machine type)
+    ├── openstack.yml      # the inventory file
+    └── group_vars/
+        └── all.yml        # the group_vars
 inventories/test
 └── openstack/
 ...
 ```
 
 > [!IMPORTANT]
-> Keep `group_vars/` in the **same folder** as the inventory file, that's how Ansible (and AWX's import) auto-loads them.
+> Keep `group_vars/` in the **same folder** as the inventory file, that's how Ansible (and AWX's import) auto-loads them. The group a playbook targets (e.g. `hardened_servers`) and its variables also live **here, in the inventory** — not in the playbook repo.
 
-This is my Automation group, it contains a **Playbooks** project, that contains many folders for dedicated playbooks, for example:
+**Playbooks group**: contains one **project per automation** (LinuxHardening, UpgradeHost, JoinAD...). Each repo is **flat**: the playbook, its `templates/`, and its `requirements.yml` files sit at the **repo root**, for example:
 ```
-automation/playbooks
-└── UpgradeHost/
-	├── upgrade.yml
-	├── roles/requirements.yml         # external roles (Galaxy or Git)
-	└── collections/requirements.yml   # external collections
-└── JoinAD/
+playbooks/linux-hardening   # playbooks is the group, linux-hardening is the project (repo)
+├── linux-hardening.yml      # the playbook
+├── collections/
+│   └── requirements.yml     # external collections
+└── templates/               # jinja2 templates the playbook uses
+playbooks/upgrade-host
+├── upgrade.yml
+├── roles/requirements.yml   # external roles (only if the playbook uses any)
+└── collections/requirements.yml
 ...
 ```
+
+> [!IMPORTANT] requirements.yml must be at the repo root
+> On Project sync, AWX runs `ansible-galaxy install` reading **only** the root-level `roles/requirements.yml` and `collections/requirements.yml`. 
+> 
+> Files in **subfolders are not picked up**: that's why each automation is its **own repo** with the requirements at its root (the playbook itself can sit in a subfolder, the requirements can't).
 
 ***
 
@@ -105,7 +112,7 @@ Procedure:
 
 1. **Bot user**: Admin → **Users → New user** → `svc-awx`.
    ![[Pasted image 20260604233205.png]]
-2. **Read access**: each group (`inventories`, `automation`...) → **Manage → Members → Invite** → `svc-awx` → role **Reporter**.
+2. **Read access**: each group (`inventories`, `Playbooks`...) → **Manage → Members → Invite** → `svc-awx` → role **Reporter**.
    ![[Pasted image 20260604233359.png]]
 3. **Create a SSH key**:
    ```bash
@@ -119,7 +126,7 @@ Procedure:
 
 Besides the key we just created for syncing projects and inventories, every target needs: 
 
-- A **key for letting in the execution nodes via SSH** (that you will select later in AWX when running the playbook): we have done it[[awx-execution-nodes#7. Run a real job against a target host#1. Credential a dedicated SSH key| here]], but if you want a recap: the public half goes in every target's `~/.ssh/authorized_keys`, while the private half goes into "AWX Machine credential", AWX injects it into whichever execution node runs the job (it's never stored on the nodes).
+- A **key for AWX to reach the targets via SSH** (you select it later as a **Machine credential** when running the playbook): we set it up [[awx-execution-nodes#7. Run a real job against a target host|here]]. Recap: the **public** half goes in every target's `~/.ssh/authorized_keys`; the **private** half goes into the **AWX Machine credential**: AWX injects it into whichever execution node runs the job (it's never stored on the nodes).
 - Every target allowing `:22` **from the execution node's IP** as source.
 
 ***
@@ -137,32 +144,28 @@ Besides the key we just created for syncing projects and inventories, every targ
 
 ## 4. AWX: one Project per repo
 
-Create a Project for **each** repo: same steps, different URL. 
+As I said, we need to create a Project for **each** repo: same steps, different URL. 
 
 **Resources → Projects → Add**:
 
-| Field | Playbooks | Inventories |
+| Field | Playbook | Inventories |
 |---|---|---|
-| Name | `Playbooks` | `Inventories` |
+| Name | `LinuxHardening` | `Inventories` |
 | Source Control Type | Git | Git |
-| Source Control URL | `git@gitlab.yourdomain.com:automation/playbooks.git` | `git@gitlab.yourdomain.com:inventories/prod.git` |
+| Source Control URL | `git@gitlab.yourdomain.com:playbooks/linux-hardening.git` | `git@gitlab.yourdomain.com:inventories/prod.git` |
 | Source Control Credential | `svc-awx` | `svc-awx` |
 | Options | ✅ Update Revision on Launch | ✅ Update Revision on Launch |
 
-For the Source Control URL, you have to copy the exact SSH URL from the GitLab repo's **Code → Clone with SSH**.
+For the Source Control URL, copy the exact SSH URL from the GitLab repo's **Code → Clone with SSH**.
 
 ![[Pasted image 20260605000406.png]]
 
-**Save** each, and wait for **Successful**. 
+**Save** each, and wait for **Successful**. On the playbook project sync, check the log shows `ansible-galaxy` installing your collections: that confirms the root-level `collections/requirements.yml` was picked up.
 
-Ok, so now your AWX can see inventories and playbooks from your GitLab.
+Now AWX can see your inventories and playbooks... Let's put them together!
 
-Now let's see how to actually put everything together in AWX: 
-
-- Inventories in a inventory source
-- Playbooks in a job template
-
-And combine them to make everything work and run.
+- Inventories → an **Inventory Source**
+- Playbooks → a **Job Template**
 
 ***
 
@@ -172,20 +175,22 @@ And combine them to make everything work and run.
 
 Now open it: **Sources** tab (appears only after saving) → **Add**:
 
-| Field          | Value                                                                    |
-| -------------- | ------------------------------------------------------------------------ |
-| Source         | **Sourced from a Project**                                               |
-| Project        | `Inventories`                                                            |
-| Inventory file | `openstack/openstack.yml` (in this example) (not the same as screenshot) |
-| Options        | ✅ Update on launch · ✅ Overwrite · ✅ Overwrite variables                 |
+| Field          | Value                                                     |
+| -------------- | -------------------------------------------------------- |
+| Source         | **Sourced from a Project**                              |
+| Project        | `Inventories`                                            |
+| Inventory file | `openstack/openstack.yml` (in this example)             |
+| Options        | ✅ Update on launch · ✅ Overwrite · ✅ Overwrite variables |
 ![[Pasted image 20260605000838.png]]
 
 **Save → Sync**.
 
 > [!BUG]- The "Inventory file" dropdown only shows `/ (project root)`
-> AWX auto-lists inventory files at the **repo root**: files that are in **subfolders** often aren't suggested.
-> 
-> The field is **typeable**: just type your inventory path (in my example `openstack/openstack.yml`) relative to the repo root.
+> AWX auto-lists inventory files at the **repo root**: files in **subfolders** often aren't suggested.
+> The field is **typeable**: just type your inventory path (e.g. `openstack/openstack.yml`) relative to the repo root.
+
+> [!NOTE]
+> Variables from `group_vars/all.yml` are imported as **inventory-level** variables (Inventory → Variables), not onto each host — but they still apply to every host at runtime.
 
 ***
 
@@ -195,23 +200,33 @@ This is the main use of a Project.
 
 **Resources → Templates → Add → Job Template**:
 
-| Field               | Value                                          |
-| ------------------- | ---------------------------------------------- |
-| Name                | The name of the job Template                   |
-| Job Type            | Run                                            |
-| **Inventory**       | `OpenStack` (from the one we just created)     |
-| **Project**         | `Playbooks`                                    |
-| **Playbook**        | `playbookName.yml` *(dropdown, auto-detected)* |
-| **Credentials**     | the **Machine** credential for the targets     |
-| **Instance Groups** | `execution-vms` *(run on the execution node)*  |
+| Field                     | Value                                                          |
+| ------------------------- | ------------------------------------------------------------- |
+| Name                      | e.g. `LinuxHardening`                                         |
+| Job Type                  | **Check** for a dry-run, then **Run**                        |
+| **Inventory**             | the inventory that holds the target group                    |
+| **Project**               | `LinuxHardening`                                              |
+| **Playbook**              | `linux-hardening.yml` *(dropdown; subfolders are listed too)* |
+| **Execution Environment** | leave **default** *(it's an image, not a machine)*           |
+| **Credentials**           | the **Machine** credential for the targets                   |
+| **Instance Groups**       | `execution-vms` *(the execution node that SSHes to the target)* |
 
 **Save → Launch**. 
+
+> [!WARNING] Execution Environment ≠ Execution Node
+> Two similarly-named things:
+> - **Execution Environment** = the *container image* the job runs in → leave it on the **default** (`awx-ee`). Don't pick "Control Plane Execution Environment" (that's the internal image for control-plane tasks).
+> - **Execution Node** = the *machine* (VM) that runs the job and opens the SSH to the target → you choose it via **Instance Groups → `execution-vms`**.
+
+> [!TIP]
+> Run a **dry-run first**: set **Job Type → Check** (+ **Show Changes** for the diff), read the diff, then switch to **Run**. Essential for anything touching SSH / PAM / firewall.
 
 ***
 
 ## Scaling out
 
-Git stays the single source of truth, AWX has to mirror it:
+Git stays the single source of truth, AWX mirrors it:
 
-- **playbooks** GitLab repo → AWX Project → create many **Job Templates**
-- **inventories** GitLab repo → AWX Project → add many **Inventory Sources** (one per type: `openstack/`, `windows/`…)
+- **Playbooks** group → one repo per automation → one AWX **Project** each → its **Job Template(s)**
+- **inventories** group → one repo per environment → AWX **Project** → many **Inventory Sources** (one per type: `openstack/`, `windows/`…)
+- **roles / collections** → `requirements.yml` at each repo root → installed automatically on sync
