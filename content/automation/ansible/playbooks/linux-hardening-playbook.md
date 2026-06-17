@@ -13,7 +13,7 @@ You can run the whole playbook or any subset with `--tags`.
 
 ## Project layout
 
-The one that I write here is a all-in-one layout: it includes the inventory, group_vars and everything the playbook needs under the same "linux-hardening" directory.
+The one that I write here for you is a "all-in-one" layout: it includes the inventory, group_vars and everything the playbook needs under the same "linux-hardening" directory.
 
 ```
 linux-hardening/
@@ -32,6 +32,128 @@ linux-hardening/
 ```
 
 This of course is not the only way to do it: for example, if you followed my [[my-awx-stack|Ansible AWX]] and [[gitlab-setup|Gitlab]] guides, you will have your inventory and your playbooks divided in different GitLab groups, and this is a way better scalable separation for a real production environment.
+
+> [!EXAMPLE]- The same playbook, in my GitLab / AWX layout
+> **Playbook repo**: `playbooks/linux-hardening` (one repo per automation, everything at the **repo root**):
+> ```
+> playbooks/linux-hardening/
+> ├── linux-hardening.yml
+> ├── collections/
+> │   └── requirements.yml      # community.general, ansible.posix
+> └── templates/
+>     ├── sshd-hardening.conf.j2
+>     ├── sysctl-hardening.conf.j2
+>     ├── audit-hardening.rules.j2
+>     ├── fail2ban-jail.local.j2
+>     ├── unattended-upgrades.conf.j2
+>     └── pam-faillock.j2
+> ```
+>
+> **Inventory repo**: `inventories/prod` (the hosts *and* the playbook's variables live here):
+> ```
+> inventories/prod/
+> └── openstack/
+>     ├── openstack.yml             # hosts, with a `hardened_servers` group
+>     └── group_vars/
+>         └── hardened_servers.yml  # the hardening variables
+> ```
+>
+> What moves, what's dropped, what's new compared to the all-in-one above:
+>
+> | All-in-one file | In the GitLab layout |
+> | --- | --- |
+> | `linux-hardening.yml` | ✅ playbook repo (root) |
+> | `templates/` | ✅ playbook repo (root, next to the playbook) |
+> | `inventory.yml` | ➡️ becomes the inventory in the **inventory repo** |
+> | `group_vars/hardened_servers.yml` | ➡️ moves to the **inventory repo** (group_vars belong to the inventory) |
+> | `ansible.cfg` | ❌ not needed: AWX manages its own config |
+> | *(none)* | ➕ **new**: `collections/requirements.yml` at the repo root: AWX auto-installs the collections on sync (replaces the manual `ansible-galaxy collection install`) |
+>
+> > [!IMPORTANT]
+> > `collections/requirements.yml` (and `roles/requirements.yml` if the playbook uses external roles) must sit at the **repo root**: AWX installs Galaxy deps only from the root, never from subfolders.
+>
+> Then for wiring everything together (read-only credential, Projects, Inventory Source, Job Template...) you can check out [[awx-gitlab-wiring|Connect AWX to GitLab]].
+
+***
+
+## How to use it
+
+Two ways to run it: straight from the **command line (CLI)**, or via [[my-awx-stack|AWX]] pulled from [[gitlab-setup|Gitlab]] (check out both my guides if you want to implement this "real production" approach). 
+
+Expand the one you need.
+
+> [!EXAMPLE]- With Ansible CLI
+> **One-time prerequisites on your control node**
+> ```bash
+> # Ansible itself + the collections used in the playbook
+> sudo apt install -y ansible
+> ansible-galaxy collection install community.general
+> ansible-galaxy collection install ansible.posix
+> ```
+>
+> **Dry-run first (always)**
+> ```bash
+> ansible-playbook linux-hardening.yml --check --diff
+> ```
+> Reads what would change without applying. **Always do this first on a new host**, especially with PAM and SSH: verify the diff for `/etc/pam.d/su`, `/etc/securetty`, and the sshd drop-in before committing.
+>
+> **Apply the full playbook**
+> ```bash
+> ansible-playbook linux-hardening.yml
+> ```
+>
+> **Apply just one section (using tags)**
+> ```bash
+> # Only the firewall
+> ansible-playbook linux-hardening.yml --tags firewall
+>
+> # Just sysctl + SSH + sudo
+> ansible-playbook linux-hardening.yml --tags "sysctl,ssh,sudo"
+>
+> # Everything except auditd (rules can be noisy on first apply)
+> ansible-playbook linux-hardening.yml --skip-tags auditd
+> ```
+>
+> **Make auditd immutable (only after the ruleset is stable)**
+> ```bash
+> # In group_vars/hardened_servers.yml: set auditd_immutable: true
+> ansible-playbook linux-hardening.yml --tags auditd
+> ```
+> After this, `auditctl` can no longer modify rules until the next reboot. **Don't apply this on a new host you're still tuning.**
+>
+> **Opt a host out of automatic security updates**
+> ```bash
+> # In group_vars/hardened_servers.yml (or host_vars/<host>.yml for one host):
+> #   unattended_upgrades_enabled: false
+> ansible-playbook linux-hardening.yml --tags updates
+> ```
+> The playbook will stop and disable the timer on the next run. Set the flag back to `true` to re-enable.
+
+> [!EXAMPLE]- With Ansible AWX
+> The playbook lives in GitLab under a path, e.g. `automation/playbooks/LinuxHardening/` and is pulled by an AWX **Project**: see [[awx-gitlab-wiring|Connect AWX to GitLab]] for the wiring. The CLI flags that you see in the Ansible CLI example, are mapped directly to the fields of a **Job Template**.
+>
+> **Set up the Job Template**: *Resources → Templates → Add → Job Template*:
+> - **Project**: `Playbooks` · **Playbook**: `LinuxHardening/linux-hardening.yml`
+> - **Inventory**: one that contains the `hardened_servers` group (this playbook targets `hosts: hardened_servers`, but you could have different groups of machines of course)
+> - **Credentials**: the **Machine** credential for the targets
+> - **Instance Groups**: `execution-vms` (run on the execution node)
+>
+> **Dry-run first (always)**: set **Job Type → Check** and enable **Show Changes**: that's the `--check --diff` above. Launch once and read the diff before a real run!
+>
+> **Apply the full playbook**: set **Job Type → Run** → **Launch**.
+>
+> **Just one section (tags)**: use the **Job Tags** / **Skip Tags** fields (tick *Prompt on launch* to choose per-run):
+> - Job Tags `firewall` → only the firewall
+> - Job Tags `sysctl,ssh,sudo` → those three
+> - Skip Tags `auditd` → everything except auditd
+>
+> **Toggles like `auditd_immutable` / `unattended_upgrades_enabled`**: they're variables, set them in the inventory's `group_vars` for the `hardened_servers` group, or pass them in the Job Template's **Variables** as extra vars (but I don't recommend to do that):
+> ```yaml
+> auditd_immutable: true
+> ```
+> For a nicer UI, you can consider to expose them as a **Survey** on the Job Template (a checkbox per option).
+>
+> **Same cautions as the CLI**: dry-run on a new host first, keep `disable_password_auth: false` until key login works, and don't set `auditd_immutable: true` while you're still tuning.
 
 ***
 
@@ -937,87 +1059,6 @@ Account-Type: Primary
 Account:
     required        pam_faillock.so
 ```
-
-***
-
-## How to use it
-
-Two ways to run it: straight from the **command line (CLI)**, or via [[my-awx-stack|AWX]] pulled from [[gitlab-setup|Gitlab]] (check out both my guides if you want to implement this "real production" approach). 
-
-Expand the one you need.
-
-> [!EXAMPLE]- With Ansible CLI
-> **One-time prerequisites on your control node**
-> ```bash
-> # Ansible itself + the collections used in the playbook
-> sudo apt install -y ansible
-> ansible-galaxy collection install community.general
-> ansible-galaxy collection install ansible.posix
-> ```
->
-> **Dry-run first (always)**
-> ```bash
-> ansible-playbook linux-hardening.yml --check --diff
-> ```
-> Reads what would change without applying. **Always do this first on a new host**, especially with PAM and SSH: verify the diff for `/etc/pam.d/su`, `/etc/securetty`, and the sshd drop-in before committing.
->
-> **Apply the full playbook**
-> ```bash
-> ansible-playbook linux-hardening.yml
-> ```
->
-> **Apply just one section (using tags)**
-> ```bash
-> # Only the firewall
-> ansible-playbook linux-hardening.yml --tags firewall
->
-> # Just sysctl + SSH + sudo
-> ansible-playbook linux-hardening.yml --tags "sysctl,ssh,sudo"
->
-> # Everything except auditd (rules can be noisy on first apply)
-> ansible-playbook linux-hardening.yml --skip-tags auditd
-> ```
->
-> **Make auditd immutable (only after the ruleset is stable)**
-> ```bash
-> # In group_vars/hardened_servers.yml: set auditd_immutable: true
-> ansible-playbook linux-hardening.yml --tags auditd
-> ```
-> After this, `auditctl` can no longer modify rules until the next reboot. **Don't apply this on a new host you're still tuning.**
->
-> **Opt a host out of automatic security updates**
-> ```bash
-> # In group_vars/hardened_servers.yml (or host_vars/<host>.yml for one host):
-> #   unattended_upgrades_enabled: false
-> ansible-playbook linux-hardening.yml --tags updates
-> ```
-> The playbook will stop and disable the timer on the next run. Set the flag back to `true` to re-enable.
-
-> [!EXAMPLE]- With Ansible AWX
-> The playbook lives in GitLab under a path, e.g. `automation/playbooks/LinuxHardening/` and is pulled by an AWX **Project**: see [[awx-gitlab-wiring|Connect AWX to GitLab]] for the wiring. The CLI flags that you see in the Ansible CLI example, are mapped directly to the fields of a **Job Template**.
->
-> **Set up the Job Template**: *Resources → Templates → Add → Job Template*:
-> - **Project**: `Playbooks` · **Playbook**: `LinuxHardening/linux-hardening.yml`
-> - **Inventory**: one that contains the `hardened_servers` group (this playbook targets `hosts: hardened_servers`, but you could have different groups of machines of course)
-> - **Credentials**: the **Machine** credential for the targets
-> - **Instance Groups**: `execution-vms` (run on the execution node)
->
-> **Dry-run first (always)**: set **Job Type → Check** and enable **Show Changes**: that's the `--check --diff` above. Launch once and read the diff before a real run!
->
-> **Apply the full playbook**: set **Job Type → Run** → **Launch**.
->
-> **Just one section (tags)**: use the **Job Tags** / **Skip Tags** fields (tick *Prompt on launch* to choose per-run):
-> - Job Tags `firewall` → only the firewall
-> - Job Tags `sysctl,ssh,sudo` → those three
-> - Skip Tags `auditd` → everything except auditd
->
-> **Toggles like `auditd_immutable` / `unattended_upgrades_enabled`**: they're variables, set them in the inventory's `group_vars` for the `hardened_servers` group, or pass them in the Job Template's **Variables** as extra vars (but I don't recommend to do that):
-> ```yaml
-> auditd_immutable: true
-> ```
-> For a nicer UI, you can consider to expose them as a **Survey** on the Job Template (a checkbox per option).
->
-> **Same cautions as the CLI**: dry-run on a new host first, keep `disable_password_auth: false` until key login works, and don't set `auditd_immutable: true` while you're still tuning.
 
 ***
 
