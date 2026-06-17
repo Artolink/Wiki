@@ -3,7 +3,7 @@ title: "4. Connect AWX to Gitlab: store and run playbooks and inventories using 
 tags:
 ---
 
-This guide wires [[gitlab-setup|GitLab]] into [[my-awx-stack|AWX]] so that **inventories, playbooks, roles and collections** all live in versioned, reviewable Git reposI. 
+This guide wires [[gitlab-setup|GitLab]] into [[my-awx-stack|AWX]] so that **inventories, playbooks, roles and collections** all live in versioned, reviewable Git repos. 
 
 Git becomes the single source of truth: AWX just mirrors it. 
 
