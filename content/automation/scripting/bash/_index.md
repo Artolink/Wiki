@@ -127,3 +127,7 @@ title: 🐚 Bash
 > ```
 >
 > Concepts shown: `set -euo pipefail` · `usage()` + `-h/--help` · arg validation + non-zero exit · `--dry-run` · dependency & file checks · **idempotency** · timestamped **backup** (verified) · in-place edit with the backup as the safety net · quoting · **validate-before-reload** (+ restore on failure) · reload-only-if-changed · stdout vs stderr logging · `main "$@"`. *(No secrets here, if it needed them, read with `read -rs` and never put them on the command line.)*
+
+## EXTRA: Find where a script is being run
+
+![[automation/scripting/python/_index#EXTRA Find where a script is being run]]
