@@ -301,12 +301,14 @@ Open `https://gitlab.yourdomain.com` in a browser:
 
 A bare GitLab instance can host pipelines (`.gitlab-ci.yml`), but doesn't execute them: it needs at least one **GitLab Runner** to pick up jobs. 
 
+Why are they separate from GitLab? So you can scale workers independently, run each job in a clean environment, and place runners close to where the work needs to happen.
+
 Two patterns:
 
-|Pattern|Where the runner runs|When to choose|
-|---|---|---|
-|**Shared runner**, same host|Docker container next to GitLab|Personal use, small team, no isolation concerns|
-|**Project runners on separate hosts**|Dedicated VMs / nodes|Multi-tenant, isolation between projects, scaling|
+| Pattern                                         | Where the runner runs           | When to choose                                    |
+| ----------------------------------------------- | ------------------------------- | ------------------------------------------------- |
+| **Shared runner**, in the same host with GitLab | Docker container next to GitLab | Personal use, small team, no isolation concerns   |
+| **Project runners on separate hosts**           | Dedicated VMs / nodes           | Multi-tenant, isolation between projects, scaling |
 
 For the simplest single-host setup, deploy the runner as another container in the same `docker-compose.yml`:
 
