@@ -1,5 +1,5 @@
 ---
-title: Make your website resilient with high availability!
+title: Make your website completely resilient!
 tags:
 ---
 We've already covered the classic HA building blocks on their own: 
