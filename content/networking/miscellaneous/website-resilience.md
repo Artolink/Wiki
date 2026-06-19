@@ -2,21 +2,24 @@
 title: Make your website completely resilient!
 tags:
 ---
-We've already covered the classic HA building blocks on their own: 
+> [!IMPORTANT] The HA building blocks
+> We've already covered the classic HA building blocks on their own:
+>
+> - [[haproxy|HAProxy]]: a load balancer that spreads traffic across backends and drops the dead ones
+> - [[keepalived-vrrp|Keepalived / VRRP]]: a floating IP that fails over between two nodes, so the load balancer itself isn't a single point of failure.
+>
+> I highly suggest to read them if you haven't already, so that you can later implement the architecture you choose in this page, based on your actual website architecture.
+>
+> Still, Load balancers in front of **one** web server aren't enough the moment that web server dies: it needs to be redundant as well, otherwise its considered a single point of failure.
 
-- [[haproxy|HAProxy]]: a load balancer that spreads traffic across backends and drops the dead ones
-- [[keepalived-vrrp|Keepalived / VRRP]]: a floating IP that fails over between two nodes, so the load balancer itself isn't a single point of failure. 
-
-But a load balancer in front of **one** web server still isn't enough the moment that server (or the box under it) dies. 
-
-This page zooms out: how to make an actual *site* resilient end to end.
+This page gives you a generic view on how to make your website resilient from top to bottom.
 
 It comes down to two levers: 
 
 - **Detection + self-healing**: notice a failure within seconds and try to recover automatically (restart, failover, serve from cache).
 - **Remove single points of failure (SPOFs)**: no single host or component whose death takes the whole site down (CDN, replicas, DB failover, resilient DNS).
 
-How far you push depends on whether the site is **static** (easy) or **dynamic** (hard), and on how critical it really is.
+How far you push depends on whether your site is **static** (easy) or **dynamic** (hard), and on how critical it really is.
 
 ***
 

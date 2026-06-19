@@ -350,8 +350,10 @@ For pushing (last thing you do):
 ***
 ## Where to go next
 
-Great, so now you have your VPS hosting your personal Wiki on your domain... But what can you build next?
+Great, so now you have your VPS hosting your personal wiki on your domain... but how do we make it (or any website in general) **resilient**?
 
-Well, this can also be the starting point for something bigger.  
+For a high-level overview (not a step-by-step walkthrough, since it depends on the site itself), you can check out my [[website-resilience|website resilience]] guide and go from there.
+
+And what can you build next?
   
 If this is your first step into building your own homelab, a [metrics](my-grafana-stack) and [[my-elk-stack|logging]] stack is probably the next thing to do. Go on and check out my guides!
