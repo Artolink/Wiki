@@ -63,7 +63,7 @@ Namespaces are "zones" that abstract the resources the kernel offers: Docker cre
 
 Together, namespaces (isolation/sandboxing) and cgroups (resource control) let you run **multi-tenancy** on a single Linux host, without a hypervisor.
 
-#### ### Control Groups (cgroups)
+#### Control Groups (cgroups)
 
 ![[Pasted image 20260622173600.png]]
 
