@@ -262,7 +262,7 @@ df -hT
 
 This is the #1 cause of mid-upgrade failure.
 
-On Ubuntu `/boot` is ~1 GB and fills up after a few kernel upgrades. If it's >70% full, run `apt autoremove --purge` first to evict old kernels — otherwise the new kernel install will fail mid-way and leave the system inconsistent.
+On Ubuntu `/boot` is ~1 GB and fills up after a few kernel upgrades. If it's >70% full, run `apt autoremove --purge` first to evict old kernels, otherwise the new kernel install will fail mid-way and leave the system inconsistent.
 
 ### What's about to be installed
 
@@ -273,7 +273,7 @@ apt list --upgradable
 
 Skim it. 
 
-If you see `linux-image-*`, `libc6`, `grub*`, `openssh-server`, `docker-ce` — those are the upgrades worth being awake for.
+If you see `linux-image-*`, `libc6`, `grub*`, `openssh-server`, `docker-ce`... those are the upgrades worth being awake for.
 
 ### Reboot already pending?
 
@@ -291,8 +291,11 @@ Before you trigger any reboot on a remote box, validate that SSH is going to com
 
 ```sh
 sshd -t                              # the config file is syntactically valid
-systemctl restart ssh                # it actually restarts NOW (not just "is-enabled")
+systemctl is-enabled ssh
+systemctl enable ssh
+
 systemctl is-active ssh              # it's effectively up after the restart
+systemctl restart ssh                # it actually restarts NOW (not just "is-enabled")
 ```
 
 If any of these fails, **abort the reboot**. 

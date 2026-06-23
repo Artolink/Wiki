@@ -60,6 +60,16 @@ Finally:
 
 ### Script: 02-patch-upgrade.sh
 
+
+> [!warning]- Generic procedure: not enough for every situation!
+> This is a **generic OS-level checklist**: It's perfect as-is for nodes without critical services.
+>
+> For example, for nodes hosting **databases** (Redis, PostgreSQL, MySQL/Galera, MongoDB…), **load balancers** (HAProxy, keepalived), or any **quorum/replica/cluster**-based system (etcd, RabbitMQ, Patroni, Ceph…), this procedure is **not sufficient on its own**: it must be combined with a technology-specific procedure applied *on top of this*, handling at least:
+> - **Node ordering**: e.g. replica → replica → master, to avoid losing quorum
+> - **Controlled failover**: hand over the primary role *before* patching instead of taking it at reboot
+> - **`apt-mark hold` on the service package**: sometimes you don't want to upgrade critical services together with the OS (e.g. DBs most of the time have their own dedicated procedure)
+> - **Application-level health checks (pre/post)**: replication state, sync, quorum, service version...
+
 Here is the actual [patch upgrade script](02-patch-upgrade.sh), just save it as `02-patch-upgrade.sh`, `chmod +x` and run it as root.
 
 But if you don't feel confident and prefer to do the actual procedure manually, here are the steps:
@@ -74,9 +84,20 @@ cp -a /etc/iptables /root/etc-iptables-bak 2>/dev/null
 apt update
 apt list --upgradable
 
+# If there's anything you don't want to update (e.g. DBs)
+apt-mark hold <PACKAGE_NAME> # and "apt-mark unhold <PACKAGE_NAME>" at the end
+apt-mark showhold
+
+# Also, if you need to launch a full-upgrade but you have packages on hold, make sure to verify their dependencies too, since a full-upgrade can remove them
+apt-cache rdepends --installed <PACKAGE_NAME>
+
 # Pre-upgrade cleanup
-apt autoremove --purge
+apt autoremove
 apt clean
+
+# Pre-upgrade dry-run
+apt-get -s upgrade
+apt-get -s full-upgrade
 
 # Upgrade
 apt upgrade
@@ -88,9 +109,8 @@ apt -f install
 
 # SSH validation before any reboot
 sshd -t
-systemctl restart ssh
-systemctl is-active ssh
-systemctl is-enabled ssh
+systemctl is-enabled ssh # If not: systemctl enable ssh
+systemctl is-active ssh # If not: systemctl restart ssh
 
 # Kernel diagnostics
 uname -r
