@@ -75,6 +75,9 @@ Here is the actual [patch upgrade script](02-patch-upgrade.sh), just save it as 
 But if you don't feel confident and prefer to do the actual procedure manually, here are the steps:
 
 ```bash
+screen -dmS maintenance
+screen -r maintenance
+
 # Safety backup of iptables
 iptables-save  > /root/rules.v4.bak
 ip6tables-save > /root/rules.v6.bak 2>/dev/null
@@ -100,8 +103,8 @@ apt-get -s upgrade
 apt-get -s full-upgrade
 
 # Upgrade
-apt upgrade
-apt full-upgrade
+DEBIAN_FRONTEND=noninteractive apt upgrade -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef -y
+DEBIAN_FRONTEND=noninteractive apt full-upgrade -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef -y
 
 # Repair any interrupted state (idempotent)
 dpkg --configure -a
@@ -109,8 +112,9 @@ apt -f install
 
 # SSH validation before any reboot
 sshd -t
+systemctl restart ssh # ALWAYS
 systemctl is-enabled ssh # If not: systemctl enable ssh
-systemctl is-active ssh # If not: systemctl restart ssh
+systemctl is-active ssh # If not: systemctl restart ssh again
 
 # Kernel diagnostics
 uname -r
