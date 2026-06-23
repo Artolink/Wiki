@@ -228,25 +228,35 @@ docker run --volumes-from data_container my_image              # other container
 
 ### Docker networking
 
-Docker creates a pair of virtual Ethernet interfaces per container. On install it creates three networks automatically:
+Docker creates a pair of virtual Ethernet interfaces per container. 
 
-* **bridge** — the `docker0` NIC present in every base install. Different bridge networks don't talk to each other.
-* **none** — the container has no network interface.
-* **host** — the container joins the **host's** network stack; its network config is identical to the host's.
+On install it creates three networks automatically:
+
+* **bridge**: the `docker0` NIC present in every base install. Different bridge networks don't talk to each other.
+* **none**: the container has no network interface.
+* **host**: the container joins the **host's** network stack, its network config is identical to the host's.
 
 Others can be created manually (**user-defined**): **macvlan** (bridge mode), **macvlan** (802.1q mode), **ipvlan** (L2), **ipvlan** (L3), **overlay**.
 
 #### Bridge (and user-defined bridge)
 
-Easy to declare, secure, useful to segment networks and traffic (helps switches that struggle with broadcast when there are many hosts). The automatic bridge gets a subnet different from the host's (usually `172.17.0.1`); a **user-defined** bridge lets you pick the subnet.
+Easy to declare, secure, useful to segment networks and traffic (helps switches that struggle with broadcast when there are many hosts). 
 
-Containers on the same bridge can talk to each other directly: attaching a container to a Docker network creates a virtual Ethernet interface on it. With several containers it behaves like a **switch** (the virtual interfaces are its ports). But this abstraction means you **can't reach a container directly by its private IP** — to reach a service (e.g. nginx:80) you must **publish the port**, mapping it to a port on the host NIC (**port forwarding**).
+The automatic bridge gets a subnet different from the host's (usually `172.17.0.1`), while a **user-defined** bridge lets you pick the subnet.
 
-*(🖼️ diagram: bridge network as a virtual switch + host port mapping)*
+Containers on the same bridge can talk to each other directly: attaching a container to a Docker network creates a virtual Ethernet interface on it. 
 
-For the bridge to reach the internet (private subnet), Docker uses **PAT (Port Address Translation)** to map the container's private IP onto the host's IP (≈ SNAT + port forwarding). The host's **iptables** rules make this work; the container uses the **host's routing table**, so if the host can reach the internet, so can the container.
+With several containers it behaves like a **switch** (the virtual interfaces are its ports), but this abstraction means you **can't reach a container directly by its private IP**: to reach a service (e.g. nginx:80) you must **publish the port**, mapping it to a port on the host NIC (**port forwarding**).
 
-*(🖼️ diagram: veth pair, netns, iptables NAT, host routing)*
+![[Pasted image 20260623191732.png]]
+
+For the bridge to reach the internet (private subnet), Docker uses **PAT (Port Address Translation)** to map the container's private IP onto the host's IP (≈ SNAT + port forwarding). 
+
+The host's **iptables** rules make this work: the container uses the **host's routing table**, so if the host can reach the internet, so can the container.
+
+![[Pasted image 20260623192039.png]]
+
+![[Pasted image 20260623192200.png]]
 
 > [!NOTE] User-defined bridge bonus: DNS by name
 > On the **default** bridge containers can only reach each other by IP. On a **user-defined** bridge, Docker runs an embedded **DNS** so containers resolve each other by **name** automatically. (The container's `/etc/resolv.conf` is otherwise copied from the host.)
@@ -256,49 +266,88 @@ For the bridge to reach the internet (private subnet), Docker uses **PAT (Port A
 
 #### Host
 
-The service is exposed as if it were directly on the host, using the host's NIC. Upside: no need to publish ports. Downside: **no isolation** at all.
+The service is exposed as if it were directly on the host, using the host's NIC. 
 
-*(🖼️ diagram: host networking)*
+Upside: no need to publish ports. 
+
+Downside: **no isolation** at all.
+
+![[Pasted image 20260623192343.png]]
 
 #### macvlan (bridge mode)
 
-Combines the benefits of bridge and host — but it's **complex to set up** (and keeps an IP in the host's subnet). It runs as if plugged straight into the switch port, which many switches dislike (multiple MACs from one interface) — for those that support it you must enable **promiscuous mode** on both switch and host. At creation you specify by hand: **driver** (`macvlan`), **subnet** (your router's), **gateway** (router IP), **parent** (host interface used to reach the switch). At container start you also set the **network** and a **dedicated IP** (outside the DHCP pool) — plus it gets its own MAC.
+Combines the benefits of bridge and host... but it's **complex to set up** (and keeps an IP in the host's subnet). 
 
-*(🖼️ diagram: macvlan bridge mode)*
+It runs as if plugged straight into the switch port, which many switches dislike (multiple MACs from one interface), for those that support it you must enable **promiscuous mode** on both switch and host. 
 
+At creation you specify by hand: **driver** (`macvlan`), **subnet** (your router's), **gateway** (router IP), **parent** (host interface used to reach the switch). 
+
+![[Pasted image 20260623192439.png]]
+
+At container start you also set the **network** and a **dedicated IP** (outside the DHCP pool), plus it gets its own MAC.
+
+![[Pasted image 20260623192551.png]]
+
+![[Pasted image 20260623192522.png]]
 #### macvlan (802.1q mode)
 
-Like macvlan bridge, but it can create **VLANs**, cleanly separating containers from the router's main network (and allowing an IP in a different class). Docker networks provide an automatic **IPAM** ("DHCP-like") and DNS, so a VLAN-tagged network comes up working. As with macvlan bridge you configure everything by hand — plus you must set the **VLAN ID** and prepare the **trunk** on the switch.
+Like macvlan bridge, but it can create **VLANs**, cleanly separating containers from the router's main network (and allowing an IP in a different class). 
 
-*(🖼️ diagram: macvlan 802.1q with VLAN trunk)*
+Docker networks provide an automatic **IPAM** ("DHCP-like") and DNS, so a VLAN-tagged network comes up working. 
+
+As with macvlan bridge you configure everything by hand, plus you must set the **VLAN ID** and prepare the **trunk** on the switch.
+
+![[Pasted image 20260623192618.png]]
+
+An also you need to set at container start the **network** and a **dedicated IP** (like macvlan bridge mode).
+
+![[Pasted image 20260623192655.png]]
 
 #### ipvlan (L2)
 
-Solves macvlan's promiscuous-mode problem by **not** assigning a new MAC: containers share the **host's MAC**. You still assign an IP at container creation, in the host's network. Essentially like macvlan bridge, minus the MAC issue.
+Solves macvlan's promiscuous-mode problem by **not** assigning a new MAC: containers share the **host's MAC**. 
 
-*(🖼️ diagram: ipvlan L2)*
+You still assign an IP at container creation, in the host's network... essentially like macvlan bridge, minus the MAC issue.
+
+![[Pasted image 20260623192813.png]]
+
+![[Pasted image 20260623192848.png]]
 
 #### ipvlan (L3)
 
-Everything is handled at **Layer 3**; the **host becomes the router** for the containers in the ipvlan-L3 network. You don't set a gateway at creation (the parent must be the gateway). Like macvlan 802.1q, it allows separate subnets — but out of the box **nobody can reach anyone**.
+Everything is handled at **Layer 3**: the **host becomes the router** for the containers in the ipvlan-L3 network. 
+
+You don't set a gateway at creation (the parent must be the gateway). 
+
+![[Pasted image 20260623192948.png]]
+
+Like macvlan 802.1q, it allows separate subnets, but out of the box **nobody can reach anyone**.
 
 To enable reachability, add a **static route** on the router: "to reach *container IP*, ask host *host IP*".
 
-*(🖼️ diagram: ipvlan L3 with static route on the router)*
+![[Pasted image 20260623193025.png]]
+
+![[Pasted image 20260623193006.png]]
 
 #### Overlay
 
-Used when working across **multiple hosts** (covered in detail later). Between hosts open:
+Used when working across **multiple hosts**. 
 
-* **UDP 4789** — data plane (data packets)
-* **TCP/UDP 7946** — control plane (routing protocols)
+Between hosts open:
 
-Once you have several Docker machines, **Docker Swarm** joins them into a swarm (an orchestrator; it also runs **standalone** on one host). The result is a single network spanning hosts — a distributed system. Start the containers on each host specifying the **network name**, and every container can reach all others regardless of which host it runs on.
+* **UDP 4789**: data plane (data packets)
+* **TCP/UDP 7946**: control plane (routing protocols)
+
+Once you have several Docker machines, **Docker Swarm** joins them into a swarm (an orchestrator, just like Kubernetes, it also runs **standalone** on one host). 
+
+The result is a single network spanning hosts: a distributed system. 
+
+Start the containers on each host specifying the **network name**, and every container can reach all others regardless of which host it runs on.
 
 > [!WARNING]
-> The overlay network must **already exist** — create it first.
+> The overlay network must **already exist**, create it first.
 
-*(🖼️ diagram: overlay network across multiple hosts)*
+![[Pasted image 20260623193156.png]]
 
 ## Installation
 
