@@ -1,6 +1,26 @@
 ---
 title: "Linux upgrade: 02-patch-upgrade.sh"
 ---
+**What the script does:**
+
+- Runs unattended inside a **`screen`** session with full **timestamped logging**: survives an SSH disconnect.
+
+- **Safety backup first**: `iptables`/`ip6tables` rules + `/etc/iptables` (firewall restorable if the upgrade breaks it).
+
+- **`apt update`** (fail-fast) + snapshots the upgradable packages for a before/after diff.
+
+- **Pre-upgrade cleanup**: `autoremove --purge` + `apt clean` to free `/boot` and the apt cache.
+
+- **Two-pass upgrade**: `apt upgrade` then `full-upgrade`, fully non-interactive, **keeping your existing config files** (`--force-confold/confdef`).
+
+- **Self-repairs** any interrupted dpkg/apt state (`dpkg --configure -a`, `apt -f install`)
+
+- **SSH validation** before doing anything risky: config test → enabled → live restart → active.
+
+- Logs **kernel** info and checks **`netfilter-persistent`** (reinstalls it if the upgrade removed it).
+
+- **Reboots only if** a reboot is actually required **and** SSH passed validation, otherwise it **aborts to avoid lockout**.
+
 ```sh
 #!/bin/sh
 
