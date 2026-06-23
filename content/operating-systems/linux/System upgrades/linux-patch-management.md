@@ -72,7 +72,7 @@ Finally:
 
 Here is the actual [patch upgrade script](02-patch-upgrade.sh), just save it as `02-patch-upgrade.sh`, `chmod +x` and run it as root.
 
-But if you don't feel confident and prefer to do the actual procedure manually, here are the steps:
+But if you don't feel confident and prefer to do the actual procedure manually, here are the steps (definitely better if the server is critical):
 
 ```bash
 screen -dmS maintenance
