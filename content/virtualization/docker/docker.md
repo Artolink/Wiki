@@ -331,21 +331,44 @@ To enable reachability, add a **static route** on the router: "to reach *contain
 
 #### Overlay
 
-Used when working across **multiple hosts**. 
+The overlay network lets containers on **different Docker hosts** talk to each other as if they were on the same LAN, without you touching host routing. 
 
-Between hosts open:
+It's the network you use to go multi-host.
 
-* **UDP 4789**: data plane (data packets)
-* **TCP/UDP 7946**: control plane (routing protocols)
+**How it works: VXLAN.** 
 
-Once you have several Docker machines, **Docker Swarm** joins them into a swarm (an orchestrator, just like Kubernetes, it also runs **standalone** on one host). 
+Docker wraps each container's L2 frame inside a **VXLAN** packet (an L2-over-L3 tunnel) and ships it over the physical network as **UDP** to the destination host, which unwraps it. 
 
-The result is a single network spanning hosts: a distributed system. 
+Each overlay gets its own VXLAN ID, so different overlays stay isolated.
 
-Start the containers on each host specifying the **network name**, and every container can reach all others regardless of which host it runs on.
+Ports to open **between the hosts**:
 
-> [!WARNING]
-> The overlay network must **already exist**, create it first.
+| Port               | Plane      | Purpose                                       |
+| ------------------ | ---------- | --------------------------------------------- |
+| **TCP 2377**       | management | Swarm cluster management (join, manager API)  |
+| **TCP + UDP 7946** | control    | node-to-node discovery / gossip (membership)  |
+| **UDP 4789**       | data       | **VXLAN**: the encapsulated container traffic |
+
+**You need Swarm.** 
+
+Multi-host overlay is a **Swarm** feature: you form a swarm with `docker swarm init` / `docker swarm join` (an orchestrator, like Kubernetes, a single-node swarm is fine too). 
+
+Once joined, the result is a single network spanning hosts: a distributed system where every container reaches all the others regardless of which host runs it.
+
+**What the overlay gives you for free:**
+
+- **Embedded DNS**: containers/services resolve each other by **name**, across hosts.
+- **Service discovery + load balancing**: a Swarm **service** gets a **virtual IP (VIP)**, so traffic to the service name is balanced across its replicas (via IPVS).
+- **Routing mesh**: a published port is reachable on **every** swarm node. The mesh routes the request to a node actually running the service. Docker provides a default **`ingress`** overlay for this, plus a **`docker_gwbridge`** for each container's outbound/external traffic.
+
+**Using it:**
+
+```bash
+docker network create -d overlay mynet                 # on a manager
+docker service create --network mynet ...              # normal Swarm path
+docker network create -d overlay --attachable mynet    # also usable by plain `docker run`
+docker network create -d overlay --opt encrypted mynet # IPsec on the data plane (off by default)
+```
 
 ![[Pasted image 20260623193156.png]]
 
