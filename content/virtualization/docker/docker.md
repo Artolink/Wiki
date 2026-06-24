@@ -712,3 +712,109 @@ In production it's better to **split the stack across files**, so you can change
 - `docker-compose.override.yml` is **auto-merged** on top of `docker-compose.yml`.
 - Use `docker compose -f base.yml -f prod.yml up -d` to compose per-environment.
 - A `.env` file is **auto-loaded** for `${VAR}` substitution in the YAML.
+
+## Docker Swarm
+
+This is **cluster & container orchestration**: turning a group of Docker hosts into one cluster that schedules containers for you. 
+
+The most used orchestrator is **Kubernetes**, but before that, Docker's own built-in solution is **Docker Swarm**.
+
+### The cluster: managers & workers (Raft)
+
+Nodes have two roles:
+- **Managers** (control plane): accept your commands and schedule work.
+- **Workers**: just run the tasks.
+
+```bash
+docker swarm init                              # on the first node → it becomes a manager, prints a join token
+docker swarm join --token <token> <mgr-ip>:2377   # on the other nodes
+```
+
+Managers keep the cluster state via **Raft consensus**, so they need a **majority (quorum)** to stay operational → always use an **odd number** of managers (3, 5…). 
+
+A worker can be **promoted** to manager.
+
+Ports to open **between nodes**:
+
+| Port | Purpose |
+|---|---|
+| **2377/TCP** | cluster management (manager communication, `join`) |
+| **7946 TCP+UDP** | node discovery / gossip |
+| **4789/UDP** | overlay data plane (VXLAN) |
+
+### Stacks & services
+
+- A multi-service app deployed to the swarm is a **stack**, described by a **Compose file** and deployed with:
+  ```bash
+  docker stack deploy -c docker-compose.yml mystack
+  ```
+- A stack is made of **services**, each service runs **N tasks** (containers) spread across the nodes.
+- **Service modes**:
+	- **replicated** (default): N copies spread over the cluster (`--replicas 3`).
+	- **global**: exactly **one task per node** (e.g. a log shipper / monitoring agent).
+
+> [!NOTE] Local vs distributed context
+> `docker compose up` runs on **one host** → **bridge** network. `docker stack deploy` runs on the **cluster** → **overlay** network. 
+> 
+> Two extra gotchas for stacks:
+> 	- **Images must be in a registry**: every node pulls them, so `build:` is ignored by `stack deploy`, build & **push** first.
+> 	- The **`deploy:`** key (replicas, placement, resources, restart policy) is **swarm-only**, so `docker compose up` ignores it.
+
+```yaml
+services:
+  web:
+    image: myorg/web:1.0      # in a registry → nodes pull it
+    ports:
+      - "8080:90"             # published on EVERY node via the routing mesh
+    deploy:                   # ← swarm-only
+      mode: replicated
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+```
+
+### Networking: overlay + VXLAN
+
+Stack services share an **overlay** network spanning all nodes, built on **VXLAN** (UDP 4789): a container's L2 frame is encapsulated and tunneled host→host through the **TEP (tunnel endpoint)**. 
+
+Each host keeps a **TEP table** (`mac xy → via tep <ip>`) to know which host to forward to. 
+
+the `docker_gwbridge` (172.17.0.x) wires containers to the overlay and to the outside.
+
+![[Pasted image 20260624210623.png]]
+
+### Routing mesh & VIP
+
+When you publish a service port (e.g. `8080:90`), the **routing mesh** makes it reachable on **every** node: hit *any* node on 8080 and the mesh routes you to a task, even one running on a different node.
+
+Each service also gets a **VIP (virtual IP)**: clients resolve the service **name** → VIP, and Docker (IPVS) **load-balances** across the service's tasks (round-robin).
+
+![[Pasted image 20260624210705.png]]
+
+### Storage (the hard part)
+
+Tasks move between nodes, so **local disk isn't enough** for stateful data. 
+
+Use **shared storage** reachable from every node, e.g. an **NFS volume** (`nfs://nfs/webvol/xyz` mounted at `/var/data/xyz`), so wherever a task lands, it sees the same data.
+
+Anything **custom beyond the image** (DB init scripts, config, credentials) comes from **outside**, not baked in: **env vars**, mounted **volumes**, and Swarm's own **`docker config`** / **`docker secret`** (injected into the service at runtime).
+
+### Key commands
+
+| Command | What |
+|---|---|
+| `docker swarm init` / `join` | create / join the swarm |
+| `docker node ls` / `docker node promote <node>` | list nodes / promote a worker to manager |
+| `docker service create --replicas 3 -p 8080:90 --name web img` | create a service |
+| `docker service ls` / `docker service ps web` | services / a service's tasks |
+| `docker service scale web=5` | scale a service |
+| `docker stack deploy -c file.yml mystack` | deploy a stack |
+| `docker stack services / ps mystack` / `docker stack rm mystack` | inspect / remove a stack |
+| `docker secret create` / `docker config create` | inject secrets / config into services |
+
+> [!NOTE] Swarm vs Kubernetes
+> Swarm is the **simplest** orchestrator: built into Docker, driven by Compose files, quick to stand up. 
+> 
+> **Kubernetes** is far more powerful and complex (the industry standard), so reach for K8s at production scale. 
+> 
+> Swarm shines for small clusters and learning, I suggest **hands-on**: stand up a 3-node swarm and deploy a stack to make the pieces click.
