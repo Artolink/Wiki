@@ -607,3 +607,108 @@ ENTRYPOINT ["./aspnetapp"]
 
 The key line is **`COPY --from=build /app .`**: it pulls *only* `/app` out of the previous `build` stage into the final image, leaving the SDK and intermediate files behind → a tiny, runtime-only image.
 
+## Docker Compose
+
+Compose is the **declarative** way to run a **multi-container app**: a single YAML file (a "manifest") declares all your services: frontend, API, backend/DB, plus their networks and volumes, instead of typing `docker run` for each by hand.
+
+The file is usually `docker-compose.yml` (not mandatory, use `-f othername.yml` to point elsewhere).
+
+### Dockerfile VS Compose: different jobs
+
+- **Dockerfile** = how to **build one image**.
+- **Compose** = how to **run a stack** (and optionally build its images).
+
+They're complementary: in a service, **`build: .`** ≈ `docker build .` (uses your Dockerfile), while **`image: wordpress:latest`** pulls a stock image. 
+
+So you *build* with a Dockerfile and *run* with Compose: Compose just saves you from re-typing every `docker run` flag.
+
+### A compose file
+
+Example `docker-compose.yml`, frontend + API + database:
+
+```yaml
+services:
+  web:
+    build: .                       # build from the local Dockerfile (≈ docker build .)
+    ports:
+      - "3000:3000"                # ONLY the frontend is published to the host
+    environment:
+      API_URL: http://api:4000
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  api:
+    image: myorg/api:1.0           # prebuilt image, no port published → internal only
+    environment:
+      DB_HOST: db
+    depends_on:
+      db:
+        condition: service_healthy # wait until the DB is healthy
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      retries: 5
+
+volumes:
+  db-data:
+```
+
+Run it:
+
+```bash
+docker compose up -d       # reads the yaml, builds if needed, starts in the background
+docker compose logs -f     # follow the logs
+```
+
+(`-d` = detached: containers start in the background and the terminal returns to the prompt immediately)
+
+> [!NOTE] Services talk to each other by name
+> Compose creates a network for the project, and each service reaches the others by **service name**: `web` → `http://api:4000`, `api` → `db:5432`. 
+> 
+> That's why **only the frontend's port is published**: the API and DB are reachable *internally*, so there's no need to expose them on the host.
+
+### Common keys
+
+| Key | What |
+|---|---|
+| `services` | the containers that make up the app |
+| `build` | build the image from a Dockerfile (`build: .`, or `build:` with `context:`/`dockerfile:`) |
+| `image` | use a prebuilt image (`image: postgres:16`) |
+| `ports` | **publish** to the host (`"host:container"`) |
+| `expose` | expose only to other services (internal, not published) |
+| `environment` / `env_file` | env vars inline / from a file |
+| `volumes` | named volumes or bind mounts for persistence |
+| `depends_on` | start order (+ `condition: service_healthy` to actually wait) |
+| `networks` | attach services to specific networks |
+| `restart` | restart policy (`unless-stopped`, `always`…) |
+| `healthcheck` | per-service health probe |
+| `command` | override the image's default command |
+
+### Common commands
+
+| Command | What |
+|---|---|
+| `docker compose up -d` | build (if needed) + start, detached |
+| `docker compose down` | stop & remove containers/networks (`-v` also removes named volumes) |
+| `docker compose ps` | list the project's containers |
+| `docker compose logs -f [svc]` | follow logs (optionally one service) |
+| `docker compose build` / `pull` | (re)build / pull images |
+| `docker compose restart [svc]` | restart |
+| `docker compose exec <svc> sh` | shell into a running service |
+| `docker compose config` | validate & render the final merged config |
+
+### Splitting into multiple files
+
+In production it's better to **split the stack across files**, so you can change/redeploy **one component without bringing everything down**:
+
+- `docker-compose.override.yml` is **auto-merged** on top of `docker-compose.yml`.
+- Use `docker compose -f base.yml -f prod.yml up -d` to compose per-environment.
+- A `.env` file is **auto-loaded** for `${VAR}` substitution in the YAML.
