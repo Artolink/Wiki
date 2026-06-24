@@ -387,3 +387,133 @@ But for production, prefer the official apt repository (pinned versions) over th
 Check out https://docs.docker.com/engine/install/ and select your OS.
 
 ***
+
+## Commands
+
+### Basic Commands
+
+A visual summary of the core commands and how things move between **Dockerfile → images → containers → registry**:
+
+![[Pasted image 20260624104025.png]]
+
+#### The Dockerfile & build
+
+A **Dockerfile** is the config file used to build an image. 
+
+It must be named exactly **`Dockerfile`** (capital D). 
+
+This is the Dockerfile of a Node.js app:
+```dockerfile
+FROM node:14            # base image: Node.js 14, our starting point
+WORKDIR /app            # working directory inside the image
+COPY package.json .     # copy the dependency manifest into /app
+RUN npm install         # install the dependencies
+COPY . .                # copy the rest of the source code
+EXPOSE 3000             # the port the app will listen on
+CMD ["npm", "start"]    # startup command
+```
+
+Then build it (the `build` arrow → an image):
+
+```bash
+docker build -t myapp:1.0 .
+```
+
+- **`-t name:tag`** names and tags the image. `docker build .` *works too* but gives you a generated **ID**, which complicates everything, so always tag.
+- The **tag** carries any meaningful info you want: `1.0`, `latest`, `beta`…
+
+Run an instance (container) of the image (the `run` arrow):
+
+```bash
+docker run -p 3000:3000 myapp:1.0     # -p maps host_port:container_port
+```
+
+> [!NOTE]
+> You never say *where* the image is: Docker keeps all images in one place, don't move them. To move them across machines, use `docker push`/`pull` against a registry (the versioning workflow).
+
+#### Images
+
+| Action | Command |
+|---|---|
+| **tag** | `docker tag img img:tag` — add a tag to an existing image |
+| **push / pull** | `docker push img` → registry (e.g. Docker Hub); `docker pull img` ← |
+| **save / load** | `docker save -o file.tar img` → tarball; `docker load -i file.tar` ← |
+| **run** | `docker run [opts] img` → a container (pulls first if the image is missing) |
+
+#### Containers
+
+| Action | Command |
+|---|---|
+| **stop / start / restart** | `docker stop / start / restart <container>` |
+| **commit** | `docker commit <container> img` — a new image from the container's modified state (e.g. before a push) |
+
+### Operational commands
+
+General form: **`docker <object> <action> [--flags] [args]`**. 
+
+Beyond the basics, these are for everyday managing, inspecting and troubleshooting.
+
+#### Inspect & status
+
+| Command                                   | What                                                                              |
+| ----------------------------------------- | --------------------------------------------------------------------------------- |
+| `docker ps -a`                            | all containers, including stopped ones                                            |
+| `docker container ls --size`              | adds the actual & virtual size                                                    |
+| `docker images`                           | list images                                                                       |
+| `docker image / container inspect <id>`   | detailed info (JSON)                                                              |
+| `docker logs [-f] <id>`                   | container logs (kept *outside* the container → survive a stop); `-f` follows live |
+| `docker stats`                            | live CPU / memory / I/O per container                                             |
+| `docker top <id>`                         | processes running inside a container                                              |
+| `docker version`                          | engine + client version                                                           |
+| `docker info`                             | engine overview (tweak it via `/etc/docker/daemon.json`, created by you)          |
+| `docker system df`                        | disk used by images / containers / volumes                                        |
+| `docker image history <img>`              | the image's layer-by-layer history                                                |
+| `docker compose ls` / `docker compose ps` | compose projects / their containers                                               |
+
+#### Run, exec & access
+
+| Command | What |
+|---|---|
+| `docker container create` | create without starting |
+| `docker container run` | create + start; pulls if missing (from a custom registry use the full URL); `--memory=100m` caps the container's memory (too low → **OOM** crash) |
+| `docker run -it <img> <cmd>` | run a one-off command (e.g. `bash`, `ps -ef`) |
+| `docker exec -it <id> <cmd>` | run a command **in a running** container (e.g. `bash`) |
+| `docker attach <id>` | attach to the main process (**PID 1**) stdout |
+| `Ctrl-P  Ctrl-Q` | detach **without** stopping the container |
+| `docker cp <id>:/path ./local` | copy files host ↔ container |
+
+#### Cleanup
+
+| Command | What |
+|---|---|
+| `docker rm <id>` / `docker rmi <img>` | remove a container / an image |
+| `docker image prune` | remove **dangling** (unreferenced) images |
+| `docker system prune [-a]` | remove all unused data (stopped containers, unused networks, dangling images; `-a` also unused images) |
+
+> [!NOTE]
+> `docker rmi -f` on an image used by a **running** container only **untags** it, the layers stay (still referenced) and the container keeps running.
+
+#### Save / transfer
+
+| Command                                           | What                                                                              |
+| ------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `docker image save <img>`                         | export an image **with its full structure/metadata**, the right way               |
+| `docker load`                                     | import an image tarball                                                           |
+| `docker container export` / `docker image import` | export/import a container's filesystem: **loses image metadata, not recommended** |
+
+> [!TIP]
+> For moving images around, a **registry** (push/pull) beats save/export every time.
+
+#### Volumes & networks
+
+| Command                                       | What                                              |
+| --------------------------------------------- | ------------------------------------------------- |
+| `docker volume create / ls / inspect / prune` | manage volumes (local, or NFS/iSCSI… via drivers) |
+| `docker network create / ls / inspect`        | manage networks (bridge, overlay…)                |
+
+#### Handy combos
+
+```bash
+docker container rm -f $(docker container ls -aq)    # force-remove ALL containers
+docker rmi $(docker images -qf dangling=true)        # remove all dangling images
+```
