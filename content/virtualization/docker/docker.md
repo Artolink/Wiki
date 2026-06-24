@@ -517,3 +517,93 @@ Beyond the basics, these are for everyday managing, inspecting and troubleshooti
 docker container rm -f $(docker container ls -aq)    # force-remove ALL containers
 docker rmi $(docker images -qf dangling=true)        # remove all dangling images
 ```
+
+## Dockerfile
+
+When you build an image from a Dockerfile, each instruction is a **layer** (mostly) a change on top of the base image (`FROM`).
+
+- **Metadata instructions don't create a layer**: `CMD`, `WORKDIR`, `ENV`, `EXPOSE`, `LABEL`, `USER`… only edit the image's **JSON metadata**, they don't touch the filesystem.
+- **Layer caching**: rebuilds don't start from scratch, Docker reuses the layers your change didn't affect, and only rebuilds **from the first changed instruction down**. So *order matters*: put rarely-changing steps first (deps).
+- **`--no-cache`** forces a full rebuild (e.g. to actually re-pull `FROM ubuntu:latest` or re-run `RUN apt-get update` and get fresh packages).
+- **`.dockerignore`** works like `.gitignore`: it keeps files out of the **build context** (the files sent to the daemon): smaller/faster builds, and avoids leaking secrets.
+
+### Instructions
+
+Directives are written in **UPPERCASE** (convention).
+
+| Instruction   | What it does                                                                                           | Layer?        |
+| ------------- | ------------------------------------------------------------------------------------------------------ | ------------- |
+| `FROM`        | base image (`FROM ubuntu:24.04`). `FROM scratch` = empty, no filesystem (the next instruction adds it) | sets the base |
+| `RUN`         | runs a command at build time and **commits a new layer** (`RUN apt-get update`). 3 `RUN`s = 3 layers   | ✅             |
+| `COPY`        | copy **local** files into the image (`COPY app/ /app`): **the preferred one**                          | ✅             |
+| `ADD`         | like COPY but also unpacks local tarballs and fetches **remote URLs**: use only when you need those    | ✅             |
+| `WORKDIR`     | set (and create) the working directory for the following instructions                                  | metadata      |
+| `CMD`         | default command/args: fully **replaced** if you pass a command at `docker run`                         | metadata      |
+| `ENTRYPOINT`  | the **fixed** command: `docker run` args are **appended** to it                                        | metadata      |
+| `ENV`         | set environment variables (available at **runtime**)                                                   | metadata      |
+| `ARG`         | **build-time** variable (`ARG TARGETARCH`): not present at runtime                                     | —             |
+| `EXPOSE`      | **documents** the port the app listens on: it does **not** publish it (you still need `-p`)            | metadata      |
+| `USER`        | user (UID/username) the container runs as (avoid `root`)                                               | metadata      |
+| `VOLUME`      | declare a mount point for persistent data (stored under `/var/lib/docker/volumes/<name>/`)             | metadata      |
+| `LABEL`       | add metadata/labels to the image                                                                       | metadata      |
+| `HEALTHCHECK` | command Docker runs to mark the container **healthy/unhealthy**                                        | metadata      |
+
+### CMD vs ENTRYPOINT
+
+* **`CMD`** is a **default that gets replaced**. `CMD ["ping"]` → `docker run myimage 8.8.8.8` tries to run `8.8.8.8` *as a command* → **error**.
+* **`ENTRYPOINT`** is the **fixed command**: run-time args are **appended**. `ENTRYPOINT ["ping"]` → `docker run myimage 8.8.8.8` runs `ping 8.8.8.8`. ✓
+* **Combine them**: ENTRYPOINT = the command, CMD = default (overridable) args:
+  ```dockerfile
+  ENTRYPOINT ["ping"]
+  CMD ["8.8.8.8"]
+  ```
+  `docker run myimage` → `ping 8.8.8.8`; `docker run myimage 4.4.4.4` → `ping 4.4.4.4`.
+
+### Build
+
+```bash
+docker build -t name:tag .       # same as: docker image build . -t name:tag
+```
+
+> [!TIP] Pipe a Dockerfile from STDIN
+> ```bash
+> cat Dockerfile | docker image build -t myimage -f - .
+> ```
+> Useful when reading a Dockerfile from a remote location (e.g. via `curl`).
+
+### Best practices
+
+- **Order for the cache**: copy the dependency manifest + install deps **before** copying the code, so a code change doesn't invalidate the dependency layers.
+- **Chain `RUN` to cut layers** (and clean up in the *same* layer):
+  ```dockerfile
+  RUN apt-get update && apt-get install -y curl \
+      && rm -rf /var/lib/apt/lists/*
+  ```
+- Use **`COPY`** over `ADD`: run as a non-root **`USER`**. Start from a small base (`alpine`, `-slim`, `distroless`).
+- **`docker build --squash`** collapses the result into a **single layer** (the "squash" operation, handy in performance-sensitive production).
+
+### Multi-stage build
+
+Build in one stage (with the compiler/SDK), then copy **only the artifact** into a slim final image, so the SDK never ships. 
+
+For example (.NET):
+```dockerfile
+# --- build stage (has the SDK) ---
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG TARGETARCH
+WORKDIR /source
+COPY aspnetapp/*.csproj .
+RUN dotnet restore -a $TARGETARCH
+COPY aspnetapp/. .
+RUN dotnet publish -a $TARGETARCH --no-restore -o /app
+
+# --- final stage (runtime only) ---
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+COPY --from=build /app .          # take ONLY /app from the build stage
+USER $APP_UID
+ENTRYPOINT ["./aspnetapp"]
+```
+
+The key line is **`COPY --from=build /app .`**: it pulls *only* `/app` out of the previous `build` stage into the final image, leaving the SDK and intermediate files behind → a tiny, runtime-only image.
+
