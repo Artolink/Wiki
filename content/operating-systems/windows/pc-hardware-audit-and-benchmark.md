@@ -112,7 +112,7 @@ Plus three test sections:
 
 ---
 
-## Worked example: Lenovo ThinkPad L14 Gen 1
+## Example: Lenovo ThinkPad L14 Gen 1
 
 > Acceptance report for a refurbished unit
 > **Inspection date:** 2026-06-29 · **Hostname:** *[redacted]*
@@ -358,7 +358,7 @@ For browsing, Office, multitasking and day-to-day work the GPU doesn't matter: C
 
 ---
 
-## Appendix: commands used (for manual tests)
+## Commands used
 
 > **PowerShell** commands (Windows 11). Open *PowerShell* and paste them. 🔒 = requires PowerShell launched as **administrator**. This section is updated each time a new test is run.
 
