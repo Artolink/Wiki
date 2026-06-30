@@ -6,7 +6,6 @@ tags:
   - windows
 ---
 
-
 > This is a repeatable methodology to **inventory, verify and benchmark** a Windows PC from BIOS strings to port-by-port testing to thermal stress, and produce a clean acceptance report.
 > 
 > Useful whenever you receive an unknown machine (refurbished purchase, second-hand, fleet handover, customer device) and need to answer one question with evidence: *does this hardware do what it claims to do?*
