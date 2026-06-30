@@ -1,9 +1,7 @@
 ---
 title: PC Hardware Audit and Benchmark on Windows
 tags:
-  - hardware
-  - powershell
-  - windows
+  - Maintenance
 ---
 
 > This is a repeatable methodology to **inventory, verify and benchmark** a Windows PC from BIOS strings to port-by-port testing to thermal stress, and produce a clean acceptance report.
