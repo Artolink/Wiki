@@ -260,7 +260,7 @@ Plus three test sections:
 | **WEI base score** | winsat | **6.5** | capped by integrated GPU (CPU/RAM/SSD all 8.9) |
 | **Thermal stress test** | Cinebench R23 10 min + HWiNFO | ✅ Stable · CPU ~3.0–3.2 GHz · peak **95 °C** | see 🌡️ |
 
-#### SSD detail: CrystalDiskMark 9 (C:, 1 GiB × 3 passes)
+#### SSD detail: CrystalDiskMark 9
 
 | Pattern | Read | Write |
 |---------|------|-------|
@@ -275,7 +275,7 @@ Plus three test sections:
 
 ![[Screenshot 2026-06-29 234457.png]]
 
-#### Thermal stress test: Cinebench R23 (10 min, 100 % load)
+#### Thermal stress test: Cinebench R23
 
 **✅ CPU healthy: HWiNFO log, 36 samples under full load:**
 
