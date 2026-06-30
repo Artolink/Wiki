@@ -6,7 +6,7 @@ tags:
   - windows
 ---
 
-# 🖥️ PC Hardware Audit and Benchmark on Windows
+## PC Hardware Audit and Benchmark on Windows
 
 > A repeatable methodology to **inventory, verify and benchmark** a Windows PC from BIOS strings to port-by-port testing to thermal stress, and produce a clean acceptance report.
 > 
@@ -14,7 +14,7 @@ tags:
 
 ---
 
-## 🎯 Why audit a PC
+### Why audit a PC
 
 Concretely, a structured PC audit lets you:
 
@@ -27,7 +27,7 @@ A good report can also be archived as part of an **asset inventory** alongside l
 
 ---
 
-## 🗓️ When to use this methodology
+### When to use this methodology
 
 | Scenario                                | Why it matters                                                                      |
 | --------------------------------------- | ----------------------------------------------------------------------------------- |
@@ -39,7 +39,7 @@ A good report can also be archived as part of an **asset inventory** alongside l
 
 ---
 
-## 🛠️ Workflow
+### Workflow
 
 ```mermaid
 flowchart LR
@@ -58,7 +58,7 @@ You want to know what you're stressing, and you want a clean baseline reading be
 
 ---
 
-## 📚 Sections of the report (template)
+### Sections of the report (template)
 
 The example below is structured around eight sections. 
 
@@ -83,7 +83,7 @@ Plus three test sections:
 
 ---
 
-## 🧰 Tools used
+### Tools used
 
 | Tool | What it gives you | License |
 |------|-------------------|---------|
@@ -102,7 +102,7 @@ Plus three test sections:
 
 ---
 
-## 🔍 What "good" looks like for each section
+### What "good" looks like for each section
 
 - **Battery (laptop)**: > 80 % health and a sane cycle count for the unit's age. Anything below 70 % is replacement territory.
 - **SSD**: SMART **Healthy**, sequential read ≥ 1 GB/s for NVMe (≥ 500 MB/s for SATA), no reallocated sectors.
@@ -113,12 +113,12 @@ Plus three test sections:
 
 ---
 
-## 📋 Worked example: Lenovo ThinkPad L14 Gen 1
+## Worked example: Lenovo ThinkPad L14 Gen 1
 
 > Acceptance report for a refurbished unit
 > **Inspection date:** 2026-06-29 · **Hostname:** *[redacted]*
 
-### 📋 System summary
+### System summary
 
 | Field | Value |
 |-------|-------|
@@ -131,7 +131,7 @@ Plus three test sections:
 | **Motherboard S/N** | *[redacted]* |
 | **Form factor** | Portable |
 
-### 🧠 Processor (CPU)
+### Processor (CPU)
 
 | Field | Value |
 |-------|-------|
@@ -144,7 +144,7 @@ Plus three test sections:
 | **Socket** | U3E1 (BGA, soldered) |
 | **TDP** | 15 W |
 
-### 🧩 RAM
+### RAM
 
 | Field | Value |
 |-------|-------|
@@ -156,7 +156,7 @@ Plus three test sections:
 | **Part number** | M471A1K43DB1-CWE |
 | **Slots** | ChannelA-DIMM0 · ChannelB-DIMM0 |
 
-### 💾 Storage (SSD)
+### Storage (SSD)
 
 | Field | Value |
 |-------|-------|
@@ -174,7 +174,7 @@ Plus three test sections:
 |--------|-------|------|------|
 | `C:` (NTFS) | ≈ 236.7 GB | ≈ 180.3 GB | ≈ 56.4 GB (24 %) |
 
-### 🎨 GPU
+### GPU
 
 | Field | Value |
 |-------|-------|
@@ -183,7 +183,7 @@ Plus three test sections:
 | **Driver** | 31.0.101.2137 |
 | **Current resolution** | 1920 × 1080 (Full HD) |
 
-### 🔋 Battery
+### Battery
 
 | Field | Value |
 |-------|-------|
@@ -196,7 +196,7 @@ Plus three test sections:
 
 > 💡 97 % health with only 16 charge cycles indicates a battery that is effectively new — a strong signal of high-quality refurbishment.
 
-### 🌐 Network and connectivity
+### Network and connectivity
 
 | Interface | Device | Status |
 |-----------|--------|--------|
@@ -207,7 +207,7 @@ Plus three test sections:
 - **Wi-Fi 6 (802.11ax)** + integrated **Bluetooth**
 - MAC addresses and current IP redacted
 
-### 🪟 Operating system and firmware
+### Operating system and firmware
 
 | Field | Value |
 |-------|-------|
@@ -222,7 +222,7 @@ Plus three test sections:
 
 ---
 
-### 🔌 Port and peripheral tests
+### Port and peripheral tests
 
 > Connectivity probe performed with a **Kingston DataTraveler 3.0** USB stick (USB 3.0).
 > Uncached **read** throughput reflects the real port class: ≈100 MB/s = USB 3.x · ≈30–35 MB/s = USB 2.0.
@@ -243,7 +243,7 @@ Plus three test sections:
 
 ---
 
-### 🧪 Benchmarks and tests
+### Benchmarks and tests
 
 > Benchmarks run on **2026-06-29 / 2026-06-30**: built-in Windows tools (`winsat`) + **CrystalDiskMark 9**, **Cinebench R23**, **HWMonitor / HWiNFO**.
 
@@ -260,7 +260,7 @@ Plus three test sections:
 | **WEI base score** | winsat | **6.5** | capped by integrated GPU (CPU/RAM/SSD all 8.9) |
 | **Thermal stress test** | Cinebench R23 10 min + HWiNFO | ✅ Stable · CPU ~3.0–3.2 GHz · peak **95 °C** | see 🌡️ |
 
-#### 💾 SSD detail: CrystalDiskMark 9 (C:, 1 GiB × 3 passes)
+#### SSD detail: CrystalDiskMark 9 (C:, 1 GiB × 3 passes)
 
 | Pattern | Read | Write |
 |---------|------|-------|
@@ -275,7 +275,7 @@ Plus three test sections:
 
 ![[Screenshot 2026-06-29 234457.png]]
 
-#### 🌡️ Thermal stress test: Cinebench R23 (10 min, 100 % load)
+#### Thermal stress test: Cinebench R23 (10 min, 100 % load)
 
 **✅ CPU healthy: HWiNFO log, 36 samples under full load:**
 
@@ -304,7 +304,7 @@ Under sustained load the CPU **holds ~3.0–3.2 GHz on all cores**: a strong res
 
 ---
 
-### ✅ Acceptance checklist
+### Acceptance checklist
 
 - [x] Hardware inventory complete
 - [x] SSD health verified (Healthy)
@@ -316,11 +316,11 @@ Under sustained load the CPU **holds ~3.0–3.2 GHz on all cores**: a strong res
 
 ---
 
-### 🏁 Final remarks
+### Final remarks
 
 **Overall verdict: excellent refurbished unit, approved.** The ThinkPad L14 Gen 1 passes the audit with very good results.
 
-#### 👍 Strengths
+#### Strengths
 - 🔋 **Battery as good as new**: 97.1 % health with only 16 charge cycles.
 - 💾 **Excellent NVMe SSD**: 3,333 / 1,560 MB/s sequential read/write, *Healthy* status.
 - 🧠 **Healthy and performant CPU**: Cinebench R23 **3,466 pts** multi / **1,054 pts** single, ~3.2 GHz sustained under load.
@@ -328,16 +328,16 @@ Under sustained load the CPU **holds ~3.0–3.2 GHz on all cores**: a strong res
 - 🔌 **Ports**: **8/8 tested, all OK** (USB-A ×2 and USB-C ×2 USB 3.x, microSD reader, audio jack, HDMI with external monitor, Gigabit Ethernet at 1 Gbps).
 - 🪟 **Software**: Windows 11 Pro 25H2, security stack (VBS / HVCI / Secure Boot) active.
 
-#### 👀 Things to watch
+#### Things to watch
 - 🌡️ **Temperatures under full load**: up to **95 °C**, but the test was run in harsh conditions (**~33 °C ambient, very warm room, no extra cooling, laptop flat on the desk without a riser**): in normal conditions, expect lower values. Still under the 100 °C limit; for more headroom, a thermal-paste renewal can be considered.
 
-#### ✅ All tests completed
+#### All tests completed
 - 🟢 **HDMI** (external monitor) and 🟠 **Gigabit Ethernet**: verified and working. No test deferred.
 
-#### 🎯 Judgement
+#### Judgement
 Solid, reliable hardware with good performance for the category (14" business ultrabook). **No blocking defect found**: **purchase approved.** ✅
 
-#### 🏆 Final score
+#### Final score
 
 Per-component rating (0 to 10 scale):
 
@@ -359,11 +359,11 @@ For browsing, Office, multitasking and day-to-day work the GPU doesn't matter: C
 
 ---
 
-## 🧰 Appendix: commands used (for manual tests)
+## Appendix: commands used (for manual tests)
 
 > **PowerShell** commands (Windows 11). Open *PowerShell* and paste them. 🔒 = requires PowerShell launched as **administrator**. This section is updated each time a new test is run.
 
-### A · System information
+### System information
 
 ```powershell
 # General overview (OS, model, BIOS, RAM, network)
@@ -400,7 +400,7 @@ Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' |
   Select-Object ProductName,DisplayVersion,CurrentBuildNumber,UBR
 ```
 
-### B · Battery (health and charge cycles)
+### Battery (health and charge cycles)
 
 ```powershell
 # Official Windows report: Design Capacity, Full Charge Capacity, Cycle Count
@@ -411,14 +411,14 @@ powercfg /batteryreport /output "$env:USERPROFILE\Desktop\battery-report.html"
 (Get-CimInstance -Namespace ROOT\WMI -ClassName BatteryFullChargedCapacity).FullChargedCapacity
 ```
 
-### C · TPM and Secure Boot 🔒
+### TPM and Secure Boot
 
 ```powershell
 Get-Tpm                  # 🔒 TPM status
 Confirm-SecureBootUEFI   # 🔒 returns True/False
 ```
 
-### D · USB ports: detection and speed
+### USB ports: detection and speed
 
 ```powershell
 # USB controllers present
@@ -430,7 +430,7 @@ Get-PnpDevice -PresentOnly -Class USB | Select-Object FriendlyName,InstanceId
 
 **Port speed:** use the `usb-bench.ps1` script (section H). Key rule: read **uncached** (`FILE_FLAG_NO_BUFFERING`), otherwise Windows serves the data from RAM and reports fake multi-GB/s numbers. Rule of thumb with a USB 3.0 stick: **read ≈100 MB/s = USB 3.x port**, **≈30–35 MB/s = USB 2.0 port**.
 
-### E · microSD reader
+### microSD reader
 
 ```powershell
 # Card reader controller
@@ -440,7 +440,7 @@ Get-Disk   | Where-Object BusType -eq 'SD'
 Get-Volume | Where-Object DriveType -eq 'Removable'
 ```
 
-### F · Combo audio jack
+### Combo audio jack
 
 ```powershell
 # Audio endpoints: plug headphones in and watch a "2nd output" / "External Mic" appear
@@ -451,7 +451,7 @@ Get-PnpDevice -Class AudioEndpoint | Select-Object Status,FriendlyName
 [console]::beep(880,400); [console]::beep(660,400); [console]::beep(988,600)
 ```
 
-### G · Performance benchmarks
+### Performance benchmarks
 
 **WEI / winsat** (CPU, RAM, disk, graphics): 🔒 admin required:
 
@@ -508,7 +508,7 @@ $pi = Get-CimInstance Win32_PerfFormattedData_Counters_ProcessorInformation -Fil
 powercfg /getactivescheme
 ```
 
-### H · Full support scripts
+### Full support scripts
 
 **`usb-bench.ps1`** — measures a USB stick's speed (write + uncached read):
 
