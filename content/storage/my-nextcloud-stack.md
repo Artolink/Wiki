@@ -10,21 +10,25 @@ tags:
 
 ## What is Nextcloud?
 
-**Nextcloud** is the open-source, self-hosted alternative to Dropbox, Google Drive and Microsoft OneDrive: file sync between devices, sharing links, a web UI to browse and preview, and — if you enable the extra apps — calendar, contacts, notes, video calls, an office suite, and a whole ecosystem of plugins.
+**Nextcloud** is the open-source, self-hosted alternative to Dropbox, Google Drive and Microsoft OneDrive: file sync between devices, sharing links, a web UI to browse and preview... and much more, if you enable the extra apps.
 
-It's a monolithic PHP application, but around it you always need three supporting pieces:
+I personally use it for fast, private file transfer and access: whenever you have no idea how to pass files from one machine to another, this can be very handy: you just upload them from the source, and access the UI from the destination to download it (you can also upload/download via CLI if you are in a server situation with no desktop environment: i'll show you how to do that later).
 
-- A **database** (MariaDB or PostgreSQL): stores metadata, users, sharing rules. SQLite works for one user but starts to hurt as soon as two things want to talk to it at the same time.
+Nextcloud is a monolithic PHP application, but around it you always need three supporting pieces:
+
+- A **database** (MariaDB or PostgreSQL): stores metadata, users, sharing rules.
 - A **cache + lock coordinator** (Redis): coordinates file locks across worker processes, holds distributed cache and PHP sessions.
 - A **reverse proxy** (nginx or Apache): terminates TLS, buffers large uploads, forwards the right headers.
 
-Put together, that quartet is what we'll call *the Nextcloud stack*.
+Put together, that trio plus the Nextcloud app itself is what we'll call *the Nextcloud stack*.
 
 ***
 
 ## Architecture
 
-For this one, the whole thing lives on **one VPS** — the same one that already runs my [[my-elk-stack|logs]] and [[my-grafana-stack|metrics]] stacks. No private LAN this time: single host, one Docker Compose file, four containers, and the host nginx sitting in front.
+For this one, the whole thing can live in **one VPS**.
+
+Single host, one Docker Compose file, four containers, and the host nginx sitting in front.
 
 ```mermaid
 flowchart LR
@@ -49,7 +53,9 @@ flowchart LR
     CRON <--> REDIS
 ```
 
-The important trick is how the container binds its port: `127.0.0.1:8080` and **not** `0.0.0.0:8080`. That way the Nextcloud container is invisible from outside the VPS — the only public entrypoint is the host nginx, which terminates TLS with a Let's Encrypt cert and reverse-proxies to the container. Same shape I use for Grafana and Kibana on this same VPS, so nothing new at the ingress layer.
+The important trick is how the container binds its port: `127.0.0.1:8080` and **not** `0.0.0.0:8080`. 
+
+That way the Nextcloud container is invisible from outside the VPS — the only public entrypoint is the host nginx, which terminates TLS with a Let's Encrypt cert and reverse-proxies to the container. 
 
 ### The stack I use
 
@@ -71,7 +77,11 @@ For deploying your Nextcloud stack, we'll follow this order:
 
 Why one host and not two (or three)?
 
-Because for a personal file-transfer cloud, splitting the database or Redis onto their own VMs is pure ceremony: no throughput to gain, more failure domains, more things to keep patched. The scaling moves that actually pay off for Nextcloud — external object store for user data, primary-replica DB, dedicated Redis Sentinel — only start being worth their weight past ~50 concurrent users. If that's the scale you're at, you probably don't need this guide anyway.
+Because for a personal file-transfer cloud, splitting the database or Redis onto their own VMs is pure ceremony: no throughput to gain, more failure domains, more things to keep patched. 
+
+The scaling moves that actually pay off for Nextcloud like external object store for user data, primary-replica DB, dedicated Redis Sentinel — only start being worth their weight past ~50 concurrent users. 
+
+If that's the scale you're at, you probably don't need this guide anyway.
 
 ***
 
@@ -81,7 +91,9 @@ Here's the whole deployment, start to finish.
 
 ### 1. DNS
 
-Point a subdomain at your VPS. I chose `files.` because it says what the service *does* rather than *which app runs there* — if I ever swap Nextcloud for Seafile or something else, the name still fits.
+Point a subdomain at your VPS. 
+
+I chose `files.` because it says what the service *does* rather than *which app runs there*: if I ever swap Nextcloud for Seafile or something else, the name still fits.
 
 ```
 files.<your-domain>   A   <YOUR_VPS_IP>   TTL 300
@@ -99,9 +111,9 @@ You should see your VPS IP.
 
 ### 2. Reverse proxy + TLS
 
-Same pattern as [[my-elk-stack|Kibana]] and [[my-grafana-stack|Grafana]]: a vhost on the host nginx, TLS from certbot, reverse-proxy to the container.
+Same usual pattern: a vhost on the host nginx, TLS from certbot, reverse-proxy to the container.
 
-Two-step vhost setup: an HTTP-only *bootstrap* version so certbot can pass the ACME challenge, then the full *production* version with reverse proxy.
+Two-step vhost setup: an HTTP-only *bootstrap* version, so certbot can pass the ACME challenge, then the full *production* version with the real reverse proxy.
 
 First, the bootstrap:
 
@@ -181,11 +193,15 @@ sudo nginx -t && sudo systemctl reload nginx
 
 ### 3. The Docker Compose stack
 
-Now the fun part. Four services in one Compose file: the Nextcloud app (Apache + PHP), MariaDB, Redis and the cron worker.
+Now the fun part. 
 
-The whole thing lives at `~/nextcloud/`. Two files.
+Four services in one Compose file: the Nextcloud app (Apache + PHP), MariaDB, Redis and the cron worker.
 
-**`.env`** — secrets, `chmod 600`:
+The whole thing lives at `~/nextcloud/`. 
+
+Two files:
+
+**`.env`** is for secrets, `chmod 600`:
 
 ```dotenv
 DB_ROOT_PASSWORD=<random 32 chars>
@@ -194,7 +210,10 @@ ADMIN_USER=admin
 ADMIN_PASSWORD=<random 20 chars>
 ```
 
-Generate the random values with `openssl rand -base64 32 | tr -d '\n=/+' | head -c 32`. Don't commit this file — add it to `.gitignore` alongside `db-data/` and `nextcloud-app/`.
+Generate the random values with `openssl rand -base64 32 | tr -d '\n=/+' | head -c 32`. 
+
+> [!IMPORTANT]
+> Don't commit this file: add it to `.gitignore` alongside `db-data/` and `nextcloud-app/`.
 
 **`docker-compose.yml`**:
 
@@ -267,7 +286,9 @@ docker compose up -d
 docker compose logs -f app        # ~30 s
 ```
 
-You want the log to settle on the Apache banner (`Command line: 'apache2 -D FOREGROUND'`) with no more `Initializing Nextcloud`. Sanity-check via the status endpoint:
+You want the log to settle on the Apache banner (`Command line: 'apache2 -D FOREGROUND'`) with no more `Initializing Nextcloud`. 
+
+Sanity-check via the status endpoint:
 
 ```bash
 curl -s https://files.<your-domain>/status.php | jq
@@ -278,7 +299,9 @@ curl -s https://files.<your-domain>/status.php | jq
 
 ### 4. Post-install tuning
 
-Six `occ` commands, straight into the app container. This is what turns a fresh install into something you'd actually want to rely on:
+Six `occ` commands, straight into the app container. 
+
+This is what turns a fresh install into something you'd actually want to rely on:
 
 ```bash
 # add the DB indices that first-run install skips
@@ -296,7 +319,7 @@ docker compose exec -u www-data app php occ config:system:set redis port --value
 # background jobs → cron (the container we already deployed)
 docker compose exec -u www-data app php occ background:cron
 
-# soft per-user quota — a runaway upload can't fill /
+# soft per-user quota
 docker compose exec -u www-data app php occ config:app:set files default_quota --value "10 GB"
 
 # and the built-in health check
@@ -311,11 +334,13 @@ The last line should print only `ℹ` (informational) lines. Anything red is rea
 
 Point your browser at `https://files.<your-domain>` and log in with the credentials from `.env`.
 
-Now — this bit surprised me the first time, so I'll spare you the debugging.
+Now, this bit surprised me the first time, so I'll spare you the debugging.
 
-On some `stable-apache` builds, `NEXTCLOUD_ADMIN_PASSWORD` from the env doesn't fully take. The DB user gets created, WebDAV Basic Auth accepts the password, but the browser login form keeps saying *Wrong login or password*. Worse: every failed attempt writes `set-cookie: nc_username=deleted; …` to your browser, and the browser keeps sending them. From that point on, even the correct password bounces off the form.
+On some `stable-apache` builds, `NEXTCLOUD_ADMIN_PASSWORD` from the env doesn't fully take: the DB user gets created, WebDAV Basic Auth accepts the password, but the browser login form keeps saying *Wrong login or password*. 
 
-The 20-second rescue is a three-step ritual:
+Worse: every failed attempt writes `set-cookie: nc_username=deleted; …` to your browser, and the browser keeps sending them. From that point on, even the correct password bounces off the form.
+
+The 20-second rescue is:
 
 ```bash
 # 1. Flush Redis — nukes the poisoned session state on the server
@@ -331,12 +356,86 @@ curl -s -o /dev/null -w '%{http_code}\n' -u "admin:$NEW_PW" \
      https://files.<your-domain>/remote.php/dav/files/admin/
 ```
 
-And the important last step: **open an incognito window** for the actual login. The tainted cookies live in your browser cache too, not just on the server — a normal reload still carries them, and the login form still bounces. Incognito ignores them, and you're in.
+And the important last step: **open an incognito window** for the actual login. 
+
+The tainted cookies live in your browser cache too, not just on the server, so a normal reload still carries them, and the login form still bounces. 
 
 Once you're logged in, change the password from *Settings → Security* to something you'll actually remember, and enable 2FA while you're there.
+
+## CLI access
+
+One thing that's easy to miss but pays off every day: the whole Nextcloud API is **WebDAV**. 
+
+This means you can talk to your cloud from any shell, in three lines of `curl`, without touching a browser.
+
+The pattern for a download:
+
+```bash
+curl -u "USER:PASSWORD" -O \
+  https://files.<your-domain>/remote.php/dav/files/USER/PATH/FILE
+```
+
+- `USER`: your Nextcloud username (`admin` on a fresh install).
+- `PATH/FILE`: the path inside your Nextcloud home.
+- `-O` saves under the original filename: use `-o /somewhere/else.txt` to rename on the way in.
+
+Uploads are the same call with `-T` instead of `-O`:
+
+```bash
+curl -u "USER:PASSWORD" -T ./local-file.txt \
+  https://files.<your-domain>/remote.php/dav/files/USER/local-file.txt
+```
+
+That's the whole story for one-shots... but if you're going to use this often, then these two upgrades down below are absolutely worth doing.
+
+### App passwords, not your real password
+
+Every time you type your admin password into a `curl` one-liner, you're one shell-history dump away from leaking it. Nextcloud has a first-class fix: **app passwords**.
+
+From the web UI, *Personal → Security → Create new app password* gives you a random single-use string that only works for the client you name. 
+
+If that ever leaks (committed to Git by accident, ends up in a log or history...) you can revoke it from the web UI without touching your account password.
+
+### Meet `rclone`
+
+`curl` is fine for a one-off. 
+
+For anything recurring or massive, `rclone` is the tool. 
+
+Same philosophy as `rsync`, works with 40+ storage backends, and Nextcloud (via WebDAV) is one of them.
+
+Configure the remote once:
+
+```bash
+rclone config
+# n) New remote
+# name: nc
+# storage: webdav
+# url: https://files.<your-domain>/remote.php/dav/files/YOUR_USER/
+# vendor: nextcloud
+# user + password: use your app password
+```
+
+Then everything is one command:
+
+```bash
+rclone ls nc:                                    # list remote files
+rclone copy nc:test.txt .                        # download a file
+rclone copy ./laptop-backup/ nc:backups/laptop/  # push a directory
+rclone sync ./LocalDir nc:BackupDir              # keep them identical
+rclone mount nc: ~/nextcloud-mount --daemon      # mount as a filesystem
+```
+
+The last one is genuinely magic: your Nextcloud becomes a regular directory on your machine. 
+
+You can `cp`, `mv`, `ls`, tab-complete filenames, feed it to `rsync`, same as if it were on disk. 
+
+Add `--vfs-cache-mode writes` if you plan to write a lot.
 
 ***
 
 And that's it!
 
-We've got a complete private Nextcloud instance running behind our own domain: TLS, distributed caching, background jobs, sane quotas. Congratulations!
+We've got a complete private Nextcloud instance running behind our own domain. 
+
+Congratulations!
