@@ -27,7 +27,7 @@ This is what will be exposed, and to whom:
 ### 1. Prerequisites on each VM
 
 - Ubuntu 24.04 VM on the private network.
-- Docker CE installed (same recipe as in [[observability/logs/elasticsearch/elasticsearch-setup#Prerequisites|elasticsearch-setup]]).
+- Docker CE installed: ![[docker#Installation]]
 - Network reachability from the VM to the VPS at `10.0.0.5:9200`.
 
 ### 2. Generate the logstash_writer password on the VPS
