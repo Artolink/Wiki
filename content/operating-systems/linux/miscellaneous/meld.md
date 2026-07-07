@@ -77,7 +77,7 @@ Double-click any file to open a file-level diff in a new tab.
 From the terminal, three paths in *mine → base → theirs* order:
 
 ```bash
-meld mine base theirs
+meld mine base theirs # e.g: meld nginx.conf.MINE nginx.conf.BASE nginx.conf.THEIRS
 ```
 
 Or from the UI: *File → New Comparison → File comparison → tick "3-way" → pick your three files.*
