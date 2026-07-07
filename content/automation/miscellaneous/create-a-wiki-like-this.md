@@ -24,7 +24,7 @@ Here is what I actually do:
 
 - I push them to my VPS using a Python script
 
-- As soon as they arrive, a static site is automatically generated using [Quartz](quartz-setup-linux), and everything is pushed to [GitHub](github-101) for backup, using [Git](git-basics) for versioning.
+- As soon as they arrive, a static site is automatically generated using [Quartz](quartz-setup-linux.md), and everything is pushed to [GitHub](github-101) for backup, using [Git](git-basics) for versioning.
 
 This guide walks you through this entire pipeline.
 
