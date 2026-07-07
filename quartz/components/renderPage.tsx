@@ -5,7 +5,7 @@ import BodyConstructor from "./Body"
 import { JSResourceToScriptElement, StaticResources } from "../util/resources"
 import { FullSlug, RelativeURL, joinSegments, normalizeHastElement } from "../util/path"
 import { clone } from "../util/clone"
-import { visit } from "unist-util-visit"
+import { visit, SKIP } from "unist-util-visit"
 import { Root, Element, ElementContent } from "hast"
 import { GlobalConfiguration } from "../cfg"
 import { i18n } from "../i18n"
@@ -69,11 +69,13 @@ function renderTranscludes(
   cfg: GlobalConfiguration,
   slug: FullSlug,
   componentData: QuartzComponentProps,
-  // Set di chiavi "target+anchor" già transcluse, NON solo dei target.
-  // Questo permette `![[file#sezA]]` + `![[file#sezB]]` nella stessa pagina
-  // (sezioni distinte = chiavi distinte) senza falsi positivi di "circular".
-  // Il self-embed `![[file]]` dentro `file` resta correttamente bloccato perché
-  // il caller seed-a il set con la chiave nuda del root slug.
+  // Set di chiavi "target+anchor" degli ANTENATI della catena di transclusione
+  // corrente — NON un set globale della pagina. La stessa sezione transclusa in
+  // due rami fratelli (es. `![[docker#Installation]]` dentro due prerequisiti
+  // diversi poi transclusi entrambi in una pagina-hub) è legittima e renderizza
+  // in entrambi i punti; solo un ciclo vero (chiave già presente nella catena
+  // corrente) viene bloccato. Il self-embed `![[file]]` dentro `file` resta
+  // bloccato perché il caller seed-a il set con la chiave nuda del root slug.
   visited: Set<string>,
 ) {
   // process transcludes in componentData
@@ -110,9 +112,8 @@ function renderTranscludes(
               ],
             },
           ]
-          return
+          return SKIP
         }
-        visited.add(transcludeKey)
 
         const page = componentData.allFiles.find((f) => f.slug === transcludeTarget)
         if (!page) {
@@ -217,6 +218,19 @@ function renderTranscludes(
             },
           ]
         }
+
+        // Espandi le transclusioni annidate nel contenuto appena spliced con la
+        // catena di antenati estesa: copia per-ramo, così i fratelli non si
+        // avvelenano il set a vicenda. Poi SKIP: l'outer visit non deve
+        // ri-processare questi figli con il set del livello sbagliato.
+        renderTranscludes(
+          { type: "root", children: node.children } as Root,
+          cfg,
+          slug,
+          componentData,
+          new Set(visited).add(transcludeKey),
+        )
+        return SKIP
       }
     }
   })
