@@ -385,7 +385,7 @@ docker run hello-world              # verify
 But for production, prefer the official apt repository (pinned versions) over the convenience script. 
 
 Check out https://docs.docker.com/engine/install/ and select your OS.
-> [!example]- Example: Debian/Ubuntu
+> [!example]- Example: Debian/Ubuntu installation
 > 
 > ```bash
 > # Add Docker's official GPG key:
