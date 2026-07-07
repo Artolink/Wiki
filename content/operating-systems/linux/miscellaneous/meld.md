@@ -21,7 +21,7 @@ you probably want colours, side-by-side panes, the ability to *click* the arrow 
 
 Meld is a GNOME-project GUI diff and merge tool, written in Python + GTK. 
 
-Open-source (GPL), actively maintained, available on Linux, macOS and Windows.
+Open-source (GPL), actively maintained, available on Linux, macOS and Windows (great to use via WSL as well).
 
 It does three things very well:
 
