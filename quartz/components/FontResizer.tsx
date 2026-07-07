@@ -7,8 +7,10 @@ import { classNames } from "../util/lang"
 // Resizer floating: due controlli affiancati su due righe.
 //   Riga 1: font-size del corpo del testo (A piccola ↔ slider ↔ A grande ↔ reset)
 //   Riga 2: larghezza della pagina (.page) — utile su monitor wide/4K dove
-//           il default 1500px lascia banding bianco ai lati del contenuto.
-//           Slider tra MIN (= default Quartz, 1500px) e MAX (~2400px).
+//           il default 860px lascia banding bianco ai lati del contenuto.
+//           Slider tra MIN 860 e MAX 1600 — il max DEVE coincidere con
+//           WIDTH_MAX in fontResizer.inline.ts, e (max-min) deve essere un
+//           multiplo dello step, o la maniglia non raggiunge il fondo track.
 const FontResizer: QuartzComponent = ({ displayClass }: QuartzComponentProps) => {
   return (
     <div class={classNames(displayClass, "font-resizer-floating")}>
@@ -76,7 +78,7 @@ const FontResizer: QuartzComponent = ({ displayClass }: QuartzComponentProps) =>
             class="width-slider"
             min="860"
             max="1600"
-            step="40"
+            step="20"
             defaultValue="860"
             aria-label="Larghezza pagina"
           />

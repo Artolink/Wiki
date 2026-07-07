@@ -24,13 +24,14 @@ const FONT_DEFAULT = 1.0
 // `.center` cell fissa (che lo "incollerebbe" al bordo sx quando supera il cell).
 //
 // MIN = larghezza attuale (860px) — sotto, lo slider non avrebbe effetto.
-// MAX = limite oltre cui le sidebar diventerebbero troppo strette per essere
-//       leggibili (200px min). 860 + (380-200)*2 = 1220 è il punto in cui le
-//       sidebar arrivano al minimo; oltre lo slider può continuare ad agire
-//       solo sul max-width dell'article (utile su monitor ultrawide).
+// MAX = 1600, allineato al max="1600" dello slider in FontResizer.tsx — i due
+//       valori DEVONO coincidere, altrimenti il clamp di setWidth() risincronizza
+//       la maniglia prima della fine della track. Oltre 1220 (sidebar al minimo
+//       di 200px) lo slider agisce solo sul max-width dell'article (utile su
+//       monitor ultrawide).
 const WIDTH_KEY = "pageWidth"
 const WIDTH_MIN = 860
-const WIDTH_MAX = 1400
+const WIDTH_MAX = 1600
 const WIDTH_STEP = 40
 const WIDTH_DEFAULT = 860
 const SIDEBAR_DEFAULT = 380
