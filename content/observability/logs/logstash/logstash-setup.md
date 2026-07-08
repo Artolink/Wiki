@@ -214,6 +214,6 @@ Same image, same `.env` (same password), same pipeline, same ports.
 
 ## Where to go next
 
-- [[networking/miscellaneous/haproxy|haproxy]]: the load balancer that will be deployed in front of these workers.
+- [[haproxy|haproxy]]: the load balancer that will be deployed in front of these workers.
 
 - [[observability/logs/filebeat/filebeat-setup|Filebeat]] (coming later in the series): the producer that will push events through HAProxy into these workers.

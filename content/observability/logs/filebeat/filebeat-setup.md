@@ -15,7 +15,7 @@ If you've been following the series in the correct order, then everything below 
 
 - A working Logstash pool ([[observability/logs/logstash/logstash-setup|check out the Logstash setup]]).
 
-- A working HAProxy + Keepalived HA pair with a VIP ([[networking/miscellaneous/haproxy|check out HAProxy]] + [[networking/miscellaneous/keepalived-vrrp|Keepalived VRRP]]). 
+- A working HAProxy + Keepalived HA pair with a VIP ([[haproxy|check out HAProxy]] + [[keepalived-vrrp|Keepalived VRRP]]). 
   In this guide my VIP is `10.0.0.10:5044`.
 
 ## Installation
@@ -258,7 +258,7 @@ For real production scenarios, consider:
 > [!TIP] What changes when you have 2000+ machines
 > - **backing up the ES data periodically:** The ILM policy from [[observability/logs/elasticsearch/elasticsearch-setup#ILM policy + index template|the Elasticsearch setup]] only *deletes* old indices, but it doesn't back anything up, and if the VPS disk dies, the logs go with it. The native answer is an ES Backup Repository, pointed at S3 or a separate volume.
 > - **More Logstash workers** behind the same LB pair: HAProxy's `balance roundrobin` scales horizontally for free until you saturate the LB itself.
-> - **Multiple LB pairs** geographically distributed, often with DNS round-robin in front, when one VIP can't handle the throughput anymore.
+> - **Multiple LB pairs** geographically distributed, often with DNS round-robin in front, when one VIP can't handle the throughput anymore (see [[scaling-the-load-balancer]])_.
 > - **A Kafka cluster between Beats and Logstash** as a buffer: absorbs traffic spikes that even a HA-LB can't smooth out, and decouples producers from consumers (LS can be down for maintenance and no events are lost).
 > - **An Elasticsearch cluster** with separate node types: 3+ master, 5-20+ data, 2-4 ingest, 2-4 coordinator. This is where the real bottleneck lives (indexing throughput, shard count, JVM heap pressure).
 > - **Multi-tenant Kibana spaces** so different teams can have their own dashboards, saved searches, and role-based access on the same ES backend.

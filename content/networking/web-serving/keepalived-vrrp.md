@@ -1,7 +1,7 @@
 ---
 title: "Keepalived and VRRP: make HA real"
 ---
-This page is the companion to [[networking/miscellaneous/haproxy|HAProxy]].
+This page is the companion to [[haproxy|HAProxy]].
 
 It also is two things in one. 
 

@@ -134,9 +134,17 @@ The relevant timeouts in the `defaults` section:
 
 ## Architecture
 
-A single HAProxy is, of course, a single point of failure and does not allow for any traffic distribution, nor has a built-in queue system like **Kafka** or **RabbitMQ**. 
+A **single** HAProxy is, of course, a single point of failure... but not only that! 
 
-To make at least the LB layer redundant, you need a separate component that:
+There are also two *different* problems that are not solved with redundancy (HA):
+
+- **Throughput**: the LB it distributes traffic to the backends, but the LB layer itself is still one machine where all the ingress flows through. 
+
+- **Buffering**: HAProxy forwards, it never *stores*. If every backend is down or saturated, in-flight events are simply lost: absorbing bursts is a job for a message queue like **Kafka** or **RabbitMQ** (for example, log pipelines often place them between the shippers and Logstash for exactly this reason).
+
+For now, let's focus on how to make at least the LB layer **redundant**, so resilient to failures, but if also throughput is a concern for you, I covered the main techniques for [[scaling-the-load-balancer|scaling the load balancers themselves]]... and we'll see some buffering solutions too in the future.
+
+So, to implement HA, you need a separate component that:
 
 1. Constantly monitors which HAProxy instance is alive
 
@@ -146,7 +154,7 @@ There are two mainstream schools for doing this on Linux.
 
 ### 1. HAProxy + Keepalived (this lab)
 
-Two HAProxy instances on two hosts, both running the same config, plus **[[networking/miscellaneous/keepalived-vrrp|Keepalived]]** on each host implementing **[[networking/miscellaneous/keepalived-vrrp|VRRP]]**. 
+Two HAProxy instances on two hosts, both running the same config, plus **[[keepalived-vrrp|Keepalived]]** on each host implementing **[[keepalived-vrrp|VRRP]]**. 
 
 Clients always target the VIP: whichever HAProxy currently owns the VIP serves the traffic. 
 
@@ -191,6 +199,8 @@ The cost is operational complexity: more daemons, more config.
 > **About "Heartbeat".** You may hear this stack referred to generically as *Heartbeat*, especially in older docs or from veteran sysadmins. Historically Heartbeat was the original Linux-HA daemon (pre-2009) that did both messaging and resource management; the project later split into **Corosync** (messaging) + **Pacemaker** (resource manager). 
 > 
 > The Heartbeat daemon still exists as a legacy messaging layer but is rarely used in new deployments: modern clusters are Corosync-based. Treat "Heartbeat" as the name of the *concept / legacy stack*, not of a current component (the `ocf:heartbeat:*` resource agent namespace is a naming leftover from those years).
+
+Both these options solve failover, not throughput: when a single VIP can't keep up, see [[scaling-the-load-balancer]].
 
 ---
 
@@ -325,4 +335,4 @@ A clean reload doesn't drop existing connections: HAProxy spawns the new process
 
 ## Where to go next
 
-- [[networking/miscellaneous/keepalived-vrrp|Keepalived VRRP]]: let's see the VRRP layer that owns the VIP and migrates it between loglb01 and loglb02 on failure.
+- [[keepalived-vrrp|Keepalived VRRP]]: let's see the VRRP layer that owns the VIP and migrates it between loglb01 and loglb02 on failure.

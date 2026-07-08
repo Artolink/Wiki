@@ -1,5 +1,5 @@
 ---
-title: Make your website completely resilient!
+title: Make your website or app completely resilient!
 tags:
 ---
 > [!IMPORTANT] The HA building blocks
@@ -122,6 +122,6 @@ flowchart TB
 ```
 
 * **Orchestration**: this is where **[Kubernetes](https://kubernetes.io)** (or [Docker Swarm](https://docs.docker.com/engine/swarm/)) earns its keep by scheduling replicas across nodes and self-healing (overkill for a *static* site, of course)
-* **Load balancer must not itself be a SPOF**: two LBs with [[keepalived-vrrp|keepalived/VRRP]].
+* **Load balancer must not itself be a SPOF**: two LBs with [[keepalived-vrrp|keepalived/VRRP]] (that covers failures: for the throughput side of the same problem, see [[scaling-the-load-balancer|how to scale Load Balancers]]).
 * **Database HA**: primary + replica with **automatic failover** plus backups with a tested restore.
 * **HA of the application itself**: it's the program that generates the site dynamically per request (reads the DB and renders the HTML). Just to make an example, in my domain I host a [Grafana](https://grafana.com) installation, that uses Go and Node to generate the dynamic UI.
