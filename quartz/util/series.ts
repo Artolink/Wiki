@@ -13,9 +13,14 @@
 //     ---
 //     series:
 //       - foo/bar
-//       - foo/baz
+//       - baz
 //     ---
 //   La pagina che dichiara `series` è l'hub; le pagine elencate sono i membri.
+//   Le entry risolvono wikilink-style: basta il NOME del file (ultimo
+//   segmento, case-insensitive) — il path completo serve solo a disambiguare
+//   nomi duplicati. Un path stantio (es. dopo il rename di una cartella)
+//   continua a risolvere per nome, con un warning in build che invita ad
+//   aggiornarlo.
 //
 //   `fullseries` (auto-discovery, presente nel frontmatter di un _index):
 //     ---
@@ -39,6 +44,58 @@ function compareTitles(a: QuartzPluginData, b: QuartzPluginData): number {
   const at = stripLeading((a.frontmatter?.title ?? a.slug ?? "").toLowerCase())
   const bt = stripLeading((b.frontmatter?.title ?? b.slug ?? "").toLowerCase())
   return at.localeCompare(bt, undefined, { numeric: true })
+}
+
+// Slug "pubblico" di un file: lo slug interno senza l'eventuale /index finale
+// (stessa normalizzazione di findSeriesForPage e PageSequenceNav).
+function publicSlugOf(f: QuartzPluginData): string {
+  return ((f.slug ?? "") as string).replace(/\/index$/, "")
+}
+
+// Dedup dei warning: findSeriesForPage gira per ogni pagina × 4 componenti,
+// senza questo una singola entry problematica inonderebbe il log di build.
+const warnedEntries = new Set<string>()
+function warnOnce(key: string, msg: string) {
+  if (warnedEntries.has(key)) return
+  warnedEntries.add(key)
+  console.warn(msg)
+}
+
+// Risolve una entry di un array `series:` nello slug pubblico canonico.
+// Contratto wikilink-style:
+//   1. match esatto sul path (slug interno o pubblico)
+//   2. fallback sul solo nome file (ultimo segmento, case-insensitive) —
+//      così il rename di una cartella non rompe le series
+// Se non risolve nulla, ritorna l'entry invariata (i componenti la scartano,
+// stesso comportamento di prima) e avvisa una volta sola.
+export function resolveSeriesEntry(entry: string, allFiles: QuartzPluginData[]): string {
+  for (const f of allFiles) {
+    if (!f.slug) continue
+    if (f.slug === entry || publicSlugOf(f) === entry) return publicSlugOf(f)
+  }
+
+  const base = (entry.split("/").pop() ?? entry).toLowerCase()
+  const candidates = allFiles
+    .filter((f) => f.slug && (publicSlugOf(f).split("/").pop() ?? "").toLowerCase() === base)
+    .map(publicSlugOf)
+    .sort()
+
+  if (candidates.length === 0) {
+    warnOnce(entry, `Warning: series entry "${entry}" does not match any page — skipped`)
+    return entry
+  }
+  if (candidates.length > 1) {
+    warnOnce(
+      entry,
+      `Warning: series entry "${entry}" is ambiguous (${candidates.join(", ")}) — using "${candidates[0]}"`,
+    )
+  } else if (entry.includes("/")) {
+    warnOnce(
+      entry,
+      `Warning: series entry "${entry}" resolved by filename to "${candidates[0]}" — update the path in the frontmatter`,
+    )
+  }
+  return candidates[0]
 }
 
 // Restituisce true se la pagina `member` vive sotto la cartella dell'_index `hub`.
@@ -110,7 +167,7 @@ export function findSeriesForPage(
   // 1. Esplicita: own series array
   const ownSeries = current.frontmatter?.series as unknown
   if (Array.isArray(ownSeries) && ownSeries.length > 0) {
-    return ownSeries as string[]
+    return (ownSeries as string[]).map((e) => resolveSeriesEntry(e, allFiles))
   }
 
   // 2. Auto-discovery: own fullseries (la chiave c'è, valore irrilevante)
@@ -122,10 +179,14 @@ export function findSeriesForPage(
   for (const f of allFiles) {
     if (f.slug === currentFullSlug) continue
 
-    // 3. f ha un series array che ci include
+    // 3. f ha un series array che ci include — risolvi PRIMA di confrontare,
+    // così anche una entry per-nome-file (o con path stantio) ci riconosce.
     const fSeries = f.frontmatter?.series as unknown
-    if (Array.isArray(fSeries) && (fSeries as string[]).some(matchSlug)) {
-      return fSeries as string[]
+    if (Array.isArray(fSeries) && (fSeries as string[]).length > 0) {
+      const resolved = (fSeries as string[]).map((e) => resolveSeriesEntry(e, allFiles))
+      if (resolved.some(matchSlug)) {
+        return resolved
+      }
     }
 
     // 4. f è un _index con fullseries e noi siamo sotto la sua cartella
