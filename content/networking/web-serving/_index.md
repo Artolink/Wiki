@@ -1,23 +1,11 @@
 ---
-
 title: 🌐 Web serving
-
 series:
-
-- networking/web-serving/DNS-domains
-
-- networking/web-serving/nginx-web-server-setup
-
-- networking/web-serving/tls-certificates
-
-- networking/web-serving/haproxy
-
-- networking/web-serving/keepalived-vrrp
-
-- networking/web-serving/website-resilience
-
-- networking/web-serving/scaling-the-load-balancer
-
+  - DNS-domains
+  - nginx-web-server-setup
+  - tls-certificates
+  - website-resilience
+  - scaling-the-load-balancer
 ---
 Everything it takes to serve a website or application. 
 

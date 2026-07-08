@@ -1,16 +1,16 @@
 ---
 title: 🔍 Logs (ELK Stack)
 series:
-  - observability/logs/elasticsearch
-  - observability/logs/elasticsearch/elasticsearch-setup
-  - observability/logs/kibana
-  - observability/logs/kibana/kibana-setup
-  - observability/logs/logstash
-  - observability/logs/logstash/logstash-setup
-  - networking/miscellaneous/haproxy
-  - networking/miscellaneous/keepalived-vrrp
-  - observability/logs/filebeat
-  - observability/logs/filebeat/filebeat-setup
+  - elasticsearch
+  - elasticsearch-setup
+  - kibana
+  - kibana-setup
+  - logstash
+  - logstash-setup
+  - haproxy
+  - keepalived-vrrp
+  - filebeat
+  - filebeat-setup
 ---
 This is the "logs" half of my observability setup: the complementary half of the [Grafana stack](../metrics/my-grafana-stack) project for metrics. 
 
