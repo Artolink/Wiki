@@ -10,11 +10,15 @@ tags:
 
 ## Why MAAS?
 
-Virtual machines give you instant flexibility — but some workloads still demand **physical servers**: raw performance, data locality/security requirements, or simply long-term cost control at scale.
+Virtual machines give you instant flexibility, but some workloads still demand **physical servers**: raw performance, data locality/security requirements and so on.
 
-The pain with bare metal has always been the manual ceremony: walk to the rack (or open the BMC console), mount an ISO, install the OS, partition the disks, configure the network, repeat for every single box. It doesn't scale past a handful of machines.
+The pain with bare metal has always been the manual ceremony: walk to the rack (or open the BMC console), mount an ISO, install the OS, partition the disks, configure the network, repeat for every single box. 
 
-**MAAS (Metal as a Service)**, by Canonical, turns that ceremony into an API call: it discovers physical servers over the network, inventories their hardware, and deploys operating systems on them — PXE boot, disk layout, network config, SSH keys, everything — from a single control panel. Think of it as *an intelligent control panel for your datacenter*: bare-metal hardware managed with the same fluidity as a cloud.
+It obviously doesn't scale past a handful of machines.
+
+**MAAS (Metal as a Service)**, by Canonical, turns that ceremony into an API call: it discovers physical servers over the network, inventories their hardware, and deploys operating systems on them: PXE boot, disk layout, network config, SSH keys, everything.
+
+Think of it as *an intelligent control panel for your datacenter*: bare-metal hardware managed with the same fluidity as a cloud.
 
 ***
 
@@ -41,16 +45,16 @@ flowchart TB
     API <--> RC1
 ```
 
-| Component             | Role                                                                                                                                                   |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **PostgreSQL**        | Stores *all* infrastructure state: machines, networks, images, users.                                                                                  |
-| **Region Controller** | The brain: API, web UI, coordination across the whole region. Stateless → scales horizontally.                                                          |
+| Component             | Role                                                                                                                                                     |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **PostgreSQL**        | Stores *all* infrastructure state: machines, networks, images, users.                                                                                    |
+| **Region Controller** | The brain: API, web UI, coordination across the whole region. <br>Stateless, so it scales horizontally.                                                  |
 | **Rack Controller**   | The hands: lives close to the machines, provides the network services deployment needs (DHCP, TFTP for PXE, IPMI power control) and talks to the region. |
 
 > [!tip] Why the region/rack split matters
-> Rack controllers only need visibility of *their own* rack's networks. The region controller never has to reach every management network in the datacenter — each rack controller acts locally on its own scope. Smaller blast radius, cleaner security perimeter.
-
-In a **standalone installation** (this guide) a single host wears both hats: it is region *and* rack controller at once. You'll see both roles listed under the *Controllers* section of the UI.
+> Rack controllers only need visibility of *their own* rack's networks. This way, the region controller never has to reach every management network in the datacenter: each rack controller acts locally on its own scope.
+> 
+> In a **standalone installation** (this guide) a single host wears both hats: it is region *and* rack controller at once, so you'll see both roles listed under the *Controllers* section of the UI.
 
 ***
 
@@ -58,16 +62,16 @@ In a **standalone installation** (this guide) a single host wears both hats: it 
 
 Minimum resources for a standalone install:
 
-| Resource | Minimum                       |
-| -------- | ----------------------------- |
-| CPU      | 4 cores                       |
-| RAM      | 8 GB                          |
-| Disk     | 20 GB                         |
-| NIC      | 1 (2 if you manage IPMI too)  |
-| OS       | Linux — Ubuntu recommended    |
-| Network  | Internet access (image sync)  |
+| Resource | Minimum                      |
+| -------- | ---------------------------- |
+| CPU      | 4 cores                      |
+| RAM      | 8 GB                         |
+| Disk     | 20 GB                        |
+| NIC      | 1 (2 if you manage IPMI too) |
+| OS       | Linux: Ubuntu recommended    |
+| Network  | Internet access (image sync) |
 
-You should be comfortable with **bash** and **Layer 2 networking** concepts (VLANs, broadcast domains) — MAAS is all about L2 visibility.
+You should be comfortable with **bash** and **Layer 2 networking** concepts (VLANs, broadcast domains): MAAS is all about L2 visibility.
 
 The lab used throughout this guide:
 
@@ -77,7 +81,7 @@ The lab used throughout this guide:
 
 ***
 
-## Phase 1 — Installation
+## Installation
 
 Start from a fully updated system:
 
@@ -90,15 +94,13 @@ sudo reboot
 MAAS installs either via **snap** or via **APT**.
 
 > [!warning] Pick ONE method
-> Snap **or** APT — never both. Installing through both channels causes package conflicts and hard-to-debug malfunctions.
+> Snap **or** APT, never both: installing through both channels causes package conflicts and hard-to-debug malfunctions.
 
 Via snap:
 
 ```bash
 sudo snap install --channel=3.7/stable maas
 ```
-
-*(🖼️ Screenshot — snap install output)*
 
 Or via APT:
 
@@ -108,13 +110,11 @@ sudo apt update
 sudo apt -y install maas
 ```
 
-*(🖼️ Screenshot — apt install output)*
+This guide uses **3.7**: check [Canonical's docs](https://maas.io/docs) for the currently supported versions.
 
-This guide uses **3.7**; check [Canonical's docs](https://maas.io/docs) for the currently supported versions.
+**PostgreSQL** is installed and wired up automatically. 
 
-**PostgreSQL** is installed and wired up automatically. For production you'd want it in high availability, but for a standalone lab the bundled instance is fine.
-
-*(🖼️ Screenshot — PostgreSQL setup during install)*
+For production you'd want it in high availability, but for a standalone lab the bundled instance is fine.
 
 Create the admin user:
 
@@ -122,137 +122,190 @@ Create the admin user:
 sudo maas createadmin --username=$PROFILE --email=$EMAIL_ADDRESS
 ```
 
-*(🖼️ Screenshot — createadmin prompts)*
-
 Then point a browser at the server IP on port **5240**:
 
 ```
 http://<maas-ip>:5240/MAAS
 ```
 
-*(🖼️ Screenshot — MAAS web UI login/dashboard)*
+![[Pasted image 20260711115355.png]]
 
 ***
 
-## Phase 2 — Initial configuration
+## Initial configuration
 
 ### Region name and DNS
 
-The first-run wizard asks for a **region name** and the **DNS servers** MAAS will hand to managed machines. The lab uses `overflowjournal` as region name and Google DNS.
+The first-run wizard asks for a **region name** and the **DNS servers** MAAS will hand to managed machines.
 
-*(🖼️ Screenshot — region + DNS configuration screen)*
+![[Pasted image 20260711115537.png]]
 
 ### OS images
 
-Select which OS images MAAS should import. **Ubuntu 24.04 LTS** is proposed by default; more can be added at any time.
+Select which OS images MAAS should import. 
 
-*(🖼️ Screenshot — image selection screen)*
+**Ubuntu 24.04 LTS** is proposed by default, but more can be added at any time.
+
+![[Pasted image 20260711115625.png]]
 
 ### SSH key
 
 > [!warning] No key, no access
-> If you don't configure a public SSH key here, you will **not** be able to log into the servers MAAS deploys. The key gets injected into every deployed OS.
+> If you don't configure a public SSH key here, you will **not** be able to log into the servers MAAS deploys. 
+> 
+> The key gets injected into every deployed OS.
 
 Import your personal public key (from file, GitHub or Launchpad).
 
-*(🖼️ Screenshot — SSH key import)*
-
-*(🖼️ Screenshot — Controllers section showing the standalone host in both region+rack roles)*
+![[Pasted image 20260711115920.png]]
 
 ***
 
-## Phase 3 — Prepare the first environment
+## Prepare the first environment
 
 ### Pool
 
-**Pools** group machines logically — useful to split environments (prod/staging, customer A/B) and filter searches. Create one for your environment (the lab: `overflowjournal`).
+**Pools** group machines logically: useful to split environments (prod, staging, developement...) and filter searches. 
 
-*(🖼️ Screenshot — pool creation dialog)*
+Create one for your environment.
+
+![[Pasted image 20260711120148.png]]
 
 ### Domain
 
-MAAS ships with the **`.maas`** zone as default. Add your own domain if you want machines to receive a proper FQDN at deploy time — the lab adds `overflowjournal.it` as an **authoritative** domain (DNS managed directly by MAAS).
+MAAS can work as a DNS server too: it ships with the **`.maas`** zone as default. 
 
-*(🖼️ Screenshot — Add domain dialog)*
+Add your own domain if you want machines to receive a proper FQDN at deploy time.
+
+![[Pasted image 20260711120426.png]]
 
 ### Network objects
 
 Before touching the UI, learn the four MAAS network primitives:
 
-| Object     | What it is                                                                                                          |
-| ---------- | -------------------------------------------------------------------------------------------------------------------- |
+| Object     | What it is                                                                                                                                              |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Fabric** | A logical container for networks belonging to the same physical infrastructure (e.g. a "VMware" or "OpenStack" fabric). Holds VLAN+subnet combinations. |
-| **Space**  | A *functional* grouping of subnets: "management", "backend", "ipmi"...                                              |
-| **Subnet** | An IP network. Always attached to exactly one VLAN.                                                                  |
-| **VLAN**   | The L2 segment (VID). Belongs to a fabric.                                                                            |
+| **Space**  | A *functional* grouping of subnets: "management", "backend", "ipmi"...                                                                                  |
+| **Subnet** | An IP network. Always attached to exactly one VLAN.                                                                                                     |
+| **VLAN**   | The L2 segment (VID). Belongs to a fabric.                                                                                                              |
 
 > [!important] L2 visibility is everything
-> The rack controller must have **Layer 2 visibility** on the target servers' management network *and* on their IPMI network. If PXE broadcast frames can't reach the rack controller, nothing downstream works.
+> The rack controller must have **Layer 2 visibility** on the target servers' management network *and also* on their IPMI network. 
+> 
+> If PXE broadcast frames can't reach the rack controller, nothing downstream works.
 
-MAAS auto-discovers the subnets its NICs sit on — they appear under generic names (`fabric-0`, `fabric-1`). Rename everything to something meaningful:
+MAAS auto-discovers the subnets its NICs sit on: they appear under generic names (`fabric-0`, `fabric-1`). 
 
-- `fabric-0` → `overflowjournal-management`
-- `fabric-1` → `overflowjournal-ipmi`
-- Create two **spaces**: `management` and `ipmi`
-- Rename the subnets: `10.100.129.0/24` → `overflowjournal-management`, `10.100.130.0/24` → `overflowjournal-ipmi`
-- On each fabric, take the **untagged VLAN**, rename it and assign it to its space
+Rename everything to something meaningful:
 
-*(🖼️ Screenshots — subnets list with fabric-0/fabric-1, fabric rename dialogs, space creation, subnet rename, VLAN configuration — one per step)*
+- `fabric-0` → `openstack-management`
+- `fabric-1` → `openstack-ipmi`
+
+![[Pasted image 20260711120829.png]]
+
+![[Pasted image 20260711121019.png]]
+
+Then we create two **spaces**: `management` and `ipmi`
+
+![[Pasted image 20260711121150.png]]
+
+![[Pasted image 20260711121232.png]]
+
+Now we select the subnets by clicking on them, and we rename them:
+
+- `10.100.129.0/24` → ``openstack-management`
+- `10.100.130.0/24` → `openstack-ipmi`
+
+![[Pasted image 20260711121411.png]]
+
+Ok, now only the VLAN configuration remains.
+
+On each fabric, take the **untagged VLAN** (by clicking on "untagged"), rename it and assign it to its space:
+
+![[Pasted image 20260711122445.png]]
 
 ### DHCP
 
 PXE boot needs DHCP: the machine being provisioned gets a **temporary IP** from MAAS to communicate during enlistment and deploy.
 
 > [!warning] Check the range twice
-> Make sure the DHCP range you reserve is genuinely **free**. Overlapping with an existing DHCP server or with statically-assigned IPs on the same segment means conflicts that are painful to debug.
+> Make sure the DHCP range you reserve is genuinely **free**. 
+> 
+> Overlapping with an existing DHCP server or with statically-assigned IPs on the same segment means conflicts that are painful to debug.
 
-On the management VLAN: *Configure DHCP* → select the rack controller that will serve it → define the temporary IP range. Repeat on the IPMI VLAN.
+On the management VLAN: *Configure DHCP* → select the rack controller that will serve it → define the temporary IP range (we don't need it for the IPMI VLAN). 
 
-*(🖼️ Screenshots — Configure DHCP button, DHCP settings dialog with rack controller + range, resulting VLAN summary)*
+![[Pasted image 20260711122413.png]]
+
+![[Pasted image 20260711122338.png]]
+
+This should be the final result:
+![[Pasted image 20260711122310.png]]
 
 ***
 
-## Phase 4 — Prepare the physical server
+## Prepare the physical server
 
 Example hardware: **Dell PowerEdge R640** (any IPMI-capable server works the same way).
 
 > [!important] Switch ports
-> The NIC used for PXE boot must be on the same L2 segment as the rack controller's management network. Verify the switch port configuration (VLAN, no port security blocking DHCP) *before* blaming MAAS.
+> The NIC used for PXE boot must be on the same L2 segment as the rack controller's management network. 
+> 
+> Verify the switch port configuration (VLAN, no port security blocking DHCP) *before* blaming MAAS.
 
 ### BIOS settings
 
-1. Enter the BIOS (`F2` on Dell) — *(🖼️ Screenshot — BIOS access)*
-2. **Boot mode → UEFI** (required by modern OS versions) — *(🖼️ Screenshot — UEFI setting)*
-3. Check the **storage** layout — the lab presents 2 RAID volumes — *(🖼️ Screenshot — RAID config)*
-4. **Enable PXE boot** on the management NIC — *(🖼️ Screenshot — PXE enablement)*
+1. [[enter-the-UEFI-BIOS|Enter the BIOS]]
+2. **Boot mode → UEFI** (required by modern OS versions)
+   ![[Pasted image 20260711122946.png]]
+3. Check the **storage** layout: the lab presents 2 RAID volumes
+   ![[Pasted image 20260711123003.png]]
+4. **Enable PXE boot** on the management NIC
+   ![[Pasted image 20260711123025.png]]
 
-Reboot and pick PXE from the boot menu (`F12` on Dell).
-
-*(🖼️ Screenshot — PXE boot menu + DHCP address acquisition)*
+Reboot and pick PXE from the boot menu (`F12` since we are talking about Dell).
+![[Pasted image 20260711123055.png]]
 
 The server gets a temporary DHCP lease, boots the MAAS enlistment image, registers itself, **powers off automatically**, and appears in the *Machines* section.
+![[Pasted image 20260711123110.png]]
 
-*(🖼️ Screenshot — machine appearing in the Machines list)*
+![[Pasted image 20260711123147.png]]
 
 ### Enrich the machine in MAAS
 
 Select the machine → set a proper **name** and DNS domain, and assign it to the **pool** created earlier (Configuration tab).
 
-*(🖼️ Screenshot — machine configuration tab with pool assignment)*
+![[Pasted image 20260711123304.png]]
+
+![[Pasted image 20260711123332.png]]
 
 ### Commissioning
 
-Commissioning is the diagnostic pass: MAAS powers the machine on, boots an ephemeral image, builds a full **hardware profile** (CPU, RAM, disks, NICs, BIOS details) and runs functional tests. On success the machine lands in the **Ready** state.
+Commissioning is the diagnostic pass: MAAS powers the machine on, boots an ephemeral image, builds a full **hardware profile** (CPU, RAM, disks, NICs, BIOS details) and runs functional tests. 
 
-*(🖼️ Screenshots — commissioning running, machine in Ready state)*
+On success the machine lands in the **Ready** state.
+
+![[Pasted image 20260711123434.png]]
+
+![[Pasted image 20260711123509.png]]
 
 ### Network layout
 
-The *Network* tab lists every NIC with link state (red = no carrier; connected ports show negotiated speed). The lab server has two live 10 Gbps interfaces, `eno1np0` and `eno2np1`.
+The *Network* tab lists every NIC with link state (red = no carrier; connected ports show negotiated speed). 
 
-Here you can build **bonds, bridges, VLANs** — the full production network layout, applied at deploy time. The lab keeps it simple: static IP on `eno1np0`, second NIC left unconfigured.
+The lab server has two live 10 Gbps interfaces, `eno1np0` and `eno2np1`.
 
-*(🖼️ Screenshots — Network tab, static IP configuration on eno1np0)*
+Here you can build **bonds, bridges, VLANs**: the full production network layout, applied at deploy time. 
+
+The lab keeps it simple: static IP on `eno1np0`, second NIC left unconfigured.
+
+![[Pasted image 20260711123612.png]]
+
+![[Pasted image 20260711123653.png]]
+
+It should look something like this:
+![[Pasted image 20260711123732.png]]
 
 ### Storage layout
 
@@ -261,25 +314,35 @@ The two RAID volumes appear as two disks:
 - Disk 1: `/boot/efi` + root (`/`)
 - Disk 2: formatted **XFS**, mounted at `/mnt/disk1`
 
-> [!warning] Verify the boot disk
-> Check which disk carries the *boot* flag: MAAS may auto-select the wrong one and happily install the OS on the wrong volume. Fix it via **"Set boot disk..."** if needed.
+![[Pasted image 20260711123813.png]]
 
-*(🖼️ Screenshots — storage tab with both disks, partition layout, Set boot disk option)*
+![[Pasted image 20260711123850.png]]
+
+> [!warning] Verify the boot disk
+> Check which disk carries the *boot* flag: MAAS may auto-select the wrong one and happily install the OS on the wrong volume. 
+> 
+> Fix it via **"Set boot disk..."** if needed.
+> ![[Pasted image 20260711123911.png]]
+
 
 ***
 
-## Phase 5 — Deploy the OS
+## Deploy the OS
 
-Everything is staged — hit **Deploy**, pick **Ubuntu 24.04 LTS**, confirm.
+Everything is staged: hit **Deploy**, pick **Ubuntu 24.04 LTS**, confirm.
 
-*(🖼️ Screenshots — Deploy dialog with OS selection)*
+![[Pasted image 20260711124002.png]]
+
+![[Pasted image 20260711124024.png]]
 
 > [!note]
-> The deploy can take several minutes — the actual duration depends on the bandwidth between MAAS and the target server (image transfer + install + first boot).
+> The deploy can take several minutes: the actual duration depends on the bandwidth between MAAS and the target server (image transfer + install + first boot).
+> 
+> You can check the progress by connecting to the IPMI and watch the console.
 
 When it finishes, the machine shows **Deployed**.
 
-*(🖼️ Screenshot — machine in Deployed state)*
+![[Pasted image 20260711124148.png]]
 
 ### Verify
 
@@ -292,19 +355,21 @@ ip -br a
 lsblk -f
 ```
 
-*(🖼️ Screenshot — SSH session on the deployed server)*
+![[Pasted image 20260711124323.png]]
 
 ***
 
 ## Closing thoughts
 
-One server, provisioned end-to-end without ever mounting an ISO. But the real value shows up at scale: the exact same flow runs **in parallel on dozens of machines** — enlistment, commissioning, deploy — from one panel, with one consistent configuration.
+One server, provisioned end-to-end without ever mounting an ISO. 
+
+But the real value shows up at scale: the exact same flow runs **in parallel on dozens of machines** from one panel, with one consistent configuration.
 
 What you gain:
 
 - **Time**: no per-server manual installs
 - **Consistency**: every machine deployed from the same recipe (goodbye snowflakes)
 - **Fewer human errors**: disk layouts and network configs are declared once, applied by machine
-- **A cloud-like workflow on your own iron**: Ready machines are a pool you allocate on demand
+- **A cloud-like workflow on your own iron**: ready machines are a pool you allocate on demand
 
 Bare metal, minus the ceremony.
