@@ -1511,6 +1511,13 @@ pre > .clipboard-button {
       content: "Copied!";
     }
   }
+
+  // Variante copia-riga (click su una singola riga): stessa livrea verde,
+  // label dedicata. La classe `line` è aggiunta insieme a `copied` da
+  // clipboard.inline.ts; due classi = specificità maggiore di `.copied::after`.
+  &.copied.line::after {
+    content: "Line copied!";
+  }
 }
 
 // Dark mode: il green-100 stride sul body scuro. Usiamo un verde scuro

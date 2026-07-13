@@ -25,22 +25,30 @@ document.addEventListener("nav", () => {
       button.innerHTML = svgCopy
       button.ariaLabel = "Copy source"
 
-      // Triggera la copia + feedback visivo. Usato sia dal click sul button
-      // che dal click ovunque sul <pre> (vedi onPreClick sotto).
+      // Feedback verde sul bottone, condiviso tra copy-all e copy-riga: la
+      // classe `copied` accende la livrea verde, la classe `line` cambia solo
+      // la label via CSS ("Copied!" vs "Line copied!", vedi custom.scss).
+      // Timer condiviso e riazzerato a ogni copia: due copie ravvicinate non
+      // si spengono il feedback a vicenda.
+      let resetTimer: ReturnType<typeof setTimeout> | undefined
+      function showCopiedFeedback(kind: "full" | "line") {
+        button.blur()
+        button.innerHTML = svgCheck
+        button.classList.add("copied")
+        button.classList.toggle("line", kind === "line")
+        if (resetTimer !== undefined) clearTimeout(resetTimer)
+        resetTimer = setTimeout(() => {
+          button.innerHTML = svgCopy
+          button.classList.remove("copied", "line")
+          button.style.borderColor = ""
+        }, 2000)
+      }
+
+      // Triggera la copia dell'intero blocco + feedback. Usato dal click sul
+      // button in alto a destra.
       function triggerCopy() {
         navigator.clipboard.writeText(source).then(
-          () => {
-            button.blur()
-            button.innerHTML = svgCheck
-            // Classe `copied` per lo stile verde + label "Copied!" via CSS
-            // (vedi pre > .clipboard-button.copied in custom.scss).
-            button.classList.add("copied")
-            setTimeout(() => {
-              button.innerHTML = svgCopy
-              button.classList.remove("copied")
-              button.style.borderColor = ""
-            }, 2000)
-          },
+          () => showCopiedFeedback("full"),
           (error) => console.error(error),
         )
       }
@@ -56,8 +64,9 @@ document.addEventListener("nav", () => {
       //   - il click è sul .expand-button di Mermaid → non c'entra
       //   - il click non atterra su uno span[data-line] (padding del pre, o code
       //     block non processato da rehype-pretty-code) → nessuna copia
-      // Il feedback è locale: flash verde sulla riga copiata (classe
-      // `line-copied`, stile in custom.scss), non sul bottone.
+      // Feedback doppio: flash verde sulla riga copiata (classe `line-copied`,
+      // stile in custom.scss) + bottone in alto a destra in stato verde con
+      // label "Line copied!".
       function onPreClick(e: MouseEvent) {
         const target = e.target as Element
         if (target.closest(".clipboard-button")) return
@@ -76,6 +85,7 @@ document.addEventListener("nav", () => {
           () => {
             line.classList.add("line-copied")
             setTimeout(() => line.classList.remove("line-copied"), 800)
+            showCopiedFeedback("line")
           },
           (error) => console.error(error),
         )
