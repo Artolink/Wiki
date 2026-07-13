@@ -49,17 +49,36 @@ document.addEventListener("nav", () => {
         triggerCopy()
       }
 
-      // Click ovunque sul <pre> = copia. Skip se:
+      // Click su una RIGA del code block = copia solo quella riga (il copy-all
+      // resta compito del bottone in alto a destra). Skip se:
       //   - l'utente sta selezionando del testo (drag-to-select) → window.getSelection
       //   - il click è sul .clipboard-button stesso → lo gestisce il suo handler
       //   - il click è sul .expand-button di Mermaid → non c'entra
+      //   - il click non atterra su uno span[data-line] (padding del pre, o code
+      //     block non processato da rehype-pretty-code) → nessuna copia
+      // Il feedback è locale: flash verde sulla riga copiata (classe
+      // `line-copied`, stile in custom.scss), non sul bottone.
       function onPreClick(e: MouseEvent) {
         const target = e.target as Element
         if (target.closest(".clipboard-button")) return
         if (target.closest(".expand-button")) return
         const sel = window.getSelection()
         if (sel && sel.toString().length > 0) return
-        triggerCopy()
+
+        const line = target.closest("code > span[data-line]") as HTMLElement | null
+        if (!line) return
+        // innerText di una riga vuota è "" o "\n": copiare il nulla svuoterebbe
+        // la clipboard dell'utente senza motivo.
+        const text = line.innerText.replace(/\n$/, "")
+        if (text.trim() === "") return
+
+        navigator.clipboard.writeText(text).then(
+          () => {
+            line.classList.add("line-copied")
+            setTimeout(() => line.classList.remove("line-copied"), 800)
+          },
+          (error) => console.error(error),
+        )
       }
 
       button.addEventListener("click", onClick)

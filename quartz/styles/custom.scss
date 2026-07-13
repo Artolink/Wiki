@@ -1437,6 +1437,9 @@ pre > code:has(> span[data-line]) {
 
 pre > code > span[data-line] {
   padding: 0 1.2rem;
+  // Il pointer comunica che la riga è cliccabile (click = copia la riga,
+  // vedi clipboard.inline.ts). Il drag-to-select continua a funzionare.
+  cursor: pointer;
   // L'highlight su hover usa una transizione brevissima per non sembrare un
   // flash brusco quando si scorre tra righe vicine.
   transition: background-color 0.08s ease;
@@ -1444,6 +1447,18 @@ pre > code > span[data-line] {
 
 pre > code > span[data-line]:hover {
   background: var(--code-line-hover);
+}
+
+// Feedback "riga copiata": flash verde per ~0.8s (classe applicata da
+// clipboard.inline.ts). Stessa palette del bottone `.copied`; definita DOPO
+// la regola :hover così vince a parità di specificità mentre il mouse è
+// ancora sulla riga.
+pre > code > span[data-line].line-copied {
+  background: #dcfce7; // green-100, coerente col bottone .copied
+}
+
+html[saved-theme="dark"] pre > code > span[data-line].line-copied {
+  background: #14532d; // green-900, coerente col bottone .copied in dark
 }
 
 // ── Pulsante Copy in alto a destra, stile syselement ──────────────────────────
@@ -1516,21 +1531,15 @@ pre > .clipboard-button.copied {
   opacity: 1;
 }
 
-// ── Click ovunque sul code block = copia ─────────────────────────────────────
-// L'handler in clipboard.inline.ts ascolta i click sul <pre> e, se non c'è
-// una selezione attiva (l'utente sta solo cliccando, non evidenziando), copia
-// tutto il contenuto. Il cursor: pointer comunica l'affordance.
-// (Le selezioni con drag continuano a funzionare normalmente — il check su
+// ── Click su una riga del code block = copia quella riga ─────────────────────
+// L'handler in clipboard.inline.ts ascolta i click sul <pre>: se atterrano su
+// uno span[data-line] (e non c'è una selezione attiva) copia SOLO quella riga,
+// con flash verde di conferma (`.line-copied`, vedi sopra). Il copy-all è
+// compito esclusivo del bottone in alto a destra. Il cursor: pointer sta
+// sullo span[data-line]; il resto del pre (padding, blocchi senza righe
+// rehype-pretty-code) non è cliccabile e mantiene il cursore di default.
+// (Le selezioni con drag continuano a funzionare — il check su
 // window.getSelection() le filtra.)
-pre {
-  cursor: pointer;
-
-  // Tornare al testo selezionabile quando si seleziona davvero, così non
-  // sembra "non selezionabile" a chi vuole copiare solo una parola.
-  & code {
-    cursor: text;
-  }
-}
 
 // ──────────────────────────────────────────────────────────────────────────────
 // CODE BLOCKS DENTRO CALLOUT — fix scroll orizzontale
